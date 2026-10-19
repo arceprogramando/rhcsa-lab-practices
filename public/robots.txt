@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rhcsa.arceprog.dev/sitemap-index.xml
