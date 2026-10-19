@@ -1,0 +1,106 @@
+---
+import "../styles/global.css";
+import { cvUrl, getLocaleConfig, localePath, otherLocale, SITE, type Locale } from "../lib/i18n";
+import { getUI } from "../lib/i18n";
+
+interface Props {
+  title: string;
+  description: string;
+  locale?: Locale;
+  path?: string;
+}
+
+const { title, description, locale = "es", path = "/" } = Astro.props;
+const ui = getUI(locale);
+const config = getLocaleConfig(locale);
+const other = otherLocale(locale);
+const canonical = new URL(localePath(locale, path), SITE).href;
+const alternateEs = new URL(localePath("es", path), SITE).href;
+const alternateEn = new URL(localePath("en", path), SITE).href;
+const fullTitle = title.includes("arceprog") ? title : `${title} | arceprog`;
+const home = localePath(locale, "/");
+const stats = localePath(locale, "/estadisticas/");
+---
+
+<!doctype html>
+<html lang={config.htmlLang} data-locale={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es-AR" href={alternateEs} />
+    <link rel="alternate" hreflang="en-US" href={alternateEn} />
+    <link rel="alternate" hreflang="x-default" href={alternateEs} />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={config.ogLocale} />
+    <meta property="og:locale:alternate" content={getLocaleConfig(other).ogLocale} />
+    <meta http-equiv="content-language" content={locale} />
+    <link rel="icon" type="image/svg+xml" href="/redhat-hat.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-paper text-ink antialiased">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-card focus:px-3 focus:py-2">
+      {ui.skip}
+    </a>
+    <header class="border-b border-line/80">
+      <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4">
+        <a href={home} class="group flex items-center gap-3 no-underline">
+          <img src="/redhat-hat.svg" alt="" width="36" height="28" class="h-7 w-auto" />
+          <span class="flex items-baseline gap-3">
+            <span class="text-sm font-semibold tracking-[0.18em] text-ink uppercase">arceprog</span>
+            <span class="text-sm text-muted group-hover:text-ink">{ui.brand}</span>
+          </span>
+        </a>
+        <nav class="flex items-center gap-4 text-sm font-medium" aria-label={ui.nav}>
+          <a class="text-muted no-underline hover:text-ink" href={stats}>{ui.statsNav}</a>
+          <a class="text-muted no-underline hover:text-ink" href={cvUrl(locale)}>{ui.cv}</a>
+          <a
+            class="rounded-full border border-ink px-2.5 py-1 text-xs font-semibold tracking-wide no-underline"
+            href={localePath(other, path)}
+            hreflang={getLocaleConfig(other).htmlLang}
+            title={getLocaleConfig(other).label}
+            aria-label={getLocaleConfig(other).label}
+            onclick={`localStorage.setItem('locale-preference', '${other}')`}
+          >
+            {other.toUpperCase()}
+          </a>
+        </nav>
+      </div>
+      <p class="border-t border-line/80 px-5 py-2 text-center text-sm text-muted">
+        {ui.banner}
+      </p>
+    </header>
+    <main id="contenido">
+      <slot />
+    </main>
+    <script is:inline>
+      (function () {
+        const path = window.location.pathname;
+        const isRoot = path === "/";
+        const hasPreference = localStorage.getItem("locale-preference");
+        const ua = navigator.userAgent || "";
+        const isBot = /bot|crawler|spider|bing|google|slurp|duckduck/i.test(ua);
+        if (isRoot && !hasPreference && !isBot) {
+          const lang = navigator.language || "es";
+          if (!lang.toLowerCase().startsWith("es")) {
+            localStorage.setItem("locale-preference", "en");
+            window.location.replace("/en/");
+          } else {
+            localStorage.setItem("locale-preference", "es");
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
