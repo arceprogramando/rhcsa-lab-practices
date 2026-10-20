@@ -353,8 +353,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-09",
     track: "pdf",
-    title: "Backup de /etc con bzip2",
-    objective: "Un archivo comprimido de /etc en el home de root.",
+    title: "Zipear /etc",
+    objective: "En el archivo /root/myetcbackup.tar.bz2, con bzip2.",
     where: "client",
     steps: [
       "Crear /root/myetcbackup.tar.bz2.",
