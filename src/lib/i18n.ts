@@ -137,10 +137,12 @@ export interface Copy {
   levels: { id: "very_low" | "low" | "normal" | "high" | "very_high"; label: string }[];
   helpAsked: string;
   helpMarked: string;
+  stepsTitle: string;
   commandsTitle: string;
   videosTitle: string;
   askHelp: string;
-  helpOpen: string;
+  showHelp: string;
+  hideHelp: string;
   redo: string;
   skipTask: string;
   actionsHint: string;
@@ -250,7 +252,7 @@ const es: Copy = {
     "No hace falta ir en orden.",
   ],
   helpTitle: "Ayuda",
-  helpBody: "Cada lab muestra el enunciado, nada más. Comandos y videos aparecen recién con Pedí ayuda, y ese lab queda contado como resuelto con ayuda.",
+  helpBody: "Cada lab muestra solo el título y una línea corta. El detalle del enunciado, los comandos y los videos aparecen recién con Pedí ayuda, y ese lab queda contado como resuelto con ayuda.",
   vmsTitle: "Las dos VMs",
   footerBefore: "Material de práctica: ",
   footerPlaylist: "lista de YouTube",
@@ -326,10 +328,12 @@ const es: Copy = {
   levels: levelsEs,
   helpAsked: "Ayuda pedida",
   helpMarked: "Quedó marcado en las estadísticas de este lab. En el examen real esto no está.",
+  stepsTitle: "Detalle del enunciado",
   commandsTitle: "Comandos para mirar",
   videosTitle: "Videos",
   askHelp: "Pedí ayuda",
-  helpOpen: "Ayuda abierta",
+  showHelp: "Ver ayuda",
+  hideHelp: "Ocultar ayuda",
   redo: "Rehacer",
   skipTask: "No lo entiendo",
   actionsHint:
@@ -425,7 +429,7 @@ const en: Copy = {
     "You do not have to go in order.",
   ],
   helpTitle: "Help",
-  helpBody: "Each lab shows the task and nothing else. Commands and videos appear only after Ask for help, and that lab is counted as solved with help.",
+  helpBody: "Each lab shows only the title and one short line. The full task detail, commands, and videos appear only after Ask for help, and that lab is counted as solved with help.",
   vmsTitle: "The two VMs",
   footerBefore: "Practice material: ",
   footerPlaylist: "YouTube playlist",
@@ -501,10 +505,12 @@ const en: Copy = {
   levels: levelsEn,
   helpAsked: "Help requested",
   helpMarked: "This lab is marked in the stats. The real exam does not have this.",
+  stepsTitle: "Task detail",
   commandsTitle: "Commands to look at",
   videosTitle: "Videos",
   askHelp: "Ask for help",
-  helpOpen: "Help open",
+  showHelp: "Show help",
+  hideHelp: "Hide help",
   redo: "Redo",
   skipTask: "I don't get it",
   actionsHint:

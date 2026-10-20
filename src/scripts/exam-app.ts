@@ -37,6 +37,8 @@ let expiredOnce = false;
 let screen: "board" | "lab" = "board";
 let visitStart: number | null = null;
 let focusDifficultyIndex: number | null = null;
+/** Panel de ayuda visible en la pantalla del lab. No se persiste: al entrar arranca cerrado. */
+let helpVisible = false;
 
 export function mountExam(host: HTMLElement): void {
   root = host;
@@ -333,17 +335,9 @@ function difficultyLine(index: number, selected: Difficulty | null): HTMLElement
   group.setAttribute("aria-label", copy().difficultyAria);
   for (const item of copy().levels) {
     const chosen = selected === item.id;
-    const hard = isHard(item.id);
-    const label = el(
-      "label",
-      `inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-sm whitespace-nowrap ${
-        chosen
-          ? hard
-            ? "border-warn bg-[#f4ead4] font-semibold text-warn"
-            : "border-ink bg-ink font-semibold text-paper"
-          : "border-line bg-paper"
-      }`,
-    );
+    const label = el("label", "diff-pill");
+    label.dataset.level = item.id;
+    label.dataset.selected = chosen ? "true" : "false";
     const input = document.createElement("input");
     input.type = "radio";
     input.name = `difficulty-${index}`;
@@ -432,14 +426,10 @@ function labCard(lab: Lab, record: LabRecord): HTMLElement {
     el("h1", "mt-2 text-3xl font-semibold tracking-tight", lab.title),
     el("p", "mt-3 text-lg text-ink/90", lab.objective),
   );
-  const list = el("ol", "mt-5 list-decimal space-y-2 pl-5 text-[1.05rem] leading-relaxed");
-  for (const step of lab.steps) list.append(el("li", "", step));
-  card.append(list);
-  if (lab.note) card.append(el("p", "mt-5 rounded-2xl bg-paper px-4 py-3 text-sm text-muted", lab.note));
   if (record.attempts > 1) {
     card.append(el("p", "mt-4 text-sm text-warn", copy().attempt(record.attempts)));
   }
-  if (record.usedHelp) card.append(helpPanel(lab));
+  if (helpVisible) card.append(helpPanel(lab));
   return card;
 }
 
@@ -453,6 +443,13 @@ function helpPanel(lab: Lab): HTMLElement {
   title?.setAttribute("id", "ayuda-titulo");
   title?.setAttribute("tabindex", "-1");
   panel.append(el("p", "mt-1 text-sm text-warn", copy().helpMarked));
+  if (lab.steps.length) {
+    panel.append(el("h3", "mt-4 text-sm font-semibold tracking-wide uppercase", copy().stepsTitle));
+    const list = el("ol", "mt-2 list-decimal space-y-2 pl-5 text-sm leading-relaxed");
+    for (const step of lab.steps) list.append(el("li", "", step));
+    panel.append(list);
+  }
+  if (lab.note) panel.append(el("p", "mt-3 text-sm leading-relaxed text-muted", lab.note));
   panel.append(el("h3", "mt-4 text-sm font-semibold tracking-wide uppercase", copy().commandsTitle));
   const commands = el("ul", "mt-2 space-y-3");
   for (const item of lab.help.commands) {
@@ -480,9 +477,13 @@ function helpPanel(lab: Lab): HTMLElement {
 function actions(run: Run): HTMLElement {
   const record = run.labs[run.currentIndex];
   const row = el("div", "flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center");
-  const helpBtn = button(record.usedHelp ? copy().helpOpen : copy().askHelp, "btn btn-warn");
-  helpBtn.disabled = record.usedHelp;
-  helpBtn.addEventListener("click", () => askHelp());
+  const helpLabel = !record.usedHelp
+    ? copy().askHelp
+    : helpVisible
+      ? copy().hideHelp
+      : copy().showHelp;
+  const helpBtn = button(helpLabel, "btn btn-warn");
+  helpBtn.addEventListener("click", () => toggleHelp());
   const revisitBtn = button(copy().revisit, "btn btn-quiet");
   revisitBtn.addEventListener("click", () => setMark(run.currentIndex, "revisit"));
   const redoBtn = button(copy().redo, "btn btn-quiet");
@@ -593,16 +594,21 @@ function statusText(record: LabRecord): string {
   return bits.join(" · ");
 }
 
-function askHelp(): void {
+function toggleHelp(): void {
   const run = current();
   if (!run || run.status !== "in_progress" || screen !== "lab") return;
   const record = run.labs[run.currentIndex];
-  if (!record || record.usedHelp) return;
-  snapshot();
-  record.usedHelp = true;
-  commit(run);
+  if (!record) return;
+  if (!record.usedHelp) {
+    snapshot();
+    record.usedHelp = true;
+    helpVisible = true;
+    commit(run);
+  } else {
+    helpVisible = !helpVisible;
+  }
   render();
-  document.getElementById("ayuda-titulo")?.focus();
+  if (helpVisible) document.getElementById("ayuda-titulo")?.focus();
 }
 
 function redo(): void {
@@ -632,6 +638,7 @@ function openLab(index: number): void {
   if (!record.startedAt) record.startedAt = new Date().toISOString();
   visitStart = run.pausedAt ? null : Date.now();
   screen = "lab";
+  helpVisible = false;
   commit(run);
   render();
 }
@@ -641,6 +648,7 @@ function backToBoard(): void {
   if (!run) return;
   if (visitStart != null) flushVisit(run.labs[run.currentIndex]);
   screen = "board";
+  helpVisible = false;
   commit(run);
   render();
 }
