@@ -1,4 +1,4 @@
-import { difficultyLabel, getUI, localePath, pageLocale } from "../lib/i18n";
+import { difficultyLabel, getUI, pageLocale, routePath, type RouteId } from "../lib/i18n";
 import { labsFor, REDHAT_EXAM_VIDEO, type Lab } from "../lib/labs";
 import {
   countedLabs,
@@ -22,8 +22,8 @@ function labs(): Lab[] {
   return labsFor(pageLocale());
 }
 
-function to(path: string): string {
-  return localePath(pageLocale(), path);
+function to(route: RouteId): string {
+  return routePath(pageLocale(), route);
 }
 
 let root: HTMLElement;
@@ -210,7 +210,7 @@ function renderEmpty(): void {
   box.append(
     el("h1", "text-3xl font-semibold tracking-tight", copy().emptyTitle),
     el("p", "mt-3 text-muted", copy().emptyBody),
-    link(to("/"), copy().emptyHome, "btn btn-primary mt-6"),
+    link(to("home"), copy().emptyHome, "btn btn-primary mt-6"),
   );
   root.replaceChildren(box);
 }
@@ -700,8 +700,8 @@ function summaryView(run: Run): HTMLElement {
   const remove = button(copy().deleteRun, "btn btn-quiet");
   remove.addEventListener("click", () => deleteCurrent());
   row.append(
-    link(to("/estadisticas/"), copy().seeStats, "btn btn-primary"),
-    link(to("/"), copy().backHome, "btn btn-quiet"),
+    link(to("stats"), copy().seeStats, "btn btn-primary"),
+    link(to("home"), copy().backHome, "btn btn-quiet"),
     remove,
   );
   head.append(row);

@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { getUI, type Locale } from "../lib/i18n";
+import { getUI, routePath, type Locale } from "../lib/i18n";
 import { YT_PLAYLIST, LAB_REPO, REDHAT_EXAM_VIDEO } from "../lib/labs";
 
 interface Props {
@@ -9,9 +9,11 @@ interface Props {
 
 const { locale } = Astro.props;
 const ui = getUI(locale);
+const statsFixed = `${routePath(locale, "stats")}?mode=fixed`;
+const statsPausable = `${routePath(locale, "stats")}?mode=pausable`;
 ---
 
-<Base title={ui.homeTitle} description={ui.homeDescription} locale={locale} path="/">
+<Base title={ui.homeTitle} description={ui.homeDescription} locale={locale} route="home">
   <div class="mx-auto flex max-w-5xl flex-col gap-8 px-5 py-10">
     <section class="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
       <div>
@@ -39,11 +41,11 @@ const ui = getUI(locale);
           <p class="mt-3 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4">
             <a
               class="text-sm font-semibold text-ink underline decoration-line underline-offset-2"
-              href={locale === "en" ? "/en/estadisticas/?mode=fixed" : "/estadisticas/?mode=fixed"}
+              href={statsFixed}
             >{ui.seeStatsFixed}</a>
             <a
               class="text-sm font-medium text-muted underline decoration-line underline-offset-2 hover:text-ink"
-              href={locale === "en" ? "/en/estadisticas/?mode=pausable" : "/estadisticas/?mode=pausable"}
+              href={statsPausable}
             >{ui.seeStatsPausable}</a>
           </p>
           <p id="times-note" class="mt-2 text-sm text-muted">{ui.timesNote}</p>

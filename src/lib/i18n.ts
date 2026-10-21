@@ -37,6 +37,52 @@ export function localePath(locale: Locale, path = "/"): string {
   return `${prefix}/${clean}/`;
 }
 
+/**
+ * Logical pages and their URL slug per locale.
+ * Add new pages here so English never reuses Spanish words in the path.
+ */
+export const ROUTES = {
+  home: { es: "", en: "" },
+  practice: { es: "simulacro", en: "practice" },
+  stats: { es: "estadisticas", en: "stats" },
+  glossary: { es: "glosario", en: "glossary" },
+} as const;
+
+export type RouteId = keyof typeof ROUTES;
+
+export function routePath(locale: Locale, id: RouteId): string {
+  const slug = ROUTES[id][locale];
+  return localePath(locale, slug ? `/${slug}/` : "/");
+}
+
+/** Strip /en prefix and normalize trailing slash for matching. */
+export function barePathname(pathname: string): string {
+  let path = pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+  if (!path.startsWith("/")) path = `/${path}`;
+  if (path.length > 1 && !path.endsWith("/")) path = `${path}/`;
+  return path === "" ? "/" : path;
+}
+
+export function matchRoute(pathname: string): RouteId {
+  const bare = barePathname(pathname);
+  if (bare === "/") return "home";
+  for (const id of Object.keys(ROUTES) as RouteId[]) {
+    if (id === "home") continue;
+    const es = `/${ROUTES[id].es}/`;
+    const en = `/${ROUTES[id].en}/`;
+    if (bare === es || bare === en) return id;
+  }
+  return "home";
+}
+
+/** Same page in another locale, keeping query string if provided. */
+export function swapLocalePath(pathname: string, target: Locale, search = ""): string {
+  const base = routePath(target, matchRoute(pathname));
+  if (!search || search === "?") return base;
+  const q = search.startsWith("?") ? search : `?${search}`;
+  return `${base}${q}`;
+}
+
 export function cvUrl(locale: Locale): string {
   return locale === "en" ? "https://arceprog.dev/en/" : "https://arceprog.dev/";
 }
@@ -46,6 +92,15 @@ export interface Copy {
   brand: string;
   nav: string;
   statsNav: string;
+  glossaryNav: string;
+  glossaryTitle: string;
+  glossaryDescription: string;
+  glossaryHeading: string;
+  glossaryIntro: string;
+  glossarySearch: string;
+  glossarySearchEmpty: string;
+  glossaryTldr: string;
+  glossaryTldrRepo: string;
   cv: string;
   banner: string;
   homeTitle: string;
@@ -226,6 +281,15 @@ const es: Copy = {
   brand: "Simulacro RHCSA",
   nav: "Secciones",
   statsNav: "Estadísticas",
+  glossaryNav: "Glosario",
+  glossaryTitle: "Glosario RHCSA",
+  glossaryDescription: "Palabras y comandos que no quiero olvidar para el examen RHCSA.",
+  glossaryHeading: "Glosario",
+  glossaryIntro: "Términos que se me traban. Buscá por palabra o por la descripción. Donde hay tldr, el enlace abre ejemplos de uso en el repo de la comunidad.",
+  glossarySearch: "Buscar por palabra o descripción…",
+  glossarySearchEmpty: "No hay entradas que coincidan.",
+  glossaryTldr: "Ejemplos en tldr",
+  glossaryTldrRepo: "Repo tldr-pages",
   cv: "CV",
   banner: "Práctica personal para el RHCSA del 30 de octubre. No es el examen oficial ni un sitio de Red Hat.",
   homeTitle: "Simulacro RHCSA",
@@ -412,6 +476,15 @@ const en: Copy = {
   brand: "RHCSA practice exam",
   nav: "Sections",
   statsNav: "Stats",
+  glossaryNav: "Glossary",
+  glossaryTitle: "RHCSA glossary",
+  glossaryDescription: "Words and commands I do not want to forget for the RHCSA exam.",
+  glossaryHeading: "Glossary",
+  glossaryIntro: "Terms that stall me. Search by word or by the description. Where there is a tldr link, it opens usage examples in the community repo.",
+  glossarySearch: "Search by word or description…",
+  glossarySearchEmpty: "No matching entries.",
+  glossaryTldr: "Examples on tldr",
+  glossaryTldrRepo: "tldr-pages repo",
   cv: "CV",
   banner: "Personal practice for the October 30 RHCSA. This is not the official exam and not a Red Hat site.",
   homeTitle: "RHCSA practice exam",

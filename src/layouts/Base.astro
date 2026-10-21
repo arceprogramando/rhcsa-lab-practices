@@ -1,25 +1,38 @@
 ---
 import "../styles/global.css";
-import { cvUrl, getLocaleConfig, localePath, otherLocale, SITE, type Locale } from "../lib/i18n";
-import { getUI } from "../lib/i18n";
+import {
+  cvUrl,
+  getLocaleConfig,
+  getUI,
+  otherLocale,
+  routePath,
+  SITE,
+  swapLocalePath,
+  type Locale,
+  type RouteId,
+} from "../lib/i18n";
 
 interface Props {
   title: string;
   description: string;
   locale?: Locale;
-  path?: string;
+  /** Logical page id; drives localized URLs and language switch. */
+  route?: RouteId;
 }
 
-const { title, description, locale = "es", path = "/" } = Astro.props;
+const { title, description, locale = "es", route = "home" } = Astro.props;
 const ui = getUI(locale);
 const config = getLocaleConfig(locale);
 const other = otherLocale(locale);
-const canonical = new URL(localePath(locale, path), SITE).href;
-const alternateEs = new URL(localePath("es", path), SITE).href;
-const alternateEn = new URL(localePath("en", path), SITE).href;
+const path = routePath(locale, route);
+const alternateEs = new URL(routePath("es", route), SITE).href;
+const alternateEn = new URL(routePath("en", route), SITE).href;
+const canonical = new URL(path, SITE).href;
 const fullTitle = title.includes("arceprog") ? title : `${title} | arceprog`;
-const home = localePath(locale, "/");
-const stats = localePath(locale, "/estadisticas/");
+const home = routePath(locale, "home");
+const stats = routePath(locale, "stats");
+const glossary = routePath(locale, "glossary");
+const otherHref = swapLocalePath(path, other);
 ---
 
 <!doctype html>
@@ -83,14 +96,16 @@ const stats = localePath(locale, "/estadisticas/");
         </a>
         <nav class="flex items-center gap-4 text-sm font-medium" aria-label={ui.nav}>
           <a class="text-muted no-underline hover:text-ink" href={`${stats}?mode=fixed`}>{ui.statsNav}</a>
+          <a class="text-muted no-underline hover:text-ink" href={glossary}>{ui.glossaryNav}</a>
           <a class="text-muted no-underline hover:text-ink" href={cvUrl(locale)}>{ui.cv}</a>
           <a
             class="rounded-full border border-ink px-2.5 py-1 text-xs font-semibold tracking-wide no-underline"
-            href={localePath(other, path)}
+            href={otherHref}
             hreflang={getLocaleConfig(other).htmlLang}
             title={getLocaleConfig(other).label}
             aria-label={getLocaleConfig(other).label}
             onclick={`localStorage.setItem('locale-preference', '${other}')`}
+            data-locale-swap
           >
             {other.toUpperCase()}
           </a>
@@ -118,6 +133,11 @@ const stats = localePath(locale, "/estadisticas/");
           } else {
             localStorage.setItem("locale-preference", "es");
           }
+        }
+        const swap = document.querySelector("[data-locale-swap]");
+        if (swap && window.location.search) {
+          const href = swap.getAttribute("href") || "/";
+          swap.setAttribute("href", href + (href.includes("?") ? "&" : "?") + window.location.search.slice(1));
         }
       })();
     </script>

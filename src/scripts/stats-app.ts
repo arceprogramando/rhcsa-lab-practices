@@ -1,4 +1,4 @@
-import { difficultyLabel, getUI, localePath, pageLocale } from "../lib/i18n";
+import { difficultyLabel, getUI, pageLocale, routePath, type RouteId } from "../lib/i18n";
 import { labById } from "../lib/labs";
 import {
   aggregates,
@@ -18,8 +18,8 @@ function copy() {
   return getUI(pageLocale());
 }
 
-function to(path: string): string {
-  return localePath(pageLocale(), path);
+function to(route: RouteId): string {
+  return routePath(pageLocale(), route);
 }
 
 function readMode(): ExamMode {
@@ -28,8 +28,7 @@ function readMode(): ExamMode {
 }
 
 function modeHref(mode: ExamMode): string {
-  const base = to("/estadisticas/");
-  return `${base}?mode=${mode}`;
+  return `${to("stats")}?mode=${mode}`;
 }
 
 export function mountStats(host: HTMLElement): void {
@@ -275,7 +274,7 @@ function empty(mode: ExamMode): HTMLElement {
       "mt-3 text-muted",
       mode === "fixed" ? `${ui.noTimesBody} ${ui.startFixedHint}` : ui.noTimesBody,
     ),
-    link(to("/"), ui.goHome, "btn btn-primary mt-6"),
+    link(to("home"), ui.goHome, "btn btn-primary mt-6"),
   );
   return card;
 }

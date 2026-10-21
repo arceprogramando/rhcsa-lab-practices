@@ -179,7 +179,7 @@ export const LAB_EN: Record<string, LabEn> = {
       "Felipe can change other users' passwords without sudo asking for a password.",
       "Persistent.",
     ],
-    tip: "This lab's group is sysadm, not wheel. If the user already exists, add the secondary group with usermod -aG, not another useradd. The sudo rule goes through visudo: a syntax error leaves you without sudo. userdel -r deletes the home; on XFS that is gone.",
+    tip: "This lab's group is sysadm, not wheel. If the user already exists, add the secondary group with usermod -aG, not another useradd. The sudo rule goes through visudo: a syntax error leaves you without sudo. To delete: userdel -r USER (account + home) and groupdel GROUP (the group cannot be anyone's primary group).",
     videoHint: 'Video for this lab: Q05.',
     videos: ['Q05: Users, groups, and sudo'],
     why: [
@@ -196,7 +196,8 @@ export const LAB_EN: Record<string, LabEn> = {
       "The group can create users. % means group.",
       "Only Felipe, only passwd, no sudo password.",
       "Read the rule before testing with su - felipe.",
-      "Deletes the account, the home (/home/erik), and mail. Without -r the folder stays. The user cannot have an open session. On typical RHEL disk (XFS) those files do not come back: useradd again leaves an empty home. Only a VM snapshot from before brings them back.",
+      "Delete a user: userdel -r NAME. Removes the account, home (/home/erik), and mail. Without -r the home folder stays. The user cannot have an open session (loginctl terminate-user erik if needed). On XFS that is gone: another useradd leaves an empty home.",
+      "Delete a group: groupdel NAME. It cannot be anyone's primary group: first delete those users or change their primary group (usermod -g OTHER user). If it was only secondary, userdel or usermod -G already drops it. getent group sysadm checks it is gone.",
     ],
   },
   "lab-06": {

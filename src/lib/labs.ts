@@ -277,7 +277,7 @@ export const LABS: Lab[] = [
       "Persistente.",
     ],
     help: {
-      tip: "El grupo de este lab es sysadm, no wheel. Si el usuario ya existe, el secundario se suma con usermod -aG, no con otro useradd. La regla de sudo va con visudo: un error de sintaxis te deja sin sudo. userdel -r borra el home; en XFS eso no se recupera.",
+      tip: "El grupo de este lab es sysadm, no wheel. Si el usuario ya existe, el secundario se suma con usermod -aG, no con otro useradd. La regla de sudo va con visudo: un error de sintaxis te deja sin sudo. Para borrar: userdel -r USUARIO (cuenta + home) y groupdel GRUPO (el grupo no puede ser primario de nadie).",
       videoHint: "Video de este lab: Q05.",
       videos: [{ title: "Q05: Usuarios, grupos y sudo", url: YT.users }],
       commands: [
@@ -294,7 +294,8 @@ export const LABS: Lab[] = [
         { cmd: "%sysadm ALL=(ALL) /usr/sbin/useradd", why: "El grupo puede crear usuarios. El % indica grupo." },
         { cmd: "felipe ALL=(ALL) NOPASSWD: /usr/bin/passwd", why: "Solo Felipe, solo passwd, sin contraseña de sudo." },
         { cmd: "sudo -l -U felipe", why: "Leer la regla antes de probar con su - felipe." },
-        { cmd: "userdel -r erik", why: "Borra la cuenta y el home (/home/erik) y el mail. Sin -r queda la carpeta. El usuario no puede tener sesión abierta. En el disco típico de RHEL (XFS) esos archivos no se recuperan: recrear con useradd deja un home vacío. Solo vuelve si hay snapshot de la VM de antes." },
+        { cmd: "userdel -r erik", why: "Borrar un usuario: userdel -r NOMBRE. Quita la cuenta, el home (/home/erik) y el mail. Sin -r queda la carpeta home. El usuario no puede tener sesión abierta (loginctl terminate-user erik si hace falta). En XFS eso no se recupera: otro useradd deja el home vacío." },
+        { cmd: "groupdel sysadm", why: "Borrar un grupo: groupdel NOMBRE. Tiene que estar vacío como grupo primario: primero borrá o cambiá de grupo a los usuarios que lo tengan de primario (usermod -g OTRO usuario). Si solo era secundario, userdel o usermod -G ya lo sacan de la lista. getent group sysadm comprueba que ya no está." },
       ],
     },
   },

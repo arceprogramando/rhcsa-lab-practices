@@ -1,4 +1,4 @@
-import { getUI, localePath, pageLocale } from "../lib/i18n";
+import { getUI, pageLocale, routePath } from "../lib/i18n";
 import {
   activeRun,
   closedRuns,
@@ -30,7 +30,7 @@ export function mountHome(): void {
     fixed?.classList.add("btn-quiet");
     if (startLabel) startLabel.textContent = ui.startAnotherLabel;
     resume.addEventListener("click", () => {
-      location.href = localePath(pageLocale(), "/simulacro/");
+      location.href = routePath(pageLocale(), "practice");
     });
     if (note) {
       const when = formatWhen(running.startedAt, locale);
@@ -46,7 +46,7 @@ export function mountHome(): void {
     pausable.addEventListener("click", () => {
       if (running && !confirm(ui.confirmReplace)) return;
       startRun("pausable");
-      location.href = localePath(locale, "/simulacro/");
+      location.href = routePath(locale, "practice");
     });
   }
   if (fixed) {
@@ -54,7 +54,7 @@ export function mountHome(): void {
     fixed.addEventListener("click", () => {
       if (running && !confirm(ui.confirmReplace)) return;
       startRun("fixed");
-      location.href = localePath(locale, "/simulacro/");
+      location.href = routePath(locale, "practice");
     });
   }
 

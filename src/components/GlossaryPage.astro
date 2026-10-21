@@ -1,0 +1,94 @@
+---
+import Base from "../layouts/Base.astro";
+import { glossaryFor, TLDR_REPO, tldrUrl } from "../lib/glossary";
+import { getUI, type Locale } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const ui = getUI(locale);
+const entries = glossaryFor(locale);
+---
+
+<Base title={ui.glossaryTitle} description={ui.glossaryDescription} locale={locale} route="glossary">
+  <div class="mx-auto max-w-5xl px-5 py-8">
+    <h1 class="text-3xl font-semibold tracking-tight">{ui.glossaryHeading}</h1>
+    <p class="mt-2 max-w-2xl text-muted">
+      {ui.glossaryIntro}
+      {" "}
+      <a class="text-ink underline decoration-line underline-offset-2" href={TLDR_REPO} target="_blank" rel="noopener noreferrer">{ui.glossaryTldrRepo}</a>.
+    </p>
+    <label class="mt-6 block max-w-xl">
+      <span class="sr-only">{ui.glossarySearch}</span>
+      <input
+        id="glossary-search"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder={ui.glossarySearch}
+        class="w-full rounded-full border border-line bg-card px-4 py-3 text-base text-ink outline-none placeholder:text-muted focus-visible:border-ink"
+      />
+    </label>
+    <p id="glossary-empty" class="mt-6 hidden text-sm text-muted">{ui.glossarySearchEmpty}</p>
+    <dl id="glossary-list" class="mt-6 overflow-hidden rounded-3xl border border-line bg-card">
+      {
+        entries.map((entry) => (
+          <div
+            class="glossary-entry border-b border-line px-5 py-5 last:border-b-0"
+            data-term={entry.term}
+            data-definition={entry.definition}
+            data-example={entry.example ?? ""}
+          >
+            <dt class="font-mono text-lg font-semibold tracking-tight">{entry.term}</dt>
+            <dd class="mt-2 text-[1.05rem] leading-relaxed text-ink/90">{entry.definition}</dd>
+            {entry.example ? (
+              <dd class="mono mt-3 rounded-2xl bg-paper px-3 py-2 text-sm text-muted">{entry.example}</dd>
+            ) : null}
+            {entry.tldr ? (
+              <dd class="mt-3 text-sm">
+                <a
+                  class="font-medium text-ink underline decoration-line underline-offset-2"
+                  href={tldrUrl(entry.tldr)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {ui.glossaryTldr}
+                </a>
+              </dd>
+            ) : null}
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</Base>
+
+<script>
+  const input = document.getElementById("glossary-search") as HTMLInputElement | null;
+  const empty = document.getElementById("glossary-empty");
+  const list = document.getElementById("glossary-list");
+  if (input && empty && list) {
+    const entries = Array.from(list.querySelectorAll<HTMLElement>(".glossary-entry"));
+    const filter = () => {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      for (const entry of entries) {
+        const haystack = [
+          entry.dataset.term ?? "",
+          entry.dataset.definition ?? "",
+          entry.dataset.example ?? "",
+        ]
+          .join(" ")
+          .toLowerCase();
+        const match = !q || haystack.includes(q);
+        entry.classList.toggle("hidden", !match);
+        if (match) shown += 1;
+      }
+      empty.classList.toggle("hidden", shown > 0);
+      list.classList.toggle("hidden", shown === 0);
+    };
+    input.addEventListener("input", filter);
+  }
+</script>

@@ -11,8 +11,7 @@ Gateway / DNS del lab: `172.16.1.1` (interfaz host-only de VirtualBox en el host
 
 ## Dónde levantarlo
 
-- **PC de casa (Rocky + VirtualBox + Vagrant):** acá sí.
-- **Windows del trabajo:** Vagrant suele ir mal (Hyper-V / sin VT-x). Usá las VMs que ya tenés en VirtualBox, o un clon limpio. Este `Vagrantfile` es para casa.
+Este `Vagrantfile` es para la **PC de casa** (Rocky + VirtualBox + Vagrant). En el Windows del trabajo Vagrant suele ir mal; no hay guía alternativa en este repo.
 
 ```bash
 cd /ruta/a/rhcsa/labs/vanilla-rocky10   # o la copia en la PC de casa

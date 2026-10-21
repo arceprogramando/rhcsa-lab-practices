@@ -2,5 +2,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "astro",
-  "trailingSlash": true
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/en/simulacro/", "destination": "/en/practice/", "permanent": true },
+    { "source": "/en/estadisticas/", "destination": "/en/stats/", "permanent": true },
+    { "source": "/en/glosario/", "destination": "/en/glossary/", "permanent": true }
+  ]
 }
