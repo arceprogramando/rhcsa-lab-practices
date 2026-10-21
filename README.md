@@ -1,6 +1,6 @@
 # Simulacro RHCSA — arceprog
 
-Práctica tipo EX200 para [rhcsa.arceprog.dev](https://rhcsa.arceprog.dev). Un lab por vez, reloj de 3 horas y estadísticas en `localStorage` de este navegador.
+Práctica tipo EX200 para [ex200-personal-practice.arceprog.dev](https://ex200-personal-practice.arceprog.dev). Un lab por vez, reloj de 3 horas y estadísticas en `localStorage` de este navegador.
 
 ```bash
 npm install

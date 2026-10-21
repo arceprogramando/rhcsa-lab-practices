@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # =============================================================================
-# Lab vanilla Rocky Linux 10 — alineado a rhcsa.arceprog.dev / simulacro
+# Lab vanilla Rocky Linux 10 — alineado a ex200-personal-practice.arceprog.dev / simulacro
 # client 172.16.1.12 · server 172.16.1.13 · hostnames *.rhcsa.lab
 #
 # Dónde correrlo: PC de casa (Rocky) con VirtualBox + Vagrant.

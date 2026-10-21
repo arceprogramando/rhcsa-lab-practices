@@ -1,6 +1,6 @@
 # Vanilla Rocky 10 — lab para el simulacro arceprog
 
-Alineado a [rhcsa.arceprog.dev](https://rhcsa.arceprog.dev) / `c:\dev\rhcsa`:
+Alineado a [ex200-personal-practice.arceprog.dev](https://ex200-personal-practice.arceprog.dev) / `c:\dev\rhcsa`:
 
 | VM | Hostname | IP lab |
 |---|---|---|

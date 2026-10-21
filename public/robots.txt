@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rhcsa.arceprog.dev/sitemap-index.xml
+Sitemap: https://ex200-personal-practice.arceprog.dev/sitemap-index.xml

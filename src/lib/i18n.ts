@@ -2,7 +2,7 @@ export const DEFAULT_LOCALE = "es";
 export const LOCALES = ["es", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const SITE = "https://rhcsa.arceprog.dev";
+export const SITE = "https://ex200-personal-practice.arceprog.dev";
 
 export function getLocaleConfig(locale: Locale) {
   if (locale === "en") {

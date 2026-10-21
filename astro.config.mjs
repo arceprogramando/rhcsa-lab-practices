@@ -3,7 +3,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://rhcsa.arceprog.dev",
+  site: "https://ex200-personal-practice.arceprog.dev",
   trailingSlash: "always",
   i18n: {
     defaultLocale: "es",
