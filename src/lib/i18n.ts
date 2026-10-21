@@ -62,12 +62,19 @@ export interface Copy {
   startPausableAnother: string;
   startFixed: string;
   startFixedAnother: string;
+  startFixedHint: string;
   modesNote: string;
   resume: string;
+  startAnotherLabel: string;
   seeStats: string;
+  seeStatsFixed: string;
+  seeStatsPausable: string;
+  statsModeFixed: string;
+  statsModePausable: string;
   timesNote: string;
   loading: string;
   improvement: string;
+  improvementFixed: string;
   runs: string;
   best: string;
   withHelp: string;
@@ -107,6 +114,7 @@ export interface Copy {
   pause: string;
   resumeClock: string;
   paused: string;
+  floatDrag: string;
   thisLab: string;
   missing: string;
   redoCount: string;
@@ -230,16 +238,23 @@ const es: Copy = {
   start: "Empezá el simulacro",
   startAnother: "Empezar otro",
   startModesLabel: "Empezar un simulacro",
-  startPausable: "Empezar con pausas",
-  startPausableAnother: "Otro con pausas",
+  startPausable: "Práctica con pausas",
+  startPausableAnother: "Otra con pausas",
   startFixed: "Empezar sin pausas",
   startFixedAnother: "Otro sin pausas",
-  modesNote: "Con pausas: podés frenar el reloj para comer o descansar. Sin pausas: las 3 horas corren de corrido, como en el examen.",
+  startFixedHint: "El modo importante: 3 horas de corrido, como el examen real.",
+  modesNote: "Sin pausas es el que importa para medir cómo vas. Con pausas es solo práctica: el reloj se puede frenar.",
   resume: "Seguí donde quedaste",
+  startAnotherLabel: "O empezar otro",
   seeStats: "Ver mis tiempos",
+  seeStatsFixed: "Tiempos sin pausas",
+  seeStatsPausable: "Tiempos con pausas",
+  statsModeFixed: "Sin pausas · como el examen",
+  statsModePausable: "Con pausas · práctica",
   timesNote: "Los tiempos quedan en este navegador.",
   loading: "Cargando tiempos locales…",
   improvement: "Mejora",
+  improvementFixed: "Mejora sin pausas",
   runs: "Simulacros",
   best: "Mejor tiempo",
   withHelp: "Con ayuda",
@@ -247,7 +262,7 @@ const es: Copy = {
   lastClose: "Último cierre",
   howTitle: "Cómo se rinde",
   how: [
-    "Al empezar elegís: con pausas (podés frenar el reloj) o sin pausas (3 horas de corrido). Ves todas las tareas.",
+    "Lo principal es sin pausas: 3 horas de corrido como el examen. Con pausas es práctica opcional.",
     "Hacé primero lo que ya sabés. Esos son los puntos rápidos.",
     "Revisit (volver después): te trabaste, lo dejás marcado y seguís con otro.",
     "Done (ya está): ese ya está. Lo que no tiene marca es lo que falta.",
@@ -286,6 +301,7 @@ const es: Copy = {
   pause: "Pausar",
   resumeClock: "Seguir",
   paused: "En pausa",
+  floatDrag: "Arrastrá",
   thisLab: "Este lab",
   missing: "Te faltan",
   redoCount: "Rehacer",
@@ -360,7 +376,7 @@ const es: Copy = {
   statsTitle: "Estadísticas del simulacro",
   statsDescription: "Tiempos por lab, promedio, ayuda pedida y mejora contra el simulacro anterior. Guardado en este navegador.",
   statsHeading: "Estadísticas",
-  statsIntro: "Promedio, mejor tiempo y diferencia contra el intento anterior. Todo sale de este navegador.",
+  statsIntro: "Separadas por modo. Sin pausas es la que importa (como el examen). Con pausas es práctica.",
   noClosed: "Todavía no hay un simulacro cerrado",
   noClosedBody: "Cuando cierres uno, o se acaben las 3 horas, acá se compara contra el anterior.",
   firstExam: "Este es el primer simulacro cerrado. El próximo se resta contra este tiempo.",
@@ -408,16 +424,23 @@ const en: Copy = {
   start: "Start the practice exam",
   startAnother: "Start another",
   startModesLabel: "Start a practice exam",
-  startPausable: "Start with pauses",
+  startPausable: "Practice with pauses",
   startPausableAnother: "Another with pauses",
   startFixed: "Start without pauses",
   startFixedAnother: "Another without pauses",
-  modesNote: "With pauses: you can stop the clock for a meal or a break. Without pauses: the 3 hours run straight, like the real exam.",
+  startFixedHint: "The important mode: 3 hours straight, like the real exam.",
+  modesNote: "Without pauses is what matters for measuring progress. With pauses is only practice: you can stop the clock.",
   resume: "Continue where you left off",
+  startAnotherLabel: "Or start another",
   seeStats: "View my times",
+  seeStatsFixed: "Times without pauses",
+  seeStatsPausable: "Times with pauses",
+  statsModeFixed: "Without pauses · like the exam",
+  statsModePausable: "With pauses · practice",
   timesNote: "Times stay in this browser.",
   loading: "Loading local times…",
   improvement: "Improvement",
+  improvementFixed: "Improvement without pauses",
   runs: "Practice exams",
   best: "Best time",
   withHelp: "With help",
@@ -425,7 +448,7 @@ const en: Copy = {
   lastClose: "Last close",
   howTitle: "How to take it",
   how: [
-    "When you start you choose: with pauses (you can stop the clock) or without pauses (3 hours straight). You see every task.",
+    "The main one is without pauses: 3 hours straight like the exam. With pauses is optional practice.",
     "Do what you already know first. Those are the quick points.",
     "Revisit (come back later): you got stuck, leave it marked, and move on.",
     "Done (finished): that one is done. Anything unmarked is still left.",
@@ -464,6 +487,7 @@ const en: Copy = {
   pause: "Pause",
   resumeClock: "Resume",
   paused: "Paused",
+  floatDrag: "Drag",
   thisLab: "This lab",
   missing: "Left",
   redoCount: "Redo",
@@ -538,7 +562,7 @@ const en: Copy = {
   statsTitle: "Practice exam stats",
   statsDescription: "Time per lab, average, help requested, and improvement against the previous attempt. Stored in this browser.",
   statsHeading: "Stats",
-  statsIntro: "Average, best time, and the difference against the previous attempt. All of it comes from this browser.",
+  statsIntro: "Split by mode. Without pauses is what matters (like the exam). With pauses is practice.",
   noClosed: "No practice exam has been closed yet",
   noClosedBody: "When you close one, or the 3 hours run out, this compares it with the previous one.",
   firstExam: "This is the first closed practice exam. The next one is subtracted from this time.",

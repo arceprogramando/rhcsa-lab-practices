@@ -115,7 +115,7 @@ function blankLab(labId: string): LabRecord {
   };
 }
 
-export function startRun(mode: ExamMode = "pausable"): Run {
+export function startRun(mode: ExamMode = "fixed"): Run {
   const store = loadStore();
   const nowIso = new Date().toISOString();
   for (const run of store.runs) {
@@ -177,6 +177,11 @@ export interface LabAggregate {
   lastDifficulty: Difficulty | null;
 }
 
+export function filterRuns(store: Store, mode?: ExamMode): Store {
+  if (!mode) return store;
+  return { runs: store.runs.filter((run) => run.mode === mode) };
+}
+
 export function finishedSamples(store: Store, labId: string): LabRecord[] {
   return store.runs
     .slice()
@@ -190,9 +195,10 @@ export function finishedSamples(store: Store, labId: string): LabRecord[] {
     );
 }
 
-export function aggregates(store: Store): LabAggregate[] {
+export function aggregates(store: Store, mode?: ExamMode): LabAggregate[] {
+  const scoped = filterRuns(store, mode);
   return LABS.filter((lab) => lab.track !== "setup").map((lab) => {
-    const samples = finishedSamples(store, lab.id);
+    const samples = finishedSamples(scoped, lab.id);
     const durations = samples.map((sample) => sample.durationSec ?? 0);
     const last = samples.at(-1);
     const prev = samples.at(-2);

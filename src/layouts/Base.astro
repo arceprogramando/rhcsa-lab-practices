@@ -82,7 +82,7 @@ const stats = localePath(locale, "/estadisticas/");
           </span>
         </a>
         <nav class="flex items-center gap-4 text-sm font-medium" aria-label={ui.nav}>
-          <a class="text-muted no-underline hover:text-ink" href={stats}>{ui.statsNav}</a>
+          <a class="text-muted no-underline hover:text-ink" href={`${stats}?mode=fixed`}>{ui.statsNav}</a>
           <a class="text-muted no-underline hover:text-ink" href={cvUrl(locale)}>{ui.cv}</a>
           <a
             class="rounded-full border border-ink px-2.5 py-1 text-xs font-semibold tracking-wide no-underline"

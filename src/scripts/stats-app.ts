@@ -5,9 +5,11 @@ import {
   clearStore,
   countedLabs,
   deleteRun,
+  filterRuns,
   isHard,
   loadStore,
   wallSec,
+  type ExamMode,
   type Run,
 } from "../lib/storage";
 import { deltaLabel, formatClock, formatDelta, formatShort, formatWhen } from "../lib/time";
@@ -20,15 +22,28 @@ function to(path: string): string {
   return localePath(pageLocale(), path);
 }
 
+function readMode(): ExamMode {
+  const raw = new URLSearchParams(location.search).get("mode");
+  return raw === "pausable" ? "pausable" : "fixed";
+}
+
+function modeHref(mode: ExamMode): string {
+  const base = to("/estadisticas/");
+  return `${base}?mode=${mode}`;
+}
+
 export function mountStats(host: HTMLElement): void {
   host.replaceChildren(view());
 }
 
 function view(): HTMLElement {
-  const store = loadStore();
+  const mode = readMode();
+  const store = filterRuns(loadStore(), mode);
   const page = el("div", "flex flex-col gap-6 pb-12");
+  page.append(modeTabs(mode));
+
   if (store.runs.length === 0) {
-    page.append(empty());
+    page.append(empty(mode));
     return page;
   }
 
@@ -40,15 +55,49 @@ function view(): HTMLElement {
   const delta = latest && previous ? wallSec(latest) - wallSec(previous) : null;
 
   const runs = store.runs.slice().sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt));
-  page.append(headline(delta, latest, previous), totals(store.runs), labTable(), history(runs), tools());
+  page.append(headline(delta, latest, previous, mode), totals(store.runs), labTable(mode), history(runs), tools());
   return page;
 }
 
-function headline(delta: number | null, latest: Run | undefined, previous: Run | undefined): HTMLElement {
-  const card = el("section", "rounded-3xl border border-line bg-card p-6 sm:p-8");
+function modeTabs(mode: ExamMode): HTMLElement {
+  const ui = copy();
+  const row = el("div", "flex flex-col gap-2 sm:flex-row sm:flex-wrap");
+  row.append(
+    link(
+      modeHref("fixed"),
+      ui.statsModeFixed,
+      mode === "fixed" ? "btn btn-primary" : "btn btn-quiet",
+    ),
+    link(
+      modeHref("pausable"),
+      ui.statsModePausable,
+      mode === "pausable" ? "btn btn-primary" : "btn btn-quiet",
+    ),
+  );
+  return row;
+}
+
+function headline(
+  delta: number | null,
+  latest: Run | undefined,
+  previous: Run | undefined,
+  mode: ExamMode,
+): HTMLElement {
+  const card = el(
+    "section",
+    mode === "fixed"
+      ? "rounded-3xl border-2 border-ink bg-card p-6 sm:p-8"
+      : "rounded-3xl border border-line bg-card p-6 sm:p-8",
+  );
   const ui = copy();
   const locale = pageLocale();
-  card.append(el("p", "text-xs font-semibold tracking-[0.16em] text-muted uppercase", ui.improvement));
+  card.append(
+    el(
+      "p",
+      "text-xs font-semibold tracking-[0.16em] text-muted uppercase",
+      mode === "fixed" ? ui.improvementFixed : ui.statsModePausable,
+    ),
+  );
   if (!latest) {
     card.append(
       el("h1", "mt-2 text-3xl font-semibold tracking-tight", ui.noClosed),
@@ -65,7 +114,11 @@ function headline(delta: number | null, latest: Run | undefined, previous: Run |
   }
   const faster = delta < -5;
   card.append(
-    el("h1", `stat-value mt-2 text-4xl font-semibold ${faster ? "text-good" : delta > 5 ? "text-bad" : "text-ink"}`, formatDelta(delta, locale)),
+    el(
+      "h1",
+      `stat-value mt-2 text-4xl font-semibold ${faster ? "text-good" : delta > 5 ? "text-bad" : "text-ink"}`,
+      formatDelta(delta, locale),
+    ),
     el("p", "mt-3 text-lg", `${deltaLabel(delta, locale)} ${ui.fasterThan(formatWhen(previous.startedAt, locale))}`),
     el("p", "mt-2 text-sm text-muted", ui.lastVsPrev(formatClock(wallSec(latest)), formatClock(wallSec(previous)))),
   );
@@ -95,8 +148,8 @@ function tile(label: string, value: string): HTMLElement {
   return card;
 }
 
-function labTable(): HTMLElement {
-  const rows = aggregates(loadStore());
+function labTable(mode: ExamMode): HTMLElement {
+  const rows = aggregates(loadStore(), mode);
   const section = el("section", "overflow-hidden rounded-3xl border border-line bg-card");
   section.append(el("h2", "px-5 pt-5 text-lg font-semibold", copy().byLab));
   const table = document.createElement("div");
@@ -144,11 +197,7 @@ function labTable(): HTMLElement {
   }
   grid.append(head, body);
   table.append(grid);
-  const note = el(
-    "p",
-    "px-5 py-4 text-sm text-muted",
-    copy().statsNote,
-  );
+  const note = el("p", "px-5 py-4 text-sm text-muted", copy().statsNote);
   section.append(table, note);
   return section;
 }
@@ -172,7 +221,11 @@ function history(runs: Run[]): HTMLElement {
     const text = el("div");
     text.append(
       el("p", "font-medium", `${formatWhen(run.startedAt, pageLocale())} · ${statusLabel(run.status)}`),
-      el("p", "stat-value text-sm text-muted", `${formatClock(wallSec(run))} · ${copy().tally({ done, revisit, redo, skipped, help })}`),
+      el(
+        "p",
+        "stat-value text-sm text-muted",
+        `${formatClock(wallSec(run))} · ${copy().tally({ done, revisit, redo, skipped, help })}`,
+      ),
     );
     const remove = button(copy().delete, "btn btn-quiet");
     remove.addEventListener("click", () => {
@@ -212,12 +265,17 @@ function tools(): HTMLElement {
   return row;
 }
 
-function empty(): HTMLElement {
+function empty(mode: ExamMode): HTMLElement {
   const card = el("section", "rounded-3xl border border-line bg-card p-6 sm:p-8");
+  const ui = copy();
   card.append(
-    el("h1", "text-3xl font-semibold tracking-tight", copy().noTimes),
-    el("p", "mt-3 text-muted", copy().noTimesBody),
-    link(to("/"), copy().goHome, "btn btn-primary mt-6"),
+    el("h1", "text-3xl font-semibold tracking-tight", ui.noTimes),
+    el(
+      "p",
+      "mt-3 text-muted",
+      mode === "fixed" ? `${ui.noTimesBody} ${ui.startFixedHint}` : ui.noTimesBody,
+    ),
+    link(to("/"), ui.goHome, "btn btn-primary mt-6"),
   );
   return card;
 }

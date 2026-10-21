@@ -33,18 +33,26 @@ let undoTimer = 0;
 let tickTimer = 0;
 let globalClock: HTMLElement | null = null;
 let labClock: HTMLElement | null = null;
+let floatRoot: HTMLElement | null = null;
+let floatPauseBtn: HTMLButtonElement | null = null;
+let floatLabel: HTMLElement | null = null;
 let expiredOnce = false;
 let screen: "board" | "lab" = "board";
 let visitStart: number | null = null;
 let focusDifficultyIndex: number | null = null;
 /** Panel de ayuda visible en la pantalla del lab. */
 let helpVisible = false;
+let floatX: number | null = null;
+let floatY: number | null = null;
 
 const UI_KEY = "arceprog:rhcsa-exam-ui";
 
 function saveUi(): void {
   if (!runId || typeof sessionStorage === "undefined") return;
-  sessionStorage.setItem(UI_KEY, JSON.stringify({ runId, screen, helpVisible }));
+  sessionStorage.setItem(
+    UI_KEY,
+    JSON.stringify({ runId, screen, helpVisible, floatX, floatY }),
+  );
 }
 
 function loadUi(): void {
@@ -52,10 +60,18 @@ function loadUi(): void {
   try {
     const raw = sessionStorage.getItem(UI_KEY);
     if (!raw) return;
-    const data = JSON.parse(raw) as { runId?: string; screen?: string; helpVisible?: boolean };
+    const data = JSON.parse(raw) as {
+      runId?: string;
+      screen?: string;
+      helpVisible?: boolean;
+      floatX?: number | null;
+      floatY?: number | null;
+    };
     if (data.runId !== runId) return;
     if (data.screen === "lab" || data.screen === "board") screen = data.screen;
     helpVisible = Boolean(data.helpVisible);
+    if (typeof data.floatX === "number") floatX = data.floatX;
+    if (typeof data.floatY === "number") floatY = data.floatY;
   } catch {
     /* ignore */
   }
@@ -124,7 +140,7 @@ function tick(): void {
   if (globalClock) {
     const left = remainingSec(run);
     globalClock.textContent = formatClock(left);
-    globalClock.className = `stat-value text-3xl font-semibold sm:text-4xl ${tone(left)}`;
+    globalClock.className = `stat-value text-2xl font-semibold sm:text-3xl ${tone(left)}`;
   }
   if (labClock) {
     const record = run.labs[run.currentIndex];
@@ -160,10 +176,12 @@ function flushVisit(record: LabRecord | undefined): void {
 function render(): void {
   const run = current();
   if (!run) {
+    removeFloat();
     renderEmpty();
     return;
   }
   if (run.status !== "in_progress") {
+    removeFloat();
     root.replaceChildren(summaryView(run));
     globalClock = null;
     labClock = null;
@@ -171,14 +189,14 @@ function render(): void {
   }
   if (screen === "lab" && labs()[run.currentIndex]) {
     root.replaceChildren(examView(run));
-    globalClock = root.querySelector("[data-global-clock]");
     labClock = root.querySelector("[data-lab-clock]");
+    syncFloat(run);
     return;
   }
   screen = "board";
   root.replaceChildren(boardView(run));
-  globalClock = root.querySelector("[data-global-clock]");
   labClock = null;
+  syncFloat(run);
   if (focusDifficultyIndex != null) {
     const line = root.querySelector(`[data-difficulty="${focusDifficultyIndex}"]`);
     line?.scrollIntoView({ block: "nearest" });
@@ -187,6 +205,7 @@ function render(): void {
 }
 
 function renderEmpty(): void {
+  removeFloat();
   const box = el("section", "mx-auto max-w-xl py-16 text-center");
   box.append(
     el("h1", "text-3xl font-semibold tracking-tight", copy().emptyTitle),
@@ -393,23 +412,7 @@ function radioMark(index: number, value: "revisit" | "done", label: string, chec
 }
 
 function clockBar(run: Run, showLab: boolean): HTMLElement {
-  const left = remainingSec(run);
-  const paused = run.mode === "pausable" && Boolean(run.pausedAt);
-  const bar = el("section", "grid gap-3 rounded-3xl border border-line bg-card p-4 sm:grid-cols-[auto_1fr] sm:items-center sm:p-5");
-  const time = el("div", "flex flex-wrap items-end gap-3");
-  const clock = el("div");
-  const label = el("p", "text-xs font-semibold tracking-[0.16em] text-muted uppercase", paused ? copy().paused : copy().clock);
-  globalClock = el("p", `stat-value text-3xl font-semibold sm:text-4xl ${paused ? "text-ink" : tone(left)}`, formatClock(left));
-  globalClock.dataset.globalClock = "true";
-  globalClock.setAttribute("aria-live", "off");
-  clock.append(label, globalClock);
-  time.append(clock);
-  if (run.mode === "pausable" && run.status === "in_progress") {
-    const hold = button(paused ? copy().resumeClock : copy().pause, "btn btn-primary");
-    hold.addEventListener("click", () => togglePause());
-    time.append(hold);
-  }
-
+  const bar = el("section", "rounded-3xl border border-line bg-card p-4 sm:p-5");
   const counts = el("dl", "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6");
   const scored = countedLabs(run.labs);
   const leftTasks = scored.filter((item) => item.status !== "done" && item.status !== "skipped").length;
@@ -426,8 +429,125 @@ function clockBar(run: Run, showLab: boolean): HTMLElement {
     counter(copy().redoCount, String(redo)),
     counter(copy().withHelp, String(help)),
   );
-  bar.append(time, counts);
+  bar.append(counts);
   return bar;
+}
+
+function removeFloat(): void {
+  window.removeEventListener("resize", onFloatResize);
+  floatRoot?.remove();
+  floatRoot = null;
+  floatPauseBtn = null;
+  floatLabel = null;
+  globalClock = null;
+}
+
+function defaultFloatPos(): { x: number; y: number } {
+  const width = 168;
+  return {
+    x: Math.max(12, window.innerWidth - width - 20),
+    y: Math.max(12, window.innerHeight - 140),
+  };
+}
+
+function placeFloat(node: HTMLElement): void {
+  const fallback = defaultFloatPos();
+  const x = floatX ?? fallback.x;
+  const y = floatY ?? fallback.y;
+  const maxX = Math.max(8, window.innerWidth - node.offsetWidth - 8);
+  const maxY = Math.max(8, window.innerHeight - node.offsetHeight - 8);
+  const nextX = Math.min(Math.max(8, x), maxX);
+  const nextY = Math.min(Math.max(8, y), maxY);
+  node.style.left = `${nextX}px`;
+  node.style.top = `${nextY}px`;
+  floatX = nextX;
+  floatY = nextY;
+}
+
+function syncFloat(run: Run): void {
+  const left = remainingSec(run);
+  const paused = run.mode === "pausable" && Boolean(run.pausedAt);
+  if (!floatRoot) {
+    floatRoot = el("aside", "exam-float");
+    floatRoot.setAttribute("aria-label", copy().clock);
+    const handle = el("div", "exam-float-handle");
+    floatLabel = el("span", "", paused ? copy().paused : copy().clock);
+    handle.append(floatLabel, el("span", "exam-float-grip", "⠿"));
+    handle.title = copy().floatDrag;
+    globalClock = el(
+      "p",
+      `stat-value text-2xl font-semibold sm:text-3xl ${paused ? "text-ink" : tone(left)}`,
+      formatClock(left),
+    );
+    globalClock.dataset.globalClock = "true";
+    globalClock.setAttribute("aria-live", "off");
+    floatRoot.append(handle, globalClock);
+    if (run.mode === "pausable") {
+      floatPauseBtn = button(paused ? copy().resumeClock : copy().pause, "btn btn-primary");
+      floatPauseBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        togglePause();
+      });
+      floatRoot.append(floatPauseBtn);
+    }
+    document.body.append(floatRoot);
+    bindFloatDrag(floatRoot, handle);
+    window.addEventListener("resize", onFloatResize);
+    requestAnimationFrame(() => {
+      if (floatRoot) placeFloat(floatRoot);
+      saveUi();
+    });
+  } else {
+    floatRoot.dataset.paused = paused ? "true" : "false";
+    if (floatLabel) floatLabel.textContent = paused ? copy().paused : copy().clock;
+    if (globalClock) {
+      globalClock.textContent = formatClock(left);
+      globalClock.className = `stat-value text-2xl font-semibold sm:text-3xl ${paused ? "text-ink" : tone(left)}`;
+    }
+    if (floatPauseBtn) {
+      floatPauseBtn.textContent = paused ? copy().resumeClock : copy().pause;
+    }
+  }
+}
+
+function onFloatResize(): void {
+  if (floatRoot) placeFloat(floatRoot);
+}
+
+function bindFloatDrag(panel: HTMLElement, handle: HTMLElement): void {
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  const onMove = (event: PointerEvent) => {
+    if (!dragging) return;
+    const maxX = Math.max(8, window.innerWidth - panel.offsetWidth - 8);
+    const maxY = Math.max(8, window.innerHeight - panel.offsetHeight - 8);
+    floatX = Math.min(Math.max(8, event.clientX - offsetX), maxX);
+    floatY = Math.min(Math.max(8, event.clientY - offsetY), maxY);
+    panel.style.left = `${floatX}px`;
+    panel.style.top = `${floatY}px`;
+  };
+
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.style.cursor = "";
+    saveUi();
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+  };
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+    panel.style.cursor = "grabbing";
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  });
 }
 
 function counter(label: string, value: string, isLab = false): HTMLElement {
