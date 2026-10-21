@@ -109,6 +109,16 @@ function closePopup(): void {
   hideDetail();
 }
 
+/** Lower = better. Title beats definition/example. */
+function glossaryRank(entry: GlossaryEntry, q: string): number {
+  if (!q) return 0;
+  const term = entry.term.toLowerCase();
+  if (term === q) return 0;
+  if (term.startsWith(q)) return 1;
+  if (term.includes(q)) return 2;
+  return 3;
+}
+
 function renderResults(query: string): void {
   if (!results || !empty) return;
   const q = query.trim().toLowerCase();
@@ -126,6 +136,9 @@ function renderResults(query: string): void {
     const hay = `${entry.term} ${entry.definition} ${entry.example ?? ""}`.toLowerCase();
     return hay.includes(q);
   });
+  if (q) {
+    matches.sort((a, b) => glossaryRank(a, q) - glossaryRank(b, q) || a.term.localeCompare(b.term));
+  }
   const visible = selectedTerm
     ? matches.filter((entry) => entry.term.toLowerCase() === selectedTerm!.toLowerCase())
     : matches;

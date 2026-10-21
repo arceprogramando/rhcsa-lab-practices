@@ -108,11 +108,19 @@ const entries = glossaryFor(locale);
       if (example) example.innerHTML = highlight(entry.dataset.example ?? "", query);
     }
 
+    function rank(entry: HTMLElement, q: string): number {
+      if (!q) return 0;
+      const term = (entry.dataset.term ?? "").toLowerCase();
+      if (term === q) return 0;
+      if (term.startsWith(q)) return 1;
+      if (term.includes(q)) return 2;
+      return 3;
+    }
+
     const filter = () => {
       const q = input.value.trim();
       const qLower = q.toLowerCase();
-      let shown = 0;
-      for (const entry of entries) {
+      const visible = entries.filter((entry) => {
         const haystack = [
           entry.dataset.term ?? "",
           entry.dataset.definition ?? "",
@@ -122,13 +130,19 @@ const entries = glossaryFor(locale);
           .toLowerCase();
         const match = !qLower || haystack.includes(qLower);
         entry.classList.toggle("hidden", !match);
-        if (match) {
-          paint(entry, qLower);
-          shown += 1;
-        }
+        if (match) paint(entry, qLower);
+        return match;
+      });
+      if (qLower) {
+        visible.sort(
+          (a, b) =>
+            rank(a, qLower) - rank(b, qLower) ||
+            (a.dataset.term ?? "").localeCompare(b.dataset.term ?? ""),
+        );
       }
-      empty.classList.toggle("hidden", shown > 0);
-      list.classList.toggle("hidden", shown === 0);
+      for (const entry of qLower ? visible : entries) list.append(entry);
+      empty.classList.toggle("hidden", visible.length > 0);
+      list.classList.toggle("hidden", visible.length === 0);
     };
     input.addEventListener("input", filter);
   }

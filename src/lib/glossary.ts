@@ -74,6 +74,13 @@ const es: GlossaryEntry[] = [
     tldr: { page: "groupdel", platform: "linux" },
   },
   {
+    term: "chmod",
+    definition:
+      "Cambia permisos de un archivo o directorio. En modo numérico: tres dígitos = dueño, grupo, otros. Cada dígito suma 4 lectura (r), 2 escritura (w), 1 ejecución/entrar (x). Un cuarto dígito al frente es bit especial (4 setuid, 2 setgid, 1 sticky). También acepta letras: u=dueño, g=grupo, o=otros, a=todos; + agrega, - saca, = fija.",
+    example: "chmod 644 archivo · chmod 755 dir · chmod 2770 /shared/sysadm · chmod u+x script.sh · chmod g-w,o-rwx archivo",
+    tldr: { page: "chmod" },
+  },
+  {
     term: "setuid",
     definition:
       "Bit especial 4 (el primer dígito de chmod). En un ejecutable, el proceso corre como el dueño del archivo (ejemplo clásico: passwd como root). En directorios casi no se usa. Se ve como s en el lugar de la x del dueño: rws---. Si es S mayúscula, el bit está pero falta la x del dueño.",
@@ -152,6 +159,13 @@ const en: GlossaryEntry[] = [
       "Deletes a group. It cannot be anyone's primary group: if it fails, check getent group NAME and change the primary with usermod -g OTHER user, or delete those users. If the group was only secondary (like sysadm in the lab), groupdel is enough.",
     example: "groupdel sysadm",
     tldr: { page: "groupdel", platform: "linux" },
+  },
+  {
+    term: "chmod",
+    definition:
+      "Changes permissions on a file or directory. Numeric mode: three digits = owner, group, others. Each digit adds 4 read (r), 2 write (w), 1 execute/enter (x). A leading fourth digit is the special bit (4 setuid, 2 setgid, 1 sticky). Letter form also works: u=owner, g=group, o=others, a=all; + adds, - removes, = sets.",
+    example: "chmod 644 file · chmod 755 dir · chmod 2770 /shared/sysadm · chmod u+x script.sh · chmod g-w,o-rwx file",
+    tldr: { page: "chmod" },
   },
   {
     term: "setuid",
