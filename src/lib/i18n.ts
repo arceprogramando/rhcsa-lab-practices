@@ -101,6 +101,9 @@ export interface Copy {
   glossarySearchEmpty: string;
   glossaryTldr: string;
   glossaryTldrRepo: string;
+  glossaryPopupSearch: string;
+  glossaryPopupClose: string;
+  glossaryShortcut: string;
   cv: string;
   banner: string;
   homeTitle: string;
@@ -140,6 +143,7 @@ export interface Copy {
   helpTitle: string;
   helpBody: string;
   vmsTitle: string;
+  vmsBody: string;
   footerBefore: string;
   footerPlaylist: string;
   footerAndRepo: string;
@@ -203,6 +207,7 @@ export interface Copy {
   helpMarked: string;
   stepsTitle: string;
   commandsTitle: string;
+  asWho: (who: string) => string;
   videosTitle: string;
   askHelp: string;
   showHelp: string;
@@ -290,6 +295,9 @@ const es: Copy = {
   glossarySearchEmpty: "No hay entradas que coincidan.",
   glossaryTldr: "Ejemplos en tldr",
   glossaryTldrRepo: "Repo tldr-pages",
+  glossaryPopupSearch: "Buscar en el glosario…",
+  glossaryPopupClose: "Cerrar",
+  glossaryShortcut: "Ctrl+K abre el glosario",
   cv: "CV",
   banner: "Práctica personal para el RHCSA del 30 de octubre. No es el examen oficial ni un sitio de Red Hat.",
   homeTitle: "Simulacro RHCSA",
@@ -335,6 +343,8 @@ const es: Copy = {
   helpTitle: "Ayuda",
   helpBody: "Cada lab muestra el título y los datos exactos a cumplir. El detalle paso a paso, los comandos y los videos aparecen recién con Pedí ayuda, y ese lab queda contado como resuelto con ayuda.",
   vmsTitle: "Las dos VMs",
+  vmsBody:
+    "Para practicar uso dos máquinas virtuales. A una la trato como client y a la otra como server: en cada lab dice en cuál trabajar. En la red del lab quedan así las IPs; el gateway y el DNS son el mismo host.",
   footerBefore: "Material de práctica: ",
   footerPlaylist: "lista de YouTube",
   footerAndRepo: " y ",
@@ -412,6 +422,7 @@ const es: Copy = {
   helpMarked: "Quedó marcado en las estadísticas de este lab. En el examen real esto no está.",
   stepsTitle: "Detalle del enunciado",
   commandsTitle: "Comandos para mirar",
+  asWho: (who) => `Como ${who}`,
   videosTitle: "Videos",
   askHelp: "Pedí ayuda",
   showHelp: "Ver ayuda",
@@ -485,6 +496,9 @@ const en: Copy = {
   glossarySearchEmpty: "No matching entries.",
   glossaryTldr: "Examples on tldr",
   glossaryTldrRepo: "tldr-pages repo",
+  glossaryPopupSearch: "Search the glossary…",
+  glossaryPopupClose: "Close",
+  glossaryShortcut: "Ctrl+K opens the glossary",
   cv: "CV",
   banner: "Personal practice for the October 30 RHCSA. This is not the official exam and not a Red Hat site.",
   homeTitle: "RHCSA practice exam",
@@ -530,6 +544,8 @@ const en: Copy = {
   helpTitle: "Help",
   helpBody: "Each lab shows the title and the exact data to meet. Step-by-step detail, commands, and videos appear only after Ask for help, and that lab is counted as solved with help.",
   vmsTitle: "The two VMs",
+  vmsBody:
+    "For practice I use two virtual machines. One I treat as client and the other as server: each lab says which one to work on. On the lab network the IPs look like this; gateway and DNS are the same host.",
   footerBefore: "Practice material: ",
   footerPlaylist: "YouTube playlist",
   footerAndRepo: " and ",
@@ -607,6 +623,7 @@ const en: Copy = {
   helpMarked: "This lab is marked in the stats. The real exam does not have this.",
   stepsTitle: "Task detail",
   commandsTitle: "Commands to look at",
+  asWho: (who) => `As ${who}`,
   videosTitle: "Videos",
   askHelp: "Ask for help",
   showHelp: "Show help",

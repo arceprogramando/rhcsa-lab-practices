@@ -118,6 +118,14 @@ const otherHref = swapLocalePath(path, other);
     <main id="contenido">
       <slot />
     </main>
+    <button id="glossary-shortcut" class="glossary-shortcut no-print" type="button" title={ui.glossaryShortcut}>
+      <kbd>Ctrl</kbd>+<kbd>K</kbd> {ui.glossaryNav}
+    </button>
+    <script>
+      import { mountGlossaryPopup, openGlossaryPopup } from "../scripts/glossary-popup";
+      mountGlossaryPopup();
+      document.getElementById("glossary-shortcut")?.addEventListener("click", () => openGlossaryPopup());
+    </script>
     <script is:inline>
       (function () {
         const path = window.location.pathname;

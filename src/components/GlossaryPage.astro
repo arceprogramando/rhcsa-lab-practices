@@ -41,10 +41,10 @@ const entries = glossaryFor(locale);
             data-definition={entry.definition}
             data-example={entry.example ?? ""}
           >
-            <dt class="font-mono text-lg font-semibold tracking-tight">{entry.term}</dt>
-            <dd class="mt-2 text-[1.05rem] leading-relaxed text-ink/90">{entry.definition}</dd>
+            <dt class="glossary-term font-mono text-lg font-semibold tracking-tight">{entry.term}</dt>
+            <dd class="glossary-definition mt-2 text-[1.05rem] leading-relaxed text-ink/90">{entry.definition}</dd>
             {entry.example ? (
-              <dd class="mono mt-3 rounded-2xl bg-paper px-3 py-2 text-sm text-muted">{entry.example}</dd>
+              <dd class="glossary-example mono mt-3 rounded-2xl bg-paper px-3 py-2 text-sm text-muted">{entry.example}</dd>
             ) : null}
             {entry.tldr ? (
               <dd class="mt-3 text-sm">
@@ -71,8 +71,46 @@ const entries = glossaryFor(locale);
   const list = document.getElementById("glossary-list");
   if (input && empty && list) {
     const entries = Array.from(list.querySelectorAll<HTMLElement>(".glossary-entry"));
+
+    function escapeHtml(value: string): string {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function highlight(text: string, query: string): string {
+      if (!query) return escapeHtml(text);
+      const lower = text.toLowerCase();
+      const needle = query.toLowerCase();
+      let out = "";
+      let index = 0;
+      while (index < text.length) {
+        const at = lower.indexOf(needle, index);
+        if (at === -1) {
+          out += escapeHtml(text.slice(index));
+          break;
+        }
+        out += escapeHtml(text.slice(index, at));
+        out += `<mark class="glossary-hit">${escapeHtml(text.slice(at, at + needle.length))}</mark>`;
+        index = at + needle.length;
+      }
+      return out;
+    }
+
+    function paint(entry: HTMLElement, query: string): void {
+      const term = entry.querySelector<HTMLElement>(".glossary-term");
+      const definition = entry.querySelector<HTMLElement>(".glossary-definition");
+      const example = entry.querySelector<HTMLElement>(".glossary-example");
+      if (term) term.innerHTML = highlight(entry.dataset.term ?? "", query);
+      if (definition) definition.innerHTML = highlight(entry.dataset.definition ?? "", query);
+      if (example) example.innerHTML = highlight(entry.dataset.example ?? "", query);
+    }
+
     const filter = () => {
-      const q = input.value.trim().toLowerCase();
+      const q = input.value.trim();
+      const qLower = q.toLowerCase();
       let shown = 0;
       for (const entry of entries) {
         const haystack = [
@@ -82,9 +120,12 @@ const entries = glossaryFor(locale);
         ]
           .join(" ")
           .toLowerCase();
-        const match = !q || haystack.includes(q);
+        const match = !qLower || haystack.includes(qLower);
         entry.classList.toggle("hidden", !match);
-        if (match) shown += 1;
+        if (match) {
+          paint(entry, qLower);
+          shown += 1;
+        }
       }
       empty.classList.toggle("hidden", shown > 0);
       list.classList.toggle("hidden", shown === 0);

@@ -60,6 +60,13 @@ const es: GlossaryEntry[] = [
     tldr: { page: "userdel", platform: "linux" },
   },
   {
+    term: "usermod",
+    definition:
+      "Modifica un usuario que ya existe. -aG suma un grupo secundario sin borrar los otros (sin -a, -G reemplaza toda la lista). -s cambia el shell. -l renombra el login. -g cambia el grupo primario. -d -m mueve el home.",
+    example: "usermod -s /sbin/nologin diego · usermod -aG sysadm felipe",
+    tldr: { page: "usermod", platform: "linux" },
+  },
+  {
     term: "groupdel",
     definition:
       "Borra un grupo. No puede ser el grupo primario de nadie: si falla, mirá getent group NOMBRE y cambiá el primario con usermod -g OTRO usuario, o borrá esos usuarios. Si el grupo solo era secundario (como sysadm en el lab), groupdel alcanza.",
@@ -131,6 +138,13 @@ const en: GlossaryEntry[] = [
       "Deletes a user. With -r it also removes the home and mail. The user cannot have an open session. On XFS the home is gone: another useradd leaves an empty folder.",
     example: "userdel -r erik",
     tldr: { page: "userdel", platform: "linux" },
+  },
+  {
+    term: "usermod",
+    definition:
+      "Changes an existing user. -aG adds a secondary group without dropping the others (without -a, -G replaces the whole list). -s changes the shell. -l renames the login. -g changes the primary group. -d -m moves the home.",
+    example: "usermod -s /sbin/nologin diego · usermod -aG sysadm felipe",
+    tldr: { page: "usermod", platform: "linux" },
   },
   {
     term: "groupdel",

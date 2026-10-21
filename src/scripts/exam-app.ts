@@ -604,6 +604,15 @@ function helpPanel(lab: Lab): HTMLElement {
   const commands = el("ul", "mt-2 space-y-3");
   for (const item of lab.help.commands) {
     const li = el("li");
+    if (item.as) {
+      li.append(
+        el(
+          "p",
+          "mb-1 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
+          copy().asWho(item.as),
+        ),
+      );
+    }
     const code = el("code", "block rounded-xl bg-paper px-3 py-2 text-sm leading-relaxed");
     code.textContent = item.cmd;
     li.append(code, el("p", "mt-1 text-sm text-muted", item.why));
