@@ -21,14 +21,19 @@ const ui = getUI(locale);
         <p class="mt-4 max-w-xl text-lg text-muted">
           {ui.leadBefore}<a class="text-ink underline decoration-line underline-offset-2" href={REDHAT_EXAM_VIDEO}>{ui.videoTitle}</a>{ui.leadAfter}
         </p>
-        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <button id="start-pausable" class="btn btn-primary" type="button">{ui.startPausable}</button>
-          <button id="start-fixed" class="btn btn-quiet" type="button">{ui.startFixed}</button>
-          <button id="resume-exam" class="btn btn-quiet hidden" type="button">{ui.resume}</button>
-          <a class="btn btn-quiet" href={locale === "en" ? "/en/estadisticas/" : "/estadisticas/"}>{ui.seeStats}</a>
+        <div class="mt-6">
+          <p class="text-sm font-semibold tracking-[0.14em] text-muted uppercase">{ui.startModesLabel}</p>
+          <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <button id="start-pausable" class="btn btn-primary" type="button">{ui.startPausable}</button>
+            <button id="start-fixed" class="btn btn-quiet" type="button">{ui.startFixed}</button>
+            <button id="resume-exam" class="btn btn-quiet hidden" type="button">{ui.resume}</button>
+          </div>
+          <p class="mt-3 max-w-xl text-sm text-muted">{ui.modesNote}</p>
+          <p class="mt-3">
+            <a class="text-sm font-medium text-ink underline decoration-line underline-offset-2" href={locale === "en" ? "/en/estadisticas/" : "/estadisticas/"}>{ui.seeStats}</a>
+          </p>
+          <p id="start-note" class="mt-2 text-sm text-muted">{ui.timesNote}</p>
         </div>
-        <p class="mt-3 max-w-xl text-sm text-muted">{ui.modesNote}</p>
-        <p id="start-note" class="mt-2 text-sm text-muted">{ui.timesNote}</p>
       </div>
       <section class="rounded-3xl border border-line bg-card p-5" aria-labelledby="delta-title">
         <h2 id="delta-title" class="text-sm font-semibold tracking-[0.16em] text-muted uppercase">{ui.improvement}</h2>

@@ -37,8 +37,29 @@ let expiredOnce = false;
 let screen: "board" | "lab" = "board";
 let visitStart: number | null = null;
 let focusDifficultyIndex: number | null = null;
-/** Panel de ayuda visible en la pantalla del lab. No se persiste: al entrar arranca cerrado. */
+/** Panel de ayuda visible en la pantalla del lab. */
 let helpVisible = false;
+
+const UI_KEY = "arceprog:rhcsa-exam-ui";
+
+function saveUi(): void {
+  if (!runId || typeof sessionStorage === "undefined") return;
+  sessionStorage.setItem(UI_KEY, JSON.stringify({ runId, screen, helpVisible }));
+}
+
+function loadUi(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    const raw = sessionStorage.getItem(UI_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw) as { runId?: string; screen?: string; helpVisible?: boolean };
+    if (data.runId !== runId) return;
+    if (data.screen === "lab" || data.screen === "board") screen = data.screen;
+    helpVisible = Boolean(data.helpVisible);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function mountExam(host: HTMLElement): void {
   root = host;
@@ -48,6 +69,8 @@ export function mountExam(host: HTMLElement): void {
     return;
   }
   runId = run.id;
+  loadUi();
+  if (screen === "lab" && !run.pausedAt) visitStart = Date.now();
   expireIfNeeded();
   render();
   if (current()?.status === "in_progress") tickTimer = window.setInterval(tick, 250);
@@ -250,7 +273,7 @@ function setupBlock(lab: Lab): HTMLElement {
   block.append(
     el("h3", "font-semibold", lab.title),
     el("p", "mt-1 text-sm text-muted", lab.where),
-    el("p", "mt-2 text-sm leading-relaxed", lab.objective),
+    objectiveList(lab.objective, "mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed"),
   );
   const list = el("ol", "mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed");
   for (const step of lab.steps) list.append(el("li", "", step));
@@ -419,12 +442,18 @@ function counter(label: string, value: string, isLab = false): HTMLElement {
   return wrap;
 }
 
+function objectiveList(lines: string[], className: string): HTMLElement {
+  const list = el("ul", className);
+  for (const line of lines) list.append(el("li", "", line));
+  return list;
+}
+
 function labCard(lab: Lab, record: LabRecord): HTMLElement {
   const card = el("article", "rounded-3xl border border-line bg-card p-5 sm:p-7");
   card.append(
     el("p", "text-xs font-semibold tracking-[0.16em] text-muted uppercase", lab.where),
     el("h1", "mt-2 text-3xl font-semibold tracking-tight", lab.title),
-    el("p", "mt-3 text-lg text-ink/90", lab.objective),
+    objectiveList(lab.objective, "mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-ink/90 sm:text-lg"),
   );
   if (record.attempts > 1) {
     card.append(el("p", "mt-4 text-sm text-warn", copy().attempt(record.attempts)));
@@ -443,6 +472,7 @@ function helpPanel(lab: Lab): HTMLElement {
   title?.setAttribute("id", "ayuda-titulo");
   title?.setAttribute("tabindex", "-1");
   panel.append(el("p", "mt-1 text-sm text-warn", copy().helpMarked));
+  panel.append(el("p", "mt-3 text-sm leading-relaxed text-ink", lab.help.tip));
   if (lab.steps.length) {
     panel.append(el("h3", "mt-4 text-sm font-semibold tracking-wide uppercase", copy().stepsTitle));
     const list = el("ol", "mt-2 list-decimal space-y-2 pl-5 text-sm leading-relaxed");
@@ -470,7 +500,7 @@ function helpPanel(lab: Lab): HTMLElement {
     }
     panel.append(videos);
   }
-  panel.append(el("p", "mt-3 text-sm", lab.help.videoHint), el("p", "mt-3 text-sm text-ink", lab.help.tip));
+  panel.append(el("p", "mt-3 text-sm", lab.help.videoHint));
   return panel;
 }
 
@@ -607,6 +637,7 @@ function toggleHelp(): void {
   } else {
     helpVisible = !helpVisible;
   }
+  saveUi();
   render();
   if (helpVisible) document.getElementById("ayuda-titulo")?.focus();
 }
@@ -640,6 +671,7 @@ function openLab(index: number): void {
   screen = "lab";
   helpVisible = false;
   commit(run);
+  saveUi();
   render();
 }
 
@@ -650,6 +682,7 @@ function backToBoard(): void {
   screen = "board";
   helpVisible = false;
   commit(run);
+  saveUi();
   render();
 }
 
@@ -664,8 +697,10 @@ function setMark(index: number, status: LabRecord["status"]): void {
   if (status !== "done") record.difficulty = null;
   record.finishedAt = status === "pending" || status === "redo" ? null : new Date().toISOString();
   screen = "board";
+  helpVisible = false;
   if (status === "done") focusDifficultyIndex = index;
   commit(run);
+  saveUi();
   render();
 }
 
@@ -689,6 +724,8 @@ function deleteCurrent(): void {
   visitStart = null;
   undoSnapshot = null;
   screen = "board";
+  helpVisible = false;
+  sessionStorage.removeItem(UI_KEY);
   render();
 }
 

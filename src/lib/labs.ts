@@ -63,7 +63,7 @@ export interface Lab {
   id: string;
   track: "pdf" | "extra" | "setup";
   title: string;
-  objective: string;
+  objective: string[];
   where: string;
   steps: string[];
   note?: string;
@@ -80,7 +80,11 @@ export const LABS: Lab[] = [
     id: "setup-keyboard",
     track: "setup",
     title: "Teclado",
-    objective: "Ver qué teclado tiene la máquina, dejar el que quieras en el client, y no cambiar el del server.",
+    objective: [
+      "En vagrant ssh el teclado lo pone tu máquina.",
+      "En el client podés pasar a latam / la-latin1 para la consola de la VM.",
+      "En el server dejá el teclado en us.",
+    ],
     where: "client · vagrant ssh. El server se deja en us",
     steps: [
       "Estás en vagrant ssh. El teclado de esta ventana lo pone tu máquina, no la VM. Por eso, aunque localectl status diga VC Keymap us y X11 Layout unset, acá escribís en español sin problema. gsettings en esta SSH responde No schemas installed: no lo uses.",
@@ -113,7 +117,12 @@ export const LABS: Lab[] = [
     id: "lab-01",
     track: "pdf",
     title: "Red y hostname del client",
-    objective: "Dejar la red del client fija, con el hostname del Vagrant, y que sobreviva un reboot.",
+    objective: [
+      "IP 172.16.1.12/24 en la interfaz del lab.",
+      "Gateway 172.16.1.1 y DNS 172.16.1.1.",
+      "Hostname client.rhcsa.lab.",
+      "Persistente tras reboot.",
+    ],
     where: "client · 172.16.1.12",
     steps: [
       "IP 172.16.1.12/24 en la interfaz del lab (enp0s8).",
@@ -146,7 +155,12 @@ export const LABS: Lab[] = [
     id: "lab-02",
     track: "pdf",
     title: "Recuperar root y red del server",
-    objective: "Entrar al server sin la contraseña de root, corregir SELinux antes de volver a un boot normal, y dejarle la red fija.",
+    objective: [
+      "Reset de la contraseña de root.",
+      "IP 172.16.1.13/24, gateway y DNS 172.16.1.1.",
+      "Hostname server.rhcsa.lab.",
+      "Persistente tras reboot.",
+    ],
     where: "server · consola de VirtualBox, no SSH",
     steps: [
       "Interrumpí el boot y recuperá el acceso de root. SELinux tiene que quedar coherente antes de volver al boot normal (autorelabel si hace falta).",
@@ -184,7 +198,11 @@ export const LABS: Lab[] = [
     id: "lab-03",
     track: "pdf",
     title: "Repositorios DNF",
-    objective: "Dejar BaseOS y AppStream habilitados en las dos VMs, sin GPG, y poder listar paquetes.",
+    objective: [
+      "Repos BaseOS y AppStream enabled en client y server.",
+      "gpgcheck=0 en esos dos.",
+      "dnf list available tiene que listar paquetes.",
+    ],
     where: "client y server",
     steps: [
       "En las dos máquinas, BaseOS y AppStream tienen que figurar en dnf repolist.",
@@ -209,8 +227,12 @@ export const LABS: Lab[] = [
   {
     id: "lab-04",
     track: "pdf",
-    title: "SELinux: Apache en el puerto 82",
-    objective: "Que httpd escuche en TCP 82, con SELinux en enforcing.",
+    title: "Apache en el puerto 82",
+    objective: [
+      "httpd escucha en TCP 82.",
+      "SELinux en enforcing.",
+      "Persistente tras reboot.",
+    ],
     where: "server (ahí el Vagrant instala httpd)",
     steps: [
       "Apache tiene que escuchar en el puerto 82.",
@@ -236,7 +258,13 @@ export const LABS: Lab[] = [
     id: "lab-05",
     track: "pdf",
     title: "Usuarios, grupo y sudo",
-    objective: "Crear el grupo sysadm y tres usuarios con reglas de sudo distintas.",
+    objective: [
+      "Grupo sysadm.",
+      "Usuarios: felipe y erik en sysadm; diego con /sbin/nologin.",
+      "Contraseña de los tres: lalala.",
+      "sysadm puede sudo useradd.",
+      "felipe puede sudo passwd sin que pida contraseña.",
+    ],
     where: "client",
     steps: [
       "Grupo sysadm.",
@@ -274,7 +302,11 @@ export const LABS: Lab[] = [
     id: "lab-06",
     track: "pdf",
     title: "Directorio compartido con setgid",
-    objective: "Una carpeta de trabajo del grupo sysadm donde los archivos nuevos hereden el grupo.",
+    objective: [
+      "Directorio /shared/sysadm.",
+      "Grupo dueño sysadm, setgid.",
+      "Solo el grupo puede entrar.",
+    ],
     where: "client",
     steps: [
       "Crear /shared/sysadm.",
@@ -301,7 +333,11 @@ export const LABS: Lab[] = [
     id: "lab-07",
     track: "pdf",
     title: "Cron de Erik",
-    objective: "Una tarea de Erik, cada un minuto, que deje un mensaje en el log.",
+    objective: [
+      "Usuario erik.",
+      "Cada 1 minuto.",
+      "logger con el texto \"Ex200 Testing\".",
+    ],
     where: "client",
     steps: [
       "Usuario: erik.",
@@ -326,7 +362,11 @@ export const LABS: Lab[] = [
     id: "lab-08",
     track: "pdf",
     title: "NFS con autofs",
-    objective: "El server exporta el home de un usuario de red y el client lo monta solo al entrar al directorio.",
+    objective: [
+      "Usuario netuser1, home /home/guests/netuser1, pass arceprog.",
+      "Export NFS en el server.",
+      "Client: /netdir/netuser1 monta 172.16.1.13.",
+    ],
     where: "server exporta · client monta",
     steps: [
       "En el server, crear el usuario netuser1 con contraseña del ejercicio arceprog y el directorio /home/guests/netuser1.",
@@ -354,7 +394,11 @@ export const LABS: Lab[] = [
     id: "lab-09",
     track: "pdf",
     title: "Zipear /etc",
-    objective: "En el archivo /root/myetcbackup.tar.bz2, con bzip2.",
+    objective: [
+      "Archivo /root/myetcbackup.tar.bz2.",
+      "Contiene /etc.",
+      "Compresión bzip2.",
+    ],
     where: "client",
     steps: [
       "Crear /root/myetcbackup.tar.bz2.",
@@ -375,8 +419,13 @@ export const LABS: Lab[] = [
   {
     id: "lab-10",
     track: "pdf",
-    title: "ACL sobre una copia de fstab",
-    objective: "Permisos finos: Erik escribe, Felipe no entra, el resto solo lee.",
+    title: "ACL en /var/tmp/fstab",
+    objective: [
+      "Copia /etc/fstab → /var/tmp/fstab, dueño root:root.",
+      "erik: lectura y escritura.",
+      "felipe: sin acceso.",
+      "others: solo lectura.",
+    ],
     where: "client",
     steps: [
       "Copiar /etc/fstab a /var/tmp/fstab.",
@@ -387,16 +436,17 @@ export const LABS: Lab[] = [
       "Otros: solo lectura.",
     ],
     help: {
-      tip: "La máscara de la ACL (mask) puede bajarle el permiso a Erik aunque la ACL diga rw. Mirá getfacl entero, no solo el chmod.",
+      tip: "ACL (Access Control List): permisos extra por usuario o por grupo, encima del chmod. Se usa cuando el dueño/grupo/otros del chmod no alcanza: por ejemplo un archivo de root donde erik necesita escribir y felipe no puede ni leer, sin meter a erik en el grupo dueño ni abrir other a escritura. Formato tipo:nombre:permisos. Dos tipos: u:erik:rw (usuario) y g:sysadm:r (grupo). No existe ug: junto: o u: o g:. -m modifica; -x borra una entrada. La máscara m:: puede bajar el permiso efectivo: mirá getfacl entero, no solo el chmod.",
       videoHint: "Video de este lab: Q10.",
       videos: [{ title: "Q10: ACL en /var/tmp/fstab", url: YT.acl }],
       commands: [
         { cmd: "cp /etc/fstab /var/tmp/fstab && chown root:root /var/tmp/fstab && chmod 644 /var/tmp/fstab", why: "Base: sin ejecución, otros leen." },
         { cmd: "dnf install -y acl", why: "setfacl no siempre está en la instalación mínima." },
-        { cmd: "setfacl -m u:erik:rw /var/tmp/fstab", why: "Erik lee y escribe." },
-        { cmd: "setfacl -m u:felipe:--- /var/tmp/fstab", why: "Felipe sin ningún permiso." },
-        { cmd: "getfacl /var/tmp/fstab", why: "Ver user:, mask: y other:." },
-        { cmd: "su - erik -c 'echo prueba >> /var/tmp/fstab'", why: "Prueba real, no solo la ACL en pantalla." },
+        { cmd: "setfacl -m u:erik:rw /var/tmp/fstab", why: "ACL de usuario: u = user, erik = nombre, rw = permisos. Lee y escribe." },
+        { cmd: "setfacl -m u:felipe:--- /var/tmp/fstab", why: "Misma forma u:nombre:permisos. --- (o 0) = sin acceso." },
+        { cmd: "setfacl -m g:sysadm:r /var/tmp/fstab", why: "Ejemplo de ACL de grupo: g:nombre:permisos. Este lab no lo pide; acá alcanzan las dos de usuario." },
+        { cmd: "getfacl /var/tmp/fstab", why: "Ver user:, group:, mask: y other:." },
+        { cmd: "su - erik -c 'echo prueba >> /var/tmp/fstab'", why: "Prueba real: el >> tiene que ir adentro de las comillas. Si va afuera, escribe root y no estás probando a erik." },
       ],
     },
   },
@@ -404,7 +454,11 @@ export const LABS: Lab[] = [
     id: "lab-11",
     track: "pdf",
     title: "Hora con chrony",
-    objective: "El client sincroniza la hora contra el server, y lo sigue haciendo después de reboot.",
+    objective: [
+      "Server 172.16.1.13 ofrece NTP.",
+      "Client 172.16.1.12 sincroniza contra ese server.",
+      "Persistente en las dos.",
+    ],
     where: "server ofrece hora · client es el cliente NTP",
     steps: [
       "El server (172.16.1.13) tiene que responder NTP.",
@@ -429,7 +483,11 @@ export const LABS: Lab[] = [
     id: "lab-12",
     track: "pdf",
     title: "Buscar archivos de Erik",
-    objective: "Copiar los archivos de Erik modificados en las últimas 24 horas, conservando la ruta.",
+    objective: [
+      "Archivos de erik modificados en las últimas 24 h.",
+      "Copiarlos a /root/erikfiles.",
+      "Conservar la estructura de rutas.",
+    ],
     where: "client",
     steps: [
       "Encontrar archivos cuyo dueño es erik, modificados en las últimas 24 horas.",
@@ -438,13 +496,14 @@ export const LABS: Lab[] = [
     ],
     note: "En el PDF la carpeta de destino usa el nombre viejo del usuario. Acá el destino es /root/erikfiles.",
     help: {
-      tip: "find -exec cp pierde la ruta. Para conservarla, cpio o rsync desde una lista, con el directorio de destino como raíz.",
+      tip: "Hay que conservar la ruta bajo /root/erikfiles. Dos formas válidas: cp --parents (como en el video) o find | cpio. Un cp sin --parents deja los archivos sueltos en el destino.",
       videoHint: "Video de este lab: Q12.",
       videos: [{ title: "Q12: find y copiar conservando rutas", url: YT.find }],
       commands: [
         { cmd: "find / -user erik -mtime -1 -type f 2>/dev/null", why: "Dueño erik, modificado hace menos de 1 día. El error de /proc se descarta." },
         { cmd: "mkdir -p /root/erikfiles", why: "Destino." },
-        { cmd: "find / -user erik -mtime -1 -type f -print0 2>/dev/null | cpio -0pdm /root/erikfiles", why: "Copia y recrea los directorios. man cpio si -p no te suena." },
+        { cmd: "find / -user erik -mtime -1 -type f -exec cp --parents -p {} /root/erikfiles \\; 2>/dev/null", why: "Forma del video: find llama a cp por cada archivo. {} no es vacío ni una ruta que escribas vos: es un marcador. find lo reemplaza por la ruta real (ej. /home/erik/a.txt) y corre: cp --parents -p /home/erik/a.txt /root/erikfiles. --parents y -p son dos opciones distintas de cp (man cp): --parents recrea la ruta bajo el destino; -p conserva dueño, modo y fechas." },
+        { cmd: "find / -user erik -mtime -1 -type f -print0 2>/dev/null | cpio -0pdm /root/erikfiles", why: "Otra forma: find lista y cpio copia el lote. -0 lee nombres con null, -p copia, -d crea dirs, -m conserva fechas. Elegí una de las dos, no hace falta las dos." },
         { cmd: "find /root/erikfiles -type f", why: "Ver que llegó la estructura, no un montón de archivos sueltos." },
       ],
     },
@@ -453,7 +512,11 @@ export const LABS: Lab[] = [
     id: "lab-13",
     track: "pdf",
     title: "Filtrar palabras con grep",
-    objective: "Sacar de un diccionario las líneas que contienen ich y guardarlas.",
+    objective: [
+      "Fuente: /usr/share/dict/words.",
+      "Líneas que contienen ich.",
+      "Guardar en /root/lines.",
+    ],
     where: "client",
     steps: [
       "Fuente: /usr/share/dict/words.",
@@ -476,7 +539,11 @@ export const LABS: Lab[] = [
     id: "lab-14",
     track: "pdf",
     title: "Usuario con UID fijo",
-    objective: "Un usuario con UID pedido y contraseña del ejercicio.",
+    objective: [
+      "Usuario arce.",
+      "UID 1111.",
+      "Contraseña rhcsa-exam.",
+    ],
     where: "client",
     steps: [
       "Usuario: arce.",
@@ -500,7 +567,11 @@ export const LABS: Lab[] = [
     id: "lab-15",
     track: "pdf",
     title: "LVM wgroup / wshare",
-    objective: "Un volumen lógico de 50 extents, en ext4, montado solo al boot.",
+    objective: [
+      "VG wgroup, PE 8 MB.",
+      "LV wshare de 50 extents, ext4.",
+      "Montado en /mnt/wshare por UUID al boot.",
+    ],
     where: "server · disco extra de 1 GB",
     steps: [
       "Volume group wgroup, extent físico de 8 MB.",
@@ -528,7 +599,10 @@ export const LABS: Lab[] = [
     id: "lab-16",
     track: "pdf",
     title: "Swap de 400 MB",
-    objective: "Sumar swap y dejarlo activo en cada boot.",
+    objective: [
+      "Partición swap de 400 MB.",
+      "Activa ahora y en fstab.",
+    ],
     where: "server · mismo disco extra",
     steps: [
       "Crear una partición de swap de 400 MB.",
@@ -553,7 +627,11 @@ export const LABS: Lab[] = [
     id: "lab-17",
     track: "pdf",
     title: "Redimensionar el LV vo",
-    objective: "Dejar el volumen vo, del grupo vgroup, cerca de 50 MB.",
+    objective: [
+      "LV vo en el VG vgroup.",
+      "Tamaño final cerca de 50 MB (vale 30–70).",
+      "Filesystem ajustado junto con el LV.",
+    ],
     where: "server",
     steps: [
       "El logical volume se llama vo y está en el volume group vgroup.",
@@ -581,7 +659,10 @@ export const LABS: Lab[] = [
     id: "lab-18",
     track: "pdf",
     title: "Perfil de tuned",
-    objective: "Aplicar el perfil de rendimiento que el sistema recomienda.",
+    objective: [
+      "Perfil que diga tuned-adm recommend.",
+      "Sigue activo después de reboot.",
+    ],
     where: "client",
     steps: [
       "Instalar y activar tuned si no está.",
@@ -605,7 +686,10 @@ export const LABS: Lab[] = [
     id: "lab-19",
     track: "pdf",
     title: "Saludo al entrar",
-    objective: "Un mensaje fijo para Joaquin y otro, con su nombre, para cualquier usuario.",
+    objective: [
+      "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
+      "Cualquier usuario: \"Welcome USUARIO, you are logged in!\".",
+    ],
     where: "client",
     steps: [
       "Cuando entra joaquin, tiene que ver: Welcome to you, user Joaquin, you are amazing!",
@@ -632,7 +716,10 @@ export const LABS: Lab[] = [
     id: "lab-20",
     track: "pdf",
     title: "Imagen de contenedor",
-    objective: "Construir y etiquetar una imagen local a partir de un Dockerfile.",
+    objective: [
+      "Clonar Text-To-PDF.",
+      "Imagen localhost/text2pdf:latest.",
+    ],
     where: "client",
     steps: [
       "Clonar https://github.com/sachinyadav3496/Text-To-PDF.git.",
@@ -661,7 +748,11 @@ export const LABS: Lab[] = [
     id: "lab-21",
     track: "pdf",
     title: "Correr el contenedor",
-    objective: "Un contenedor con nombre y dos montajes del host.",
+    objective: [
+      "Contenedor mycontainer, imagen localhost/text2pdf:latest.",
+      "/opt/file → /data/input.",
+      "/opt/processed → /data/output.",
+    ],
     where: "client",
     steps: [
       "Contenedor llamado mycontainer, imagen localhost/text2pdf:latest.",
@@ -684,7 +775,10 @@ export const LABS: Lab[] = [
     id: "lab-22",
     track: "pdf",
     title: "Contenedor al boot, como usuario",
-    objective: "El contenedor de student arranca solo, aunque student no tenga sesión abierta.",
+    objective: [
+      "Usuario student, contenedor mycontainer.",
+      "Arranca al boot con linger, sin sesión abierta.",
+    ],
     where: "client",
     steps: [
       "Correr el contenedor como el usuario student, nombre mycontainer.",
@@ -710,7 +804,10 @@ export const LABS: Lab[] = [
     id: "extra-01",
     track: "extra",
     title: "Script de archivos .txt",
-    objective: "Un script que informe, directorio por directorio, si hay textos.",
+    objective: [
+      "Script /usr/local/bin/gap-txt.sh.",
+      "Mira /opt/lab/dir1, dir2 y dir3.",
+    ],
     where: "client · después de correr el prep del repo",
     steps: [
       "Creá /usr/local/bin/gap-txt.sh y dejalo ejecutable.",
@@ -736,7 +833,10 @@ export const LABS: Lab[] = [
     id: "extra-02",
     track: "extra",
     title: "Timer systemd de limpieza",
-    objective: "Borrar unos archivos de práctica 30 segundos después de que aparecen.",
+    objective: [
+      "Timer cleanup habilitado al boot.",
+      "A :30 corre /usr/local/bin/clean.sh.",
+    ],
     where: "client",
     steps: [
       "Hay un proceso que deja archivos en /tmp al segundo 00 de cada minuto. El prep está en el lab de timers del repo.",
@@ -762,8 +862,12 @@ export const LABS: Lab[] = [
   {
     id: "extra-03",
     track: "extra",
-    title: "SELinux y FTP anónimo",
-    objective: "Descargas y subidas anónimas en un directorio propio, con SELinux en enforcing.",
+    title: "SELinux y FTP anonimo",
+    objective: [
+      "vsftpd en enforcing.",
+      "Anónimo descarga de /srv/company-drop/pub.",
+      "Anónimo sube a /srv/company-drop/incoming.",
+    ],
     where: "server o client, donde corras el prep de vsftpd",
     steps: [
       "El servicio es vsftpd. El script de preparación del repo deja el escenario.",
@@ -789,7 +893,11 @@ export const LABS: Lab[] = [
     id: "extra-04",
     track: "extra",
     title: "Flatpak de sistema y de usuario",
-    objective: "Un remote, una app de sistema y una app de usuario. Es objetivo de EX200 v10.",
+    objective: [
+      "Remote Flatpak configurado.",
+      "Una app de sistema.",
+      "Otra app con --user en un usuario concreto.",
+    ],
     where: "client",
     steps: [
       "Agregá un remote de Flatpak y dejalo configurado.",
@@ -821,6 +929,9 @@ for (const lab of LABS) {
   if (!copy) throw new Error(`Falta la traducción de ${lab.id}`);
   if (copy.steps.length !== lab.steps.length) {
     throw new Error(`${lab.id}: steps ${copy.steps.length} != ${lab.steps.length}`);
+  }
+  if (copy.objective.length !== lab.objective.length) {
+    throw new Error(`${lab.id}: objective ${copy.objective.length} != ${lab.objective.length}`);
   }
   if (copy.why.length !== lab.help.commands.length) {
     throw new Error(`${lab.id}: why ${copy.why.length} != ${lab.help.commands.length}`);

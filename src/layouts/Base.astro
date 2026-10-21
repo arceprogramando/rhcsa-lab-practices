@@ -41,7 +41,7 @@ const stats = localePath(locale, "/estadisticas/");
     <meta property="og:locale" content={config.ogLocale} />
     <meta property="og:locale:alternate" content={getLocaleConfig(other).ogLocale} />
     <meta http-equiv="content-language" content={locale} />
-    <link rel="icon" type="image/svg+xml" href="/redhat-hat.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -56,7 +56,26 @@ const stats = localePath(locale, "/estadisticas/");
     <header class="border-b border-line/80">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4">
         <a href={home} class="group flex items-center gap-3 no-underline">
-          <img src="/redhat-hat.svg" alt="" width="36" height="28" class="h-7 w-auto" />
+          <svg
+            class="h-8 w-8 shrink-0"
+            viewBox="0 0 40 40"
+            width="32"
+            height="32"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="20" cy="20" r="19" fill="#f6f5f0" stroke="#cfcabe" stroke-width="1"></circle>
+            <ellipse cx="20" cy="24" rx="11" ry="11.5" fill="#121a2b"></ellipse>
+            <ellipse cx="20" cy="25.5" rx="6.8" ry="8" fill="#f6f5f0"></ellipse>
+            <circle cx="20" cy="12.5" r="7" fill="#121a2b"></circle>
+            <circle cx="16.8" cy="12" r="1.55" fill="#f6f5f0"></circle>
+            <circle cx="23.2" cy="12" r="1.55" fill="#f6f5f0"></circle>
+            <circle cx="17" cy="12.2" r="0.6" fill="#121a2b"></circle>
+            <circle cx="23.4" cy="12.2" r="0.6" fill="#121a2b"></circle>
+            <path d="M17.4 14.8 L20 17.4 L22.6 14.8 Z" fill="#e8a317"></path>
+            <ellipse cx="11.5" cy="27" rx="3" ry="1.7" fill="#e8a317" transform="rotate(-28 11.5 27)"></ellipse>
+            <ellipse cx="28.5" cy="27" rx="3" ry="1.7" fill="#e8a317" transform="rotate(28 28.5 27)"></ellipse>
+          </svg>
           <span class="flex items-baseline gap-3">
             <span class="text-sm font-semibold tracking-[0.18em] text-ink uppercase">arceprog</span>
             <span class="text-sm text-muted group-hover:text-ink">{ui.brand}</span>

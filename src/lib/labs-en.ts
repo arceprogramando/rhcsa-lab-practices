@@ -1,6 +1,6 @@
 export interface LabEn {
   title: string;
-  objective: string;
+  objective: string[];
   where: string;
   steps: string[];
   note?: string;
@@ -13,7 +13,11 @@ export interface LabEn {
 export const LAB_EN: Record<string, LabEn> = {
   "setup-keyboard": {
     title: "Keyboard",
-    objective: "See which keyboard the machine has, set the one you want on the client, and leave the server alone.",
+    objective: [
+      "In vagrant ssh the keyboard comes from your machine.",
+      "On the client you may switch to latam / la-latin1 for the VM console.",
+      "On the server leave the keyboard on us.",
+    ],
     where: "client · vagrant ssh. Leave the server on us",
     steps: [
       "You are in vagrant ssh. The keyboard in this window comes from your machine, not the VM. That is why you can type in Spanish here even when localectl status says VC Keymap us and X11 Layout unset. gsettings in this SSH answers No schemas installed: do not use it.",
@@ -39,7 +43,12 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-01": {
     title: "Client network and hostname",
-    objective: "Make the client network static, with the Vagrant hostname, and keep it after a reboot.",
+    objective: [
+      "IP 172.16.1.12/24 on the lab interface.",
+      "Gateway 172.16.1.1 and DNS 172.16.1.1.",
+      "Hostname client.rhcsa.lab.",
+      "Persistent after reboot.",
+    ],
     where: "client · 172.16.1.12",
     steps: [
       "IP 172.16.1.12/24 on the lab interface (enp0s8).",
@@ -65,7 +74,12 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-02": {
     title: "Recover root and the server network",
-    objective: "Get into the server without the root password, fix SELinux before a normal boot, and set a static network.",
+    objective: [
+      "Reset the root password.",
+      "IP 172.16.1.13/24, gateway and DNS 172.16.1.1.",
+      "Hostname server.rhcsa.lab.",
+      "Persistent after reboot.",
+    ],
     where: "server · VirtualBox console, not SSH",
     steps: [
       "Interrupt the boot and recover root access. SELinux has to be consistent before a normal boot (autorelabel if needed).",
@@ -95,7 +109,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-03": {
     title: "DNF repositories",
-    objective: "Leave BaseOS and AppStream enabled on both VMs, without GPG, and be able to list packages.",
+    objective: [
+      "Repos BaseOS and AppStream enabled on client and server.",
+      "gpgcheck=0 on those two.",
+      "dnf list available must list packages.",
+    ],
     where: "client and server",
     steps: [
       "On both machines, BaseOS and AppStream must show up in dnf repolist.",
@@ -116,8 +134,12 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-04": {
-    title: "SELinux: Apache on port 82",
-    objective: "Make httpd listen on TCP 82, with SELinux enforcing.",
+    title: "Apache on port 82",
+    objective: [
+      "httpd listens on TCP 82.",
+      "SELinux enforcing.",
+      "Persistent after reboot.",
+    ],
     where: "server (the Vagrant box installs httpd there)",
     steps: [
       "Apache has to listen on port 82.",
@@ -139,7 +161,13 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-05": {
     title: "Users, group, and sudo",
-    objective: "Create the sysadm group and three users with different sudo rules.",
+    objective: [
+      "Group sysadm.",
+      "Users: felipe and erik in sysadm; diego with /sbin/nologin.",
+      "Password for all three: lalala.",
+      "sysadm can sudo useradd.",
+      "felipe can sudo passwd with no password prompt.",
+    ],
     where: "client",
     steps: [
       "Group sysadm.",
@@ -173,7 +201,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-06": {
     title: "Shared directory with setgid",
-    objective: "A sysadm work folder where new files inherit the group.",
+    objective: [
+      "Directory /shared/sysadm.",
+      "Owning group sysadm, setgid.",
+      "Group members only can enter.",
+    ],
     where: "client",
     steps: [
       "Create /shared/sysadm.",
@@ -196,7 +228,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-07": {
     title: "Erik's cron",
-    objective: "A job for Erik, every minute, that leaves a message in the log.",
+    objective: [
+      "User erik.",
+      "Every 1 minute.",
+      "logger with the text \"Ex200 Testing\".",
+    ],
     where: "client",
     steps: [
       "User: erik.",
@@ -217,7 +253,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-08": {
     title: "NFS with autofs",
-    objective: "The server exports a network user's home and the client mounts it only when you enter the directory.",
+    objective: [
+      "User netuser1, home /home/guests/netuser1, pass arceprog.",
+      "NFS export on the server.",
+      "Client: /netdir/netuser1 mounts 172.16.1.13.",
+    ],
     where: "server exports · client mounts",
     steps: [
       "On the server, create user netuser1 with exercise password arceprog and directory /home/guests/netuser1.",
@@ -241,7 +281,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-09": {
     title: "Zip /etc",
-    objective: "Into the file /root/myetcbackup.tar.bz2, with bzip2.",
+    objective: [
+      "File /root/myetcbackup.tar.bz2.",
+      "Contains /etc.",
+      "bzip2 compression.",
+    ],
     where: "client",
     steps: [
       "Create /root/myetcbackup.tar.bz2.",
@@ -258,8 +302,13 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-10": {
-    title: "ACL on a copy of fstab",
-    objective: "Fine-grained permissions: Erik writes, Felipe cannot enter, everyone else can only read.",
+    title: "ACL on /var/tmp/fstab",
+    objective: [
+      "Copy /etc/fstab → /var/tmp/fstab, owner root:root.",
+      "erik: read and write.",
+      "felipe: no access.",
+      "others: read only.",
+    ],
     where: "client",
     steps: [
       "Copy /etc/fstab to /var/tmp/fstab.",
@@ -269,21 +318,26 @@ export const LAB_EN: Record<string, LabEn> = {
       "Felipe: no access.",
       "Others: read only.",
     ],
-    tip: "The ACL mask can lower Erik's permission even if the ACL says rw. Read the whole getfacl, not only chmod.",
+    tip: "ACL (Access Control List): extra permissions per user or group, on top of chmod. Use it when owner/group/other from chmod is not enough: for example a root-owned file where erik must write and felipe must not even read, without putting erik in the owning group or giving other write. Format type:name:permissions. Two types: u:erik:rw (user) and g:sysadm:r (group). There is no ug: together: either u: or g:. -m modifies; -x removes an entry. The mask m:: can lower the effective permission: read the whole getfacl, not only chmod.",
     videoHint: 'Video for this lab: Q10.',
     videos: ['Q10: ACL on /var/tmp/fstab'],
     why: [
       "Base: no execute, others can read.",
       "setfacl is not always in a minimal install.",
-      "Erik can read and write.",
-      "Felipe has no permissions.",
-      "See user:, mask:, and other:.",
-      "A real test, not only the ACL on screen.",
+      "User ACL: u = user, erik = name, rw = permissions. Read and write.",
+      "Same shape u:name:permissions. --- (or 0) = no access.",
+      "Group ACL example: g:name:permissions. This lab does not ask for it; the two user entries are enough.",
+      "See user:, group:, mask:, and other:.",
+      "Real test: the >> has to be inside the quotes. If it is outside, root writes and you are not testing erik.",
     ],
   },
   "lab-11": {
     title: "Time with chrony",
-    objective: "The client syncs time against the server, and keeps doing it after a reboot.",
+    objective: [
+      "Server 172.16.1.13 serves NTP.",
+      "Client 172.16.1.12 syncs against that server.",
+      "Persistent on both.",
+    ],
     where: "server offers time · client is the NTP client",
     steps: [
       "The server (172.16.1.13) has to answer NTP.",
@@ -304,7 +358,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-12": {
     title: "Find Erik's files",
-    objective: "Copy Erik's files modified in the last 24 hours, keeping the path.",
+    objective: [
+      "erik's files modified in the last 24 hours.",
+      "Copy them to /root/erikfiles.",
+      "Keep the path structure.",
+    ],
     where: "client",
     steps: [
       "Find files owned by erik, modified in the last 24 hours.",
@@ -312,19 +370,24 @@ export const LAB_EN: Record<string, LabEn> = {
       "Keep the directory structure.",
     ],
     note: "In the PDF the destination folder uses the user's old name. Here the destination is /root/erikfiles.",
-    tip: "find -exec cp drops the path. To keep it, use cpio or rsync from a list, with the destination directory as the root.",
+    tip: "You have to keep the path under /root/erikfiles. Two valid ways: cp --parents (as in the video) or find | cpio. A plain cp without --parents dumps loose files in the destination.",
     videoHint: 'Video for this lab: Q12.',
     videos: ['Q12: find and copy keeping paths'],
     why: [
       "Owner erik, modified less than 1 day ago. The /proc error is discarded.",
       "Destination.",
-      "Copies and recreates the directories. man cpio if -p is unfamiliar.",
+      "Video style: find runs cp once per file. {} is not empty and not a path you type: it is a placeholder. find replaces it with the real path (e.g. /home/erik/a.txt) and runs: cp --parents -p /home/erik/a.txt /root/erikfiles. --parents and -p are two different cp options (man cp): --parents recreates the path under the destination; -p keeps owner, mode, and timestamps.",
+      "Other way: find lists and cpio copies the batch. -0 reads null names, -p copies, -d makes dirs, -m keeps timestamps. Pick one of the two; you do not need both.",
       "See that the structure arrived, not a pile of loose files.",
     ],
   },
   "lab-13": {
     title: "Filter words with grep",
-    objective: "Take the dictionary lines that contain ich and save them.",
+    objective: [
+      "Source: /usr/share/dict/words.",
+      "Lines that contain ich.",
+      "Save to /root/lines.",
+    ],
     where: "client",
     steps: [
       "Source: /usr/share/dict/words.",
@@ -343,7 +406,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-14": {
     title: "User with a fixed UID",
-    objective: "A user with the requested UID and the exercise password.",
+    objective: [
+      "User arce.",
+      "UID 1111.",
+      "Password rhcsa-exam.",
+    ],
     where: "client",
     steps: ["User: arce.", "UID: 1111.", "Exercise password: rhcsa-exam."],
     note: "In the PDF the user had another name. Here it is arce, so the old hostname from the original material is not used.",
@@ -359,7 +426,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-15": {
     title: "LVM wgroup / wshare",
-    objective: "A logical volume of 50 extents, ext4, mounted only at boot.",
+    objective: [
+      "VG wgroup, PE 8 MB.",
+      "LV wshare of 50 extents, ext4.",
+      "Mounted at /mnt/wshare by UUID at boot.",
+    ],
     where: "server · extra 1 GB disk",
     steps: [
       "Volume group wgroup, 8 MB physical extent.",
@@ -383,7 +454,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-16": {
     title: "400 MB swap",
-    objective: "Add swap and leave it active on every boot.",
+    objective: [
+      "400 MB swap partition.",
+      "Active now and in fstab.",
+    ],
     where: "server · same extra disk",
     steps: ["Create a 400 MB swap partition.", "Activate it now.", "Make it come back by itself after reboot."],
     note: "Practice creating or growing the swap partition and leaving it permanent.",
@@ -400,7 +474,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-17": {
     title: "Resize LV vo",
-    objective: "Leave volume vo, in group vgroup, near 50 MB.",
+    objective: [
+      "LV vo in VG vgroup.",
+      "Final size near 50 MB (30–70 OK).",
+      "Filesystem resized with the LV.",
+    ],
     where: "server",
     steps: [
       "The logical volume is named vo and is in volume group vgroup.",
@@ -421,7 +499,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-18": {
     title: "tuned profile",
-    objective: "Apply the performance profile the system recommends.",
+    objective: [
+      "Profile from tuned-adm recommend.",
+      "Still active after reboot.",
+    ],
     where: "client",
     steps: [
       "Install and enable tuned if it is not there.",
@@ -441,7 +522,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-19": {
     title: "Greeting at login",
-    objective: "A fixed message for Joaquin and another, with the name, for any user.",
+    objective: [
+      "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
+      "Any user: \"Welcome USER, you are logged in!\".",
+    ],
     where: "client",
     steps: [
       "When joaquin logs in, they have to see: Welcome to you, user Joaquin, you are amazing!",
@@ -461,7 +545,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-20": {
     title: "Container image",
-    objective: "Build and tag a local image from a Dockerfile.",
+    objective: [
+      "Clone Text-To-PDF.",
+      "Image localhost/text2pdf:latest.",
+    ],
     where: "client",
     steps: [
       "Clone https://github.com/sachinyadav3496/Text-To-PDF.git.",
@@ -482,7 +569,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-21": {
     title: "Run the container",
-    objective: "A named container and two host mounts.",
+    objective: [
+      "Container mycontainer, image localhost/text2pdf:latest.",
+      "/opt/file → /data/input.",
+      "/opt/processed → /data/output.",
+    ],
     where: "client",
     steps: [
       "Container named mycontainer, image localhost/text2pdf:latest.",
@@ -501,7 +592,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-22": {
     title: "Container at boot, as a user",
-    objective: "student's container starts by itself, even if student has no open session.",
+    objective: [
+      "User student, container mycontainer.",
+      "Starts at boot with linger, no open session.",
+    ],
     where: "client",
     steps: [
       "Run the container as user student, name mycontainer.",
@@ -523,7 +617,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "extra-01": {
     title: "Script for .txt files",
-    objective: "A script that reports, directory by directory, whether there are text files.",
+    objective: [
+      "Script /usr/local/bin/gap-txt.sh.",
+      "Looks at /opt/lab/dir1, dir2, and dir3.",
+    ],
     where: "client · after running the repo prep",
     steps: [
       "Create /usr/local/bin/gap-txt.sh and make it executable.",
@@ -545,7 +642,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "extra-02": {
     title: "systemd cleanup timer",
-    objective: "Delete some practice files 30 seconds after they appear.",
+    objective: [
+      "Timer cleanup enabled at boot.",
+      "At :30 runs /usr/local/bin/clean.sh.",
+    ],
     where: "client",
     steps: [
       "A process drops files in /tmp at second 00 of every minute. The prep is in the repo's timers lab.",
@@ -568,7 +668,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "extra-03": {
     title: "SELinux and anonymous FTP",
-    objective: "Anonymous downloads and uploads in a directory of your own, with SELinux enforcing.",
+    objective: [
+      "vsftpd with enforcing.",
+      "Anonymous downloads from /srv/company-drop/pub.",
+      "Anonymous uploads to /srv/company-drop/incoming.",
+    ],
     where: "server or client, wherever you run the vsftpd prep",
     steps: [
       "The service is vsftpd. The repo prep script sets up the scenario.",
@@ -590,7 +694,11 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "extra-04": {
     title: "System and user Flatpak",
-    objective: "A remote, a system app, and a user app. It is an EX200 v10 objective.",
+    objective: [
+      "Flatpak remote configured.",
+      "One system app.",
+      "Another app with --user for a specific user.",
+    ],
     where: "client",
     steps: [
       "Add a Flatpak remote and leave it configured.",
