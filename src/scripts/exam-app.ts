@@ -1,5 +1,5 @@
 import { difficultyLabel, getUI, pageLocale, routePath, type RouteId } from "../lib/i18n";
-import { labsFor, REDHAT_EXAM_VIDEO, type Lab } from "../lib/labs";
+import { labsFor, REDHAT_EXAM_VIDEO, type Lab, type LabCommand } from "../lib/labs";
 import {
   countedLabs,
   isHard,
@@ -602,29 +602,7 @@ function helpPanel(lab: Lab): HTMLElement {
   }
   if (lab.note) panel.append(el("p", "mt-3 text-sm leading-relaxed text-muted", lab.note));
   panel.append(el("h3", "mt-4 text-sm font-semibold tracking-wide uppercase", copy().commandsTitle));
-  const commands = el("ul", "mt-2 space-y-3");
-  for (const item of lab.help.commands) {
-    const li = el("li");
-    if (item.as) {
-      li.append(
-        el(
-          "p",
-          "mb-1 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
-          copy().asWho(item.as),
-        ),
-      );
-    }
-    const row = el("div", "cmd-row");
-    const text = el("code", "cmd-text");
-    text.textContent = item.cmd;
-    row.append(
-      text,
-      createCopyButton(item.cmd, { copy: copy().copyCmd, copied: copy().copiedCmd }),
-    );
-    li.append(row, el("p", "mt-1 text-sm text-muted", item.why));
-    commands.append(li);
-  }
-  panel.append(commands);
+  panel.append(renderCommands(lab.help.commands));
   if (lab.help.videos.length) {
     panel.append(el("h3", "mt-4 text-sm font-semibold tracking-wide uppercase", copy().videosTitle));
     const videos = el("ul", "mt-2 space-y-1 text-sm");
@@ -894,6 +872,75 @@ function closeRun(): void {
   undoSnapshot = null;
   commit(run);
   render();
+}
+
+function renderCommands(items: LabCommand[]): HTMLElement {
+  const list = el("ul", "mt-2 space-y-3");
+  let i = 0;
+  while (i < items.length) {
+    const item = items[i];
+    if (item.orGroup) {
+      const groupId = item.orGroup;
+      const group: LabCommand[] = [];
+      while (i < items.length && items[i].orGroup === groupId) {
+        group.push(items[i]);
+        i += 1;
+      }
+      list.append(renderChoiceGroup(group));
+      continue;
+    }
+    list.append(renderCommandItem(item));
+    i += 1;
+  }
+  return list;
+}
+
+function renderChoiceGroup(group: LabCommand[]): HTMLElement {
+  const wrap = el("li", "help-choice");
+  const asWho = group.find((item) => item.as)?.as;
+  if (asWho) {
+    wrap.append(
+      el(
+        "p",
+        "mb-2 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
+        copy().asWho(asWho),
+      ),
+    );
+  }
+  wrap.append(el("p", "help-choice-banner", copy().helpPickOne));
+  const inner = el("div", "help-choice-list");
+  group.forEach((item, index) => {
+    const card = el("div", "help-choice-card");
+    card.append(el("p", "help-choice-label", copy().helpOption(index + 1, item.orName)));
+    card.append(commandRow(item.cmd));
+    card.append(el("p", "mt-1 text-sm text-muted", item.why));
+    inner.append(card);
+  });
+  wrap.append(inner);
+  return wrap;
+}
+
+function renderCommandItem(item: LabCommand): HTMLElement {
+  const li = el("li");
+  if (item.as) {
+    li.append(
+      el(
+        "p",
+        "mb-1 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
+        copy().asWho(item.as),
+      ),
+    );
+  }
+  li.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted", item.why));
+  return li;
+}
+
+function commandRow(cmd: string): HTMLElement {
+  const row = el("div", "cmd-row");
+  const text = el("code", "cmd-text");
+  text.textContent = cmd;
+  row.append(text, createCopyButton(cmd, { copy: copy().copyCmd, copied: copy().copiedCmd }));
+  return row;
 }
 
 function el(tag: string, className = "", text = ""): HTMLElement {

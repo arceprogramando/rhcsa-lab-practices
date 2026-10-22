@@ -209,6 +209,8 @@ export interface Copy {
   commandsTitle: string;
   copyCmd: string;
   copiedCmd: string;
+  helpPickOne: string;
+  helpOption: (n: number, name?: string) => string;
   asWho: (who: string) => string;
   videosTitle: string;
   askHelp: string;
@@ -427,6 +429,8 @@ const es: Copy = {
   commandsTitle: "Comandos para mirar",
   copyCmd: "Copiar",
   copiedCmd: "Copiado",
+  helpPickOne: "Elegí una forma · no hace falta las dos",
+  helpOption: (n, name) => (name ? `Opción ${n} · ${name}` : `Opción ${n}`),
   asWho: (who) => `Como ${who}`,
   videosTitle: "Videos",
   askHelp: "Pedí ayuda",
@@ -631,6 +635,8 @@ const en: Copy = {
   commandsTitle: "Commands to look at",
   copyCmd: "Copy",
   copiedCmd: "Copied",
+  helpPickOne: "Pick one way · you do not need both",
+  helpOption: (n, name) => (name ? `Option ${n} · ${name}` : `Option ${n}`),
   asWho: (who) => `As ${who}`,
   videosTitle: "Videos",
   askHelp: "Ask for help",

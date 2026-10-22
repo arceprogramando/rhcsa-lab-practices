@@ -37,6 +37,21 @@ const es: GlossaryEntry[] = [
     tldr: { page: "head" },
   },
   {
+    term: "wc",
+    definition:
+      "Cuenta líneas, palabras y bytes de un archivo o de lo que llega por pipe. Sin opciones muestra las tres. -l = solo líneas, -w = palabras, -c = bytes. Sirve para verificar que un filtro (grep, etc.) dejó contenido.",
+    example: "wc -l /root/lines → cuántas líneas tiene el archivo del lab de grep · grep ich /usr/share/dict/words | wc -l → cuenta sin guardar el archivo",
+    tldr: { page: "wc" },
+  },
+  {
+    term: "cp",
+    definition:
+      "Copia archivos o directorios. Orden: cp ORIGEN DESTINO. Primero lo que copiás, después a dónde. Si DESTINO es una carpeta que ya existe, el archivo entra adentro con el mismo nombre. Si DESTINO es una ruta con nombre de archivo, ahí queda con ese nombre (renombrás al copiar). -p conserva dueño/modo/fechas del origen (hace falta root para el dueño). --parents recrea la ruta del origen bajo el destino. No asigna un dueño nuevo: eso es chown después.",
+    example:
+      "cp /home/erik/foto.jpg /root/copia.jpg → origen /home/erik/foto.jpg, destino /root/copia.jpg (mismo contenido, otro nombre) · cp /home/erik/foto.jpg /root/erikfiles/ → entra en esa carpeta como foto.jpg · cp --parents -p /home/erik/a.txt /root/erikfiles → queda /root/erikfiles/home/erik/a.txt y conserva dueño",
+    tldr: { page: "cp" },
+  },
+  {
     term: "umask",
     definition: "Máscara de permisos al crear archivos o directorios. Resta bits del permiso por defecto. Un umask alto deja menos permisos abiertos.",
     example: "umask 022 → archivos nuevos suelen quedar 644; umask → muestra la máscara actual",
@@ -129,6 +144,21 @@ const en: GlossaryEntry[] = [
       "Shows only the first lines of a file or of what arrives on a pipe (10 by default). Use it for a preview without flooding the terminal. -n N changes how many lines.",
     example: "tar -tjf /root/myetcbackup.tar.bz2 | head → lists the backup and head shows the first paths without dumping all of /etc",
     tldr: { page: "head" },
+  },
+  {
+    term: "wc",
+    definition:
+      "Counts lines, words, and bytes in a file or on a pipe. With no options it prints all three. -l = lines only, -w = words, -c = bytes. Handy to check that a filter (grep, etc.) left real content.",
+    example: "wc -l /root/lines → how many lines the grep lab file has · grep ich /usr/share/dict/words | wc -l → count without saving the file",
+    tldr: { page: "wc" },
+  },
+  {
+    term: "cp",
+    definition:
+      "Copies files or directories. Order: cp SOURCE DEST. First what you copy, then where. If DEST is an existing directory, the file goes inside with the same name. If DEST is a path with a file name, it lands there with that name (rename while copying). -p keeps owner/mode/timestamps from the source (root needed for ownership). --parents recreates the source path under the destination. It does not assign a new owner: that is chown afterwards.",
+    example:
+      "cp /home/erik/foto.jpg /root/copia.jpg → source /home/erik/foto.jpg, dest /root/copia.jpg (same content, new name) · cp /home/erik/foto.jpg /root/erikfiles/ → enters that folder as foto.jpg · cp --parents -p /home/erik/a.txt /root/erikfiles → becomes /root/erikfiles/home/erik/a.txt and keeps the owner",
+    tldr: { page: "cp" },
   },
   {
     term: "umask",

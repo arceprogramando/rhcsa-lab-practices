@@ -59,6 +59,10 @@ export interface LabCommand {
   why: string;
   /** Quién ejecuta el comando: root, felipe, consola VM, etc. */
   as?: string;
+  /** Same id = mutually exclusive alternatives; pick one. */
+  orGroup?: string;
+  /** Short label next to Opción N, e.g. cp --parents */
+  orName?: string;
 }
 
 export interface Lab {
@@ -546,8 +550,20 @@ export const LABS: Lab[] = [
       commands: [
         { cmd: "find / -user erik -mtime -1 -type f 2>/dev/null", why: "Dueño erik, modificado hace menos de 1 día. El error de /proc se descarta.", as: "root" },
         { cmd: "mkdir -p /root/erikfiles", why: "Destino.", as: "root" },
-        { cmd: "find / -user erik -mtime -1 -type f -exec cp --parents -p {} /root/erikfiles \\; 2>/dev/null", why: "Forma del video: find llama a cp por cada archivo. {} no es vacío ni una ruta que escribas vos: es un marcador. find lo reemplaza por la ruta real (ej. /home/erik/a.txt) y corre: cp --parents -p /home/erik/a.txt /root/erikfiles. --parents y -p son dos opciones distintas de cp (man cp): --parents recrea la ruta bajo el destino; -p conserva dueño, modo y fechas.", as: "root" },
-        { cmd: "find / -user erik -mtime -1 -type f -print0 2>/dev/null | cpio -0pdm /root/erikfiles", why: "Otra forma: find lista y cpio copia el lote. -0 lee nombres con null, -p copia, -d crea dirs, -m conserva fechas. Elegí una de las dos, no hace falta las dos.", as: "root" },
+        {
+          cmd: "find / -user erik -mtime -1 -type f -exec cp --parents -p {} /root/erikfiles \\; 2>/dev/null",
+          why: "Forma del video: find encuentra cada archivo y llama a cp una vez por archivo. {} es un marcador: find lo cambia por la ruta real (ej. /home/erik/a.txt) y corre cp --parents -p esa-ruta /root/erikfiles. --parents = recrea carpetas bajo el destino (/root/erikfiles/home/erik/…). -p = conserva dueño, modo y fechas (como root). El \\; cierra el -exec de find.",
+          as: "root",
+          orGroup: "erik-copy",
+          orName: "cp --parents",
+        },
+        {
+          cmd: "find / -user erik -mtime -1 -type f -print0 2>/dev/null | cpio -0pdm /root/erikfiles",
+          why: "Otra forma válida: find no copia; solo lista rutas y se las pasa a cpio por el pipe (|). cpio es un comando viejo de copiar/archivar archivos en lote (acá no hace un .tar: copia al destino). -print0 = find imprime cada ruta terminada en un byte null (\\0), no en Enter: así un nombre con espacio no se parte. -0 en cpio = lee esa lista con null (tiene que ir con -print0). Las otras letras de -0pdm: -p = modo copia (pass-through) al directorio que sigue; -d = crea las carpetas que falten; -m = conserva fechas de modificación. Resultado parecido a la opción 1: estructura bajo /root/erikfiles.",
+          as: "root",
+          orGroup: "erik-copy",
+          orName: "find | cpio",
+        },
         { cmd: "find /root/erikfiles -type f", why: "Ver que llegó la estructura, no un montón de archivos sueltos.", as: "root" },
       ],
     },
@@ -586,13 +602,13 @@ export const LABS: Lab[] = [
     objective: [
       "Usuario arce.",
       "UID 1111.",
-      "Contraseña rhcsa-exam.",
+      "Contraseña lalala.",
     ],
     where: "client",
     steps: [
       "Usuario: arce.",
       "UID: 1111.",
-      "Contraseña del ejercicio: rhcsa-exam.",
+      "Contraseña del ejercicio: lalala.",
     ],
     note: "En el PDF el usuario tenía otro nombre. Acá es arce, para no usar el hostname viejo del material original.",
     help: {
@@ -602,7 +618,7 @@ export const LABS: Lab[] = [
       commands: [
         { cmd: "getent passwd 1111", why: "Ver si el UID está libre.", as: "root" },
         { cmd: "useradd -u 1111 arce", why: "-u fija el UID.", as: "root" },
-        { cmd: "echo 'rhcsa-exam' | passwd --stdin arce", why: "Contraseña del ejercicio, sin modo interactivo.", as: "root" },
+        { cmd: "echo 'lalala' | passwd --stdin arce", why: "Contraseña del ejercicio, sin modo interactivo. Misma idea que felipe/erik: lalala.", as: "root" },
         { cmd: "id arce", why: "Tiene que mostrar uid=1111.", as: "root" },
       ],
     },

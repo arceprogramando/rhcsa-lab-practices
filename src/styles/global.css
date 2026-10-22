@@ -132,6 +132,45 @@
   display: block;
 }
 
+.help-choice {
+  list-style: none;
+  border: 1px dashed color-mix(in srgb, var(--color-warn) 55%, var(--color-line));
+  border-radius: 1rem;
+  background: color-mix(in srgb, #f8f1e4 70%, var(--color-card));
+  padding: 0.85rem 0.9rem;
+}
+
+.help-choice-banner {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-warn);
+}
+
+.help-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.help-choice-card {
+  border-radius: 0.85rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-card);
+  padding: 0.7rem 0.75rem;
+}
+
+.help-choice-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
 .diff-pill {
   display: inline-flex;
   cursor: pointer;

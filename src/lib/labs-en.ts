@@ -411,8 +411,8 @@ export const LAB_EN: Record<string, LabEn> = {
     why: [
       "Owner erik, modified less than 1 day ago. The /proc error is discarded.",
       "Destination.",
-      "Video style: find runs cp once per file. {} is not empty and not a path you type: it is a placeholder. find replaces it with the real path (e.g. /home/erik/a.txt) and runs: cp --parents -p /home/erik/a.txt /root/erikfiles. --parents and -p are two different cp options (man cp): --parents recreates the path under the destination; -p keeps owner, mode, and timestamps.",
-      "Other way: find lists and cpio copies the batch. -0 reads null names, -p copies, -d makes dirs, -m keeps timestamps. Pick one of the two; you do not need both.",
+      "Video style: find finds each file and runs cp once per file. {} is a placeholder: find swaps it for the real path (e.g. /home/erik/a.txt) and runs cp --parents -p that-path /root/erikfiles. --parents = recreate folders under the destination (/root/erikfiles/home/erik/…). -p = keep owner, mode, and timestamps (as root). The \\; closes find's -exec.",
+      "Another valid way: find does not copy; it only lists paths and pipes them to cpio (|). cpio is an older batch copy/archive tool (here it does not make a .tar: it copies into the destination). -print0 = find prints each path ended with a null byte (\\0), not Enter: so a name with a space is not split. -0 on cpio = read that null-separated list (must pair with -print0). The other letters in -0pdm: -p = pass-through copy into the directory that follows; -d = create missing folders; -m = keep modification times. Similar result to option 1: structure under /root/erikfiles.",
       "See that the structure arrived, not a pile of loose files.",
     ],
   },
@@ -444,10 +444,10 @@ export const LAB_EN: Record<string, LabEn> = {
     objective: [
       "User arce.",
       "UID 1111.",
-      "Password rhcsa-exam.",
+      "Password lalala.",
     ],
     where: "client",
-    steps: ["User: arce.", "UID: 1111.", "Exercise password: rhcsa-exam."],
+    steps: ["User: arce.", "UID: 1111.", "Exercise password: lalala."],
     note: "In the PDF the user had another name. Here it is arce, so the old hostname from the original material is not used.",
     tip: "If UID 1111 already exists, id 1111 tells you before useradd fails.",
     videoHint: 'Video for this lab: Q14.',
@@ -455,7 +455,7 @@ export const LAB_EN: Record<string, LabEn> = {
     why: [
       "See if the UID is free.",
       "-u sets the UID.",
-      "Exercise password, without interactive mode.",
+      "Exercise password without interactive mode. Same idea as felipe/erik: lalala.",
       "It has to show uid=1111.",
     ],
   },
