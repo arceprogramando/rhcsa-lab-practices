@@ -30,6 +30,13 @@ const es: GlossaryEntry[] = [
     tldr: { page: "which" },
   },
   {
+    term: "head",
+    definition:
+      "Muestra solo las primeras líneas de un archivo o de lo que llega por pipe (por defecto 10). Sirve para mirar un preview sin inundar la terminal. Con -n N cambiás cuántas líneas.",
+    example: "tar -tjf /root/myetcbackup.tar.bz2 | head → lista el backup y head deja ver las primeras rutas sin tirar todo /etc",
+    tldr: { page: "head" },
+  },
+  {
     term: "umask",
     definition: "Máscara de permisos al crear archivos o directorios. Resta bits del permiso por defecto. Un umask alto deja menos permisos abiertos.",
     example: "umask 022 → archivos nuevos suelen quedar 644; umask → muestra la máscara actual",
@@ -55,7 +62,7 @@ const es: GlossaryEntry[] = [
   {
     term: "userdel",
     definition:
-      "Borra un usuario. Con -r también borra el home y el mail. El usuario no puede tener sesión abierta. En XFS el home no se recupera: otro useradd deja la carpeta vacía.",
+      "Borra un usuario. Con -r: cuenta + home + mail. Sin -r: el home queda. No borra crontab, archivos fuera del home, ACL en otros paths ni sudoers. Para limpiar todo en una VM de práctica hace falta más (crontab, find -nouser, carpetas de lab). El usuario no puede tener sesión abierta. En XFS el home no se recupera.",
     example: "userdel -r erik",
     tldr: { page: "userdel", platform: "linux" },
   },
@@ -117,6 +124,13 @@ const en: GlossaryEntry[] = [
     tldr: { page: "which" },
   },
   {
+    term: "head",
+    definition:
+      "Shows only the first lines of a file or of what arrives on a pipe (10 by default). Use it for a preview without flooding the terminal. -n N changes how many lines.",
+    example: "tar -tjf /root/myetcbackup.tar.bz2 | head → lists the backup and head shows the first paths without dumping all of /etc",
+    tldr: { page: "head" },
+  },
+  {
     term: "umask",
     definition: "Permission mask when creating files or directories. It clears bits from the default mode. A higher umask leaves fewer open permissions.",
     example: "umask 022 → new files often end up 644; umask → shows the current mask",
@@ -142,7 +156,7 @@ const en: GlossaryEntry[] = [
   {
     term: "userdel",
     definition:
-      "Deletes a user. With -r it also removes the home and mail. The user cannot have an open session. On XFS the home is gone: another useradd leaves an empty folder.",
+      "Deletes a user. With -r: account + home + mail. Without -r: the home stays. Does not remove crontab, files outside the home, ACLs on other paths, or sudoers. To wipe everything on a practice VM you need more (crontab, find -nouser, lab folders). The user cannot have an open session. On XFS the home is gone.",
     example: "userdel -r erik",
     tldr: { page: "userdel", platform: "linux" },
   },

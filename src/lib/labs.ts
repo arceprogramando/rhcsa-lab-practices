@@ -319,7 +319,7 @@ export const LABS: Lab[] = [
       "Persistente.",
     ],
     help: {
-      tip: "El grupo de este lab es sysadm, no wheel. Si el usuario ya existe, el secundario se suma con usermod -aG, no con otro useradd. La regla de sudo va con visudo: un error de sintaxis te deja sin sudo. Para borrar: userdel -r USUARIO (cuenta + home) y groupdel GRUPO (el grupo no puede ser primario de nadie).",
+      tip: "El grupo de este lab es sysadm, no wheel. Si el usuario ya existe, el secundario se suma con usermod -aG, no con otro useradd. La regla de sudo va con visudo: un error de sintaxis te deja sin sudo. userdel -r USUARIO borra cuenta + home + mail, no el crontab ni archivos fuera del home ni sudoers ni ACL. groupdel GRUPO: el grupo no puede ser primario de nadie.",
       videoHint: "Video de este lab: Q05.",
       videos: [{ title: "Q05: Usuarios, grupos y sudo", url: YT.users }],
       commands: [
@@ -336,7 +336,8 @@ export const LABS: Lab[] = [
         { cmd: "%sysadm ALL=(ALL) /usr/sbin/useradd", why: "El grupo puede crear usuarios. El % indica grupo.", as: "root" },
         { cmd: "felipe ALL=(ALL) NOPASSWD: /usr/bin/passwd", why: "Solo Felipe, solo passwd, sin contraseña de sudo.", as: "root" },
         { cmd: "sudo -l -U felipe", why: "Leer la regla antes de probar con su - felipe.", as: "root" },
-        { cmd: "userdel -r erik", why: "Borrar un usuario: userdel -r NOMBRE. Quita la cuenta, el home (/home/erik) y el mail. Sin -r queda la carpeta home. El usuario no puede tener sesión abierta (loginctl terminate-user erik si hace falta). En XFS eso no se recupera: otro useradd deja el home vacío.", as: "root" },
+        { cmd: "userdel -r erik", why: "Borra: la cuenta (passwd/shadow/group), el home (/home/erik) y el mail spool. Sin -r el home queda. No borra: crontab (/var/spool/cron/…), archivos fuera del home (ej. /root/erikfiles, /shared), ACL en otros paths, líneas de sudoers, ni procesos/sesiones abiertas. Sin sesión abierta: loginctl terminate-user erik si hace falta. En XFS el home no se recupera: otro useradd deja la carpeta vacía.", as: "root" },
+        { cmd: "crontab -u erik -r; rm -f /var/spool/cron/erik /var/spool/cron/crontabs/erik; find / -nouser -o -nogroup 2>/dev/null; setfacl -b /var/tmp/fstab 2>/dev/null", why: "Extra (VM de práctica limpia): userdel -r no alcanza si querés borrar todo lo del usuario. Sacá el crontab (con -u si la cuenta aún existe, o el archivo en spool si ya la borraste), buscá archivos/dirs huérfanos con find -nouser/-nogroup, limpiá ACL de prueba y, si aplica, rm de carpetas de lab (/root/erikfiles, /shared) y la regla en sudoers.d. Para reset total de la box, mejor snapshot o vagrant destroy.", as: "root" },
         { cmd: "groupdel sysadm", why: "Borrar un grupo: groupdel NOMBRE. Tiene que estar vacío como grupo primario: primero borrá o cambiá de grupo a los usuarios que lo tengan de primario (usermod -g OTRO usuario). Si solo era secundario, userdel o usermod -G ya lo sacan de la lista. getent group sysadm comprueba que ya no está.", as: "root" },
       ],
     },
@@ -454,7 +455,7 @@ export const LABS: Lab[] = [
       videos: [{ title: "Q09: Archivo tar.bz2 de /etc", url: YT.tar }],
       commands: [
         { cmd: "tar -cjf /root/myetcbackup.tar.bz2 /etc", why: "c crea, j comprime con bzip2, f es el archivo de salida.", as: "root" },
-        { cmd: "tar -tjf /root/myetcbackup.tar.bz2 | head", why: "Listar sin descomprimir, para verificar.", as: "root" },
+        { cmd: "tar -tjf /root/myetcbackup.tar.bz2 | head", why: "Listar sin descomprimir, para verificar. head muestra solo las primeras líneas (por defecto 10): alcanza para ver que el .tar.bz2 tiene contenido, sin tirar miles de rutas de /etc en la pantalla.", as: "root" },
         { cmd: "man tar", why: "Por si no te acordás qué letra es bzip2.", as: "root" },
       ],
     },

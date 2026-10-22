@@ -212,7 +212,7 @@ export const LAB_EN: Record<string, LabEn> = {
       "Felipe can change other users' passwords without sudo asking for a password.",
       "Persistent.",
     ],
-    tip: "This lab's group is sysadm, not wheel. If the user already exists, add the secondary group with usermod -aG, not another useradd. The sudo rule goes through visudo: a syntax error leaves you without sudo. To delete: userdel -r USER (account + home) and groupdel GROUP (the group cannot be anyone's primary group).",
+    tip: "This lab's group is sysadm, not wheel. If the user already exists, add the secondary group with usermod -aG, not another useradd. The sudo rule goes through visudo: a syntax error leaves you without sudo. userdel -r USER removes account + home + mail, not the crontab, files outside the home, sudoers, or ACLs. groupdel GROUP: the group cannot be anyone's primary group.",
     videoHint: 'Video for this lab: Q05.',
     videos: ['Q05: Users, groups, and sudo'],
     why: [
@@ -229,7 +229,8 @@ export const LAB_EN: Record<string, LabEn> = {
       "The group can create users. % means group.",
       "Only Felipe, only passwd, no sudo password.",
       "Read the rule before testing with su - felipe.",
-      "Delete a user: userdel -r NAME. Removes the account, home (/home/erik), and mail. Without -r the home folder stays. The user cannot have an open session (loginctl terminate-user erik if needed). On XFS that is gone: another useradd leaves an empty home.",
+      "Removes: the account (passwd/shadow/group), the home (/home/erik), and the mail spool. Without -r the home stays. Does not remove: crontab (/var/spool/cron/…), files outside the home (e.g. /root/erikfiles, /shared), ACLs on other paths, sudoers lines, or open sessions/processes. No open session: loginctl terminate-user erik if needed. On XFS the home is gone: another useradd leaves an empty folder.",
+      "Extra (clean practice VM): userdel -r is not enough if you want everything for that user gone. Remove the crontab (-u while the account still exists, or the spool file after), find orphaned files/dirs with find -nouser/-nogroup, clear lab ACLs, and if needed rm lab folders (/root/erikfiles, /shared) and the sudoers.d rule. For a full box reset, prefer a snapshot or vagrant destroy.",
       "Delete a group: groupdel NAME. It cannot be anyone's primary group: first delete those users or change their primary group (usermod -g OTHER user). If it was only secondary, userdel or usermod -G already drops it. getent group sysadm checks it is gone.",
     ],
   },
@@ -331,7 +332,7 @@ export const LAB_EN: Record<string, LabEn> = {
     videos: ['Q09: tar.bz2 archive of /etc'],
     why: [
       "c creates, j compresses with bzip2, f is the output file.",
-      "List without extracting, to verify.",
+      "List without extracting, to verify. head shows only the first lines (10 by default): enough to see the .tar.bz2 has content, without dumping thousands of /etc paths on the screen.",
       "In case you do not remember which letter is bzip2.",
     ],
   },

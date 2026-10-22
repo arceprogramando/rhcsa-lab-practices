@@ -118,6 +118,11 @@ const otherHref = swapLocalePath(path, other);
     <main id="contenido">
       <slot />
     </main>
+    <footer class="border-t border-line/80 no-print">
+      <div class="mx-auto max-w-5xl px-5 py-4 text-xs leading-relaxed text-muted">
+        <p>{ui.footerLegal}</p>
+      </div>
+    </footer>
     <button id="glossary-shortcut" class="glossary-shortcut no-print" type="button" title={ui.glossaryShortcut}>
       <kbd>Ctrl</kbd>+<kbd>K</kbd> {ui.glossaryNav}
     </button>

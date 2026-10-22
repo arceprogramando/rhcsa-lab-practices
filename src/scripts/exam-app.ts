@@ -13,6 +13,7 @@ import {
   type Run,
 } from "../lib/storage";
 import { formatClock, formatShort } from "../lib/time";
+import { createCopyButton } from "./copy-btn";
 
 function copy() {
   return getUI(pageLocale());
@@ -613,9 +614,14 @@ function helpPanel(lab: Lab): HTMLElement {
         ),
       );
     }
-    const code = el("code", "block rounded-xl bg-paper px-3 py-2 text-sm leading-relaxed");
-    code.textContent = item.cmd;
-    li.append(code, el("p", "mt-1 text-sm text-muted", item.why));
+    const row = el("div", "cmd-row");
+    const text = el("code", "cmd-text");
+    text.textContent = item.cmd;
+    row.append(
+      text,
+      createCopyButton(item.cmd, { copy: copy().copyCmd, copied: copy().copiedCmd }),
+    );
+    li.append(row, el("p", "mt-1 text-sm text-muted", item.why));
     commands.append(li);
   }
   panel.append(commands);

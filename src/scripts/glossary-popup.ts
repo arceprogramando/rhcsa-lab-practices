@@ -1,5 +1,6 @@
 import { glossaryFor, tldrUrl, type GlossaryEntry } from "../lib/glossary";
 import { getUI, pageLocale, routePath } from "../lib/i18n";
+import { createCopyButton } from "./copy-btn";
 
 const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA", "INPUT", "CODE", "PRE", "KBD", "A", "BUTTON"]);
 
@@ -173,17 +174,43 @@ function showDetail(entry: GlossaryEntry | undefined): void {
     return;
   }
   const ui = getUI(pageLocale());
+  const labels = { copy: ui.copyCmd, copied: ui.copiedCmd };
   detail.classList.remove("hidden");
-  detail.innerHTML = `
-    <p class="glossary-popup-term mono">${escapeHtml(entry.term)}</p>
-    <p class="glossary-popup-def">${escapeHtml(entry.definition)}</p>
-    ${entry.example ? `<p class="glossary-popup-ex mono">${escapeHtml(entry.example)}</p>` : ""}
-    ${
-      entry.tldr
-        ? `<p><a href="${tldrUrl(entry.tldr)}" target="_blank" rel="noopener noreferrer">${escapeHtml(ui.glossaryTldr)}</a></p>`
-        : ""
-    }
-  `;
+  detail.replaceChildren();
+
+  const termRow = document.createElement("div");
+  termRow.className = "glossary-term-row";
+  const term = document.createElement("span");
+  term.className = "glossary-popup-term mono";
+  term.textContent = entry.term;
+  termRow.append(term, createCopyButton(entry.term, labels));
+  detail.append(termRow);
+
+  const def = document.createElement("p");
+  def.className = "glossary-popup-def";
+  def.textContent = entry.definition;
+  detail.append(def);
+
+  if (entry.example) {
+    const exRow = document.createElement("div");
+    exRow.className = "cmd-row glossary-popup-ex-row";
+    const ex = document.createElement("code");
+    ex.className = "cmd-text";
+    ex.textContent = entry.example;
+    exRow.append(ex, createCopyButton(entry.example, labels));
+    detail.append(exRow);
+  }
+
+  if (entry.tldr) {
+    const tldr = document.createElement("p");
+    const link = document.createElement("a");
+    link.href = tldrUrl(entry.tldr);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = ui.glossaryTldr;
+    tldr.append(link);
+    detail.append(tldr);
+  }
 }
 
 function hideDetail(): void {

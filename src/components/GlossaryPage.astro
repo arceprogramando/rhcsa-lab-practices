@@ -41,10 +41,36 @@ const entries = glossaryFor(locale);
             data-definition={entry.definition}
             data-example={entry.example ?? ""}
           >
-            <dt class="glossary-term font-mono text-lg font-semibold tracking-tight">{entry.term}</dt>
+            <dt class="glossary-term-row">
+              <span class="glossary-term font-mono text-lg font-semibold tracking-tight">{entry.term}</span>
+              <button
+                type="button"
+                class="cmd-copy"
+                data-copy={entry.term}
+                aria-label={`${ui.copyCmd}: ${entry.term}`}
+                title={ui.copyCmd}
+              >
+                <svg class="cmd-copy-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                </svg>
+              </button>
+            </dt>
             <dd class="glossary-definition mt-2 text-[1.05rem] leading-relaxed text-ink/90">{entry.definition}</dd>
             {entry.example ? (
-              <dd class="glossary-example mono mt-3 rounded-2xl bg-paper px-3 py-2 text-sm text-muted">{entry.example}</dd>
+              <dd class="cmd-row glossary-example-row">
+                <code class="cmd-text glossary-example">{entry.example}</code>
+                <button
+                  type="button"
+                  class="cmd-copy"
+                  data-copy={entry.example}
+                  aria-label={`${ui.copyCmd}: ${entry.example}`}
+                  title={ui.copyCmd}
+                >
+                  <svg class="cmd-copy-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                  </svg>
+                </button>
+              </dd>
             ) : null}
             {entry.tldr ? (
               <dd class="mt-3 text-sm">
@@ -66,11 +92,32 @@ const entries = glossaryFor(locale);
 </Base>
 
 <script>
+  import { getUI, pageLocale } from "../lib/i18n";
+
   const input = document.getElementById("glossary-search") as HTMLInputElement | null;
   const empty = document.getElementById("glossary-empty");
   const list = document.getElementById("glossary-list");
+  const ui = getUI(pageLocale());
+
   if (input && empty && list) {
     const entries = Array.from(list.querySelectorAll<HTMLElement>(".glossary-entry"));
+
+    for (const btn of list.querySelectorAll<HTMLButtonElement>(".cmd-copy")) {
+      btn.addEventListener("click", async () => {
+        const text = btn.getAttribute("data-copy") ?? "";
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.setAttribute("title", ui.copiedCmd);
+          btn.classList.add("is-copied");
+          window.setTimeout(() => {
+            btn.setAttribute("title", ui.copyCmd);
+            btn.classList.remove("is-copied");
+          }, 1500);
+        } catch {
+          /* clipboard may be blocked */
+        }
+      });
+    }
 
     function escapeHtml(value: string): string {
       return value
