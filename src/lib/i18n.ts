@@ -116,6 +116,7 @@ export interface Copy {
   start: string;
   startAnother: string;
   editionLabel: string;
+  editionAppliesNext: string;
   editionV10: string;
   editionV9: string;
   editionNote: string;
@@ -157,6 +158,8 @@ export interface Copy {
   noscript: string;
   videoTitle: string;
   confirmReplace: string;
+  resumeAbandoned: string;
+  confirmResumeOther: string;
   startedNote: (when: string) => string;
   startedPausedNote: (when: string) => string;
   startedPausableNote: (when: string) => string;
@@ -244,6 +247,19 @@ export interface Copy {
   statsDescription: string;
   statsHeading: string;
   statsIntro: string;
+  coverageTitle: string;
+  coverageLead: string;
+  coverageNote: string;
+  coverageCenter: string;
+  coverageDone: string;
+  coverageHelp: string;
+  coverageRevisit: string;
+  coverageMissing: string;
+  coverageGap: (names: string) => string;
+  coverageNone: string;
+  coverageSolid: string;
+  domainShort: Record<string, string>;
+  domainName: Record<string, string>;
   noClosed: string;
   noClosedBody: string;
   firstExam: string;
@@ -318,6 +334,7 @@ const es: Copy = {
   start: "Empezá la práctica",
   startAnother: "Empezar otra",
   editionLabel: "Versión a practicar",
+  editionAppliesNext: "Esta versión es para la próxima. La práctica abierta no cambia.",
   editionV10: "RHCSA 10 · Flatpak",
   editionV9: "RHCSA 9 · Podman",
   editionNote: "No sabemos cómo es el examen. En lo publicado, el cambio de la 10 respecto de la 9 es el tema de contenedores: en la 10 Flatpak entra en la lista y Podman queda en extras, sin contar como pendiente. En la 9 es al revés.",
@@ -367,9 +384,11 @@ const es: Copy = {
   noscript: "Esta práctica guarda los tiempos en el navegador y necesita JavaScript.",
   videoTitle: "Dentro de un examen de certificación Red Hat: Lo que necesita saber",
   confirmReplace: "Hay uno en curso. Si empezás otro, ese queda guardado como abandonado.",
-  startedNote: (when) => `Hay uno empezado el ${when}. El reloj sigue desde ese momento.`,
-  startedPausedNote: (when) => `Hay uno en pausa, empezado el ${when}. El reloj está frenado.`,
-  startedPausableNote: (when) => `Hay uno con pausas, empezado el ${when}. Pausar frena el reloj.`,
+  resumeAbandoned: "Seguir esta",
+  confirmResumeOther: "Hay otra práctica en curso. Si seguís esta, esa otra pasa al historial y también se puede retomar.",
+  startedNote: (when) => `Hay uno empezado el ${when}. El reloj sigue desde ese momento. Para empezar otra, cerrala desde la lista.`,
+  startedPausedNote: (when) => `Hay uno en pausa, empezado el ${when}. El reloj está frenado. Para empezar otra, cerrala desde la lista.`,
+  startedPausableNote: (when) => `Hay uno con pausas, empezado el ${when}. Pausar frena el reloj. Para empezar otra, cerrala desde la lista.`,
   firstClose: (clock) => `Primer cierre: ${clock}. El próximo se compara contra este.`,
   openRun: "Hay una práctica sin cerrar. La mejora aparece cuando termina o se acaba el tiempo.",
   noCloseYet: "Cuando cierres la primera, acá vas a ver si la siguiente fue más corta.",
@@ -469,6 +488,42 @@ const es: Copy = {
   statsDescription: "Tiempos por lab, promedio, ayuda pedida y mejora contra la práctica anterior. Guardado en este navegador.",
   statsHeading: "Estadísticas",
   statsIntro: "Separadas por modo. Sin pausas es la que importa (como el examen). Con pausas es práctica libre.",
+  coverageTitle: "Qué falta practicar",
+  coverageLead: "Las barras agrupan los labs por tema. El largo es cuánto de ese grupo ya hiciste en este modo.",
+  coverageNote:
+    "Hecho sin abrir la ayuda cuenta entero. Hecho con la ayuda abierta cuenta la mitad. Volver a ver cuenta un cuarto. Se queda el mejor de todas las prácticas de este modo, también la que está en curso. Con RHCSA 10, Podman no entra en la cuenta. Con la 9, Flatpak no entra. Los temas los armamos nosotros para ver qué falta practicar.",
+  coverageCenter: "cobertura",
+  coverageDone: "hecho",
+  coverageHelp: "con ayuda",
+  coverageRevisit: "a revisar",
+  coverageMissing: "falta",
+  coverageGap: (names) => `Empezá por ${names}.`,
+  coverageNone: "En este modo todavía no hay un lab hecho.",
+  coverageSolid: "En este modo, todos los temas tienen sus labs hechos.",
+  domainShort: {
+    tools: "Archivos",
+    software: "Paquetes",
+    scripts: "Scripts",
+    systems: "Arranque",
+    storage: "Discos",
+    filesystems: "NFS",
+    deploy: "Servicios",
+    network: "Red",
+    users: "Cuentas",
+    security: "SELinux",
+  },
+  domainName: {
+    tools: "Archivos, grep y comprimidos",
+    software: "Paquetes y Flatpak",
+    scripts: "Scripts",
+    systems: "Arranque y tuned",
+    storage: "Discos, LVM y swap",
+    filesystems: "NFS, permisos y resize",
+    deploy: "Servicios, cron y hora",
+    network: "Red y hostname",
+    users: "Usuarios y sudo",
+    security: "SELinux y firewall",
+  },
   noClosed: "Todavía no hay una práctica cerrada",
   noClosedBody: "Cuando cierres una, o se acaben las 3 horas, acá se compara contra la anterior.",
   firstExam: "Esta es la primera práctica cerrada. La próxima se resta contra este tiempo.",
@@ -528,6 +583,7 @@ const en: Copy = {
   start: "Start practice",
   startAnother: "Start another",
   editionLabel: "Version to practice",
+  editionAppliesNext: "This version is for the next one. The open practice stays as it is.",
   editionV10: "RHCSA 10 · Flatpak",
   editionV9: "RHCSA 9 · Podman",
   editionNote: "We don't know what the exam is like. From what's published, the change in 10 compared with 9 is the container topic: on 10, Flatpak is on the main list and Podman stays in extras, not counted as missing. On 9 it is the other way around.",
@@ -577,9 +633,11 @@ const en: Copy = {
   noscript: "This practice stores times in the browser and needs JavaScript.",
   videoTitle: "Inside a Red Hat certification exam: What you need to know",
   confirmReplace: "One is already running. If you start another, that one is saved as abandoned.",
-  startedNote: (when) => `One started on ${when}. The clock continues from that moment.`,
-  startedPausedNote: (when) => `One is paused, started on ${when}. The clock is stopped.`,
-  startedPausableNote: (when) => `One with pauses started on ${when}. Pause stops the clock.`,
+  resumeAbandoned: "Continue this one",
+  confirmResumeOther: "Another practice is in progress. If you continue this one, that other one goes to the history and can be continued too.",
+  startedNote: (when) => `One started on ${when}. The clock continues from that moment. To start another, close this one from the list.`,
+  startedPausedNote: (when) => `One is paused, started on ${when}. The clock is stopped. To start another, close this one from the list.`,
+  startedPausableNote: (when) => `One with pauses started on ${when}. Pause stops the clock. To start another, close this one from the list.`,
   firstClose: (clock) => `First close: ${clock}. The next one is compared with this.`,
   openRun: "A practice run is still open. The comparison appears when it ends or the time runs out.",
   noCloseYet: "After you close the first one, this shows whether the next was shorter.",
@@ -679,6 +737,42 @@ const en: Copy = {
   statsDescription: "Time per lab, average, help requested, and improvement against the previous attempt. Stored in this browser.",
   statsHeading: "Stats",
   statsIntro: "Split by mode. Without pauses is what matters (like the exam). With pauses is free practice.",
+  coverageTitle: "What still needs practice",
+  coverageLead: "The bars group the labs by topic. The length is how much of that group you have already done in this mode.",
+  coverageNote:
+    "Done without opening help counts in full. Done with help open counts as half. Revisit counts as a quarter. The best mark across every practice in this mode is kept, including the one in progress. On RHCSA 10, Podman stays out of the count. On 9, Flatpak stays out. We made these topics to see what still needs practice.",
+  coverageCenter: "coverage",
+  coverageDone: "done",
+  coverageHelp: "with help",
+  coverageRevisit: "revisit",
+  coverageMissing: "missing",
+  coverageGap: (names) => `Start with ${names}.`,
+  coverageNone: "No lab is done yet in this mode.",
+  coverageSolid: "In this mode, every topic has its labs done.",
+  domainShort: {
+    tools: "Files",
+    software: "Packages",
+    scripts: "Scripts",
+    systems: "Boot",
+    storage: "Disks",
+    filesystems: "NFS",
+    deploy: "Services",
+    network: "Network",
+    users: "Accounts",
+    security: "SELinux",
+  },
+  domainName: {
+    tools: "Files, grep, and archives",
+    software: "Packages and Flatpak",
+    scripts: "Scripts",
+    systems: "Boot and tuned",
+    storage: "Disks, LVM, and swap",
+    filesystems: "NFS, permissions, and resize",
+    deploy: "Services, cron, and time",
+    network: "Network and hostname",
+    users: "Users and sudo",
+    security: "SELinux and firewall",
+  },
   noClosed: "No practice has been closed yet",
   noClosedBody: "When you close one, or the 3 hours run out, this compares it with the previous one.",
   firstExam: "This is the first closed practice. The next one is subtracted from this time.",

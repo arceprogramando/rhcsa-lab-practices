@@ -20,6 +20,8 @@ export function mountHome(): void {
   const resume = document.getElementById("resume-exam");
   const resumeWrap = document.getElementById("resume-wrap");
   const startLabel = document.getElementById("start-modes-label");
+  const startHints = document.getElementById("start-hints");
+  const editionNext = document.getElementById("edition-next");
   const note = document.getElementById("start-note");
   const running = activeRun();
   const ui = getUI(pageLocale());
@@ -27,9 +29,9 @@ export function mountHome(): void {
 
   if (running && resume && resumeWrap) {
     resumeWrap.classList.remove("hidden");
-    fixed?.classList.remove("btn-primary");
-    fixed?.classList.add("btn-quiet");
-    if (startLabel) startLabel.textContent = ui.startAnotherLabel;
+    if (startLabel) startLabel.hidden = true;
+    if (startHints) startHints.hidden = true;
+    if (editionNext) editionNext.classList.remove("hidden");
     resume.addEventListener("click", () => {
       location.href = routePath(pageLocale(), "practice");
     });
@@ -43,17 +45,19 @@ export function mountHome(): void {
     }
   }
   if (pausable) {
-    pausable.textContent = running ? ui.startPausableAnother : ui.startPausable;
+    pausable.hidden = Boolean(running);
+    pausable.textContent = ui.startPausable;
     pausable.addEventListener("click", () => {
-      if (running && !confirm(ui.confirmReplace)) return;
+      if (activeRun()) return;
       startRun("pausable", loadEdition());
       location.href = routePath(locale, "practice");
     });
   }
   if (fixed) {
-    fixed.textContent = running ? ui.startFixedAnother : ui.startFixed;
+    fixed.hidden = Boolean(running);
+    fixed.textContent = ui.startFixed;
     fixed.addEventListener("click", () => {
-      if (running && !confirm(ui.confirmReplace)) return;
+      if (activeRun()) return;
       startRun("fixed", loadEdition());
       location.href = routePath(locale, "practice");
     });
@@ -91,8 +95,7 @@ function paintEdition(edition: Edition): void {
     const button = document.getElementById(`edition-${id}`);
     if (!button) continue;
     const on = edition === id;
-    button.classList.toggle("btn-primary", on);
-    button.classList.toggle("btn-quiet", !on);
+    button.classList.toggle("is-on", on);
     button.setAttribute("aria-pressed", on ? "true" : "false");
     button.onclick = () => {
       saveEdition(id);

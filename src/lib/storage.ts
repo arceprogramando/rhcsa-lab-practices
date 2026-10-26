@@ -150,6 +150,29 @@ export function startRun(mode: ExamMode = "fixed", edition: Edition = "v10"): Ru
   return run;
 }
 
+/** Puts an abandoned run back in progress. Another open run goes to the history. Time spent abandoned does not count on the clock. */
+export function reopenRun(id: string): void {
+  const store = loadStore();
+  const target = store.runs.find((run) => run.id === id);
+  if (!target || target.status !== "abandoned") return;
+  const nowIso = new Date().toISOString();
+  for (const run of store.runs) {
+    if (run.id === id || run.status !== "in_progress") continue;
+    if (run.pausedAt) {
+      run.pausedSec += Math.max(0, (Date.parse(nowIso) - Date.parse(run.pausedAt)) / 1000);
+      run.pausedAt = null;
+    }
+    run.status = "abandoned";
+    run.finishedAt = nowIso;
+  }
+  if (target.finishedAt) {
+    target.pausedSec += Math.max(0, (Date.parse(nowIso) - Date.parse(target.finishedAt)) / 1000);
+  }
+  target.status = "in_progress";
+  target.finishedAt = null;
+  saveStore(store);
+}
+
 export function replaceRun(next: Run): void {
   const store = loadStore();
   const index = store.runs.findIndex((run) => run.id === next.id);

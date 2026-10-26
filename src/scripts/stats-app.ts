@@ -1,5 +1,6 @@
-import { difficultyLabel, getUI, pageLocale, routePath, type RouteId } from "../lib/i18n";
-import { labById } from "../lib/labs";
+import { domainCoverage, overallPercent, type CoverageKind, type DomainScore } from "../lib/coverage";
+import { difficultyLabel, getUI, pageLocale, routePath, type Locale, type RouteId } from "../lib/i18n";
+import { labById, loadEdition } from "../lib/labs";
 import {
   aggregates,
   clearStore,
@@ -7,7 +8,9 @@ import {
   deleteRun,
   filterRuns,
   isHard,
+  activeRun,
   loadStore,
+  reopenRun,
   wallSec,
   type ExamMode,
   type Run,
@@ -39,7 +42,7 @@ function view(): HTMLElement {
   const mode = readMode();
   const store = filterRuns(loadStore(), mode);
   const page = el("div", "flex flex-col gap-6 pb-12");
-  page.append(modeTabs(mode));
+  page.append(modeTabs(mode), coverageCard(store.runs));
 
   if (store.runs.length === 0) {
     page.append(empty(mode));
@@ -122,6 +125,180 @@ function headline(
     el("p", "mt-2 text-sm text-muted", ui.lastVsPrev(formatClock(wallSec(latest)), formatClock(wallSec(previous)))),
   );
   return card;
+}
+
+function coverageCard(runs: Run[]): HTMLElement {
+  const ui = copy();
+  const locale = pageLocale();
+  const domains = domainCoverage(runs, loadEdition());
+  const overall = overallPercent(domains);
+  const section = el("section", "rounded-3xl border border-line bg-card p-5 sm:p-6");
+  section.append(
+    el("h2", "text-lg font-semibold", ui.coverageTitle),
+    el("p", "mt-2 max-w-2xl text-sm text-muted", ui.coverageLead),
+    el("p", "mt-2 text-sm font-medium", gapLine(domains, locale)),
+  );
+  const layout = el("div", "mt-5 grid items-center gap-6 lg:grid-cols-[minmax(260px,380px)_1fr]");
+  layout.append(radialBars(domains, overall), domainList(domains));
+  section.append(layout, el("p", "mt-5 text-sm text-muted", ui.coverageNote));
+  return section;
+}
+
+function gapLine(domains: DomainScore[], locale: Locale): string {
+  const ui = copy();
+  const order = new Map(domains.map((domain, index) => [domain.id, index]));
+  const sorted = domains.slice().sort((a, b) => a.percent - b.percent || (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  if (sorted.every((domain) => domain.percent >= 100)) return ui.coverageSolid;
+  if (sorted.every((domain) => domain.percent === 0)) return ui.coverageNone;
+  const floor = sorted[0]?.percent ?? 0;
+  const names = sorted
+    .filter((domain) => domain.percent === floor)
+    .slice(0, 3)
+    .map((domain) => ui.domainName[domain.id] ?? domain.id);
+  return ui.coverageGap(joinNames(names, locale));
+}
+
+function joinNames(names: string[], locale: Locale): string {
+  if (names.length <= 1) return names[0] ?? "";
+  const and = locale === "en" ? " and " : " y ";
+  if (names.length === 2) return names.join(and);
+  return `${names.slice(0, -1).join(", ")}${and}${names.at(-1)}`;
+}
+
+function radialBars(domains: DomainScore[], overall: number): SVGSVGElement {
+  const ui = copy();
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 560 560");
+  svg.setAttribute("role", "img");
+  svg.classList.add("mx-auto", "w-full", "max-w-[420px]");
+  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+  title.textContent = `${ui.coverageTitle}. ${overall}%`;
+  svg.append(title);
+
+  const cx = 280;
+  const cy = 280;
+  const inner = 78;
+  const outer = 168;
+  const sweep = (Math.PI * 2) / domains.length;
+  const bar = sweep * 0.72;
+
+  domains.forEach((domain, index) => {
+    const mid = -Math.PI / 2 + index * sweep;
+    const a0 = mid - bar / 2;
+    const a1 = mid + bar / 2;
+    const track = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    track.setAttribute("d", ring(cx, cy, inner, outer, a0, a1));
+    track.setAttribute("fill", "#e4e0d6");
+    svg.append(track);
+    if (domain.percent > 0) {
+      const reach = inner + ((outer - inner) * domain.percent) / 100;
+      const fill = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      fill.setAttribute("d", ring(cx, cy, inner, reach, a0, a1));
+      fill.setAttribute("fill", tone(domain.percent));
+      svg.append(fill);
+    }
+    const labelR = 214;
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", String(cx + labelR * Math.cos(mid)));
+    text.setAttribute("y", String(cy + labelR * Math.sin(mid)));
+    text.setAttribute("text-anchor", anchor(mid));
+    text.setAttribute("fill", "#121a2b");
+    text.setAttribute("font-size", "15");
+    text.setAttribute("font-family", "Figtree, Segoe UI, sans-serif");
+    text.setAttribute("font-weight", "600");
+    text.textContent = ui.domainShort[domain.id] ?? domain.id;
+    const dy = Math.sin(mid) > 0.45 ? "0.85em" : Math.sin(mid) < -0.45 ? "-0.15em" : "0.35em";
+    text.setAttribute("dy", dy);
+    svg.append(text);
+  });
+
+  const value = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  value.setAttribute("x", String(cx));
+  value.setAttribute("y", String(cy - 4));
+  value.setAttribute("text-anchor", "middle");
+  value.setAttribute("fill", tone(overall));
+  value.setAttribute("font-size", "32");
+  value.setAttribute("font-family", "IBM Plex Mono, ui-monospace, monospace");
+  value.setAttribute("font-weight", "600");
+  value.textContent = `${overall}%`;
+  const caption = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  caption.setAttribute("x", String(cx));
+  caption.setAttribute("y", String(cy + 18));
+  caption.setAttribute("text-anchor", "middle");
+  caption.setAttribute("fill", "#5c6570");
+  caption.setAttribute("font-size", "12");
+  caption.setAttribute("font-family", "Figtree, Segoe UI, sans-serif");
+  caption.setAttribute("letter-spacing", "0.08em");
+  caption.textContent = ui.coverageCenter.toUpperCase();
+  svg.append(value, caption);
+  return svg;
+}
+
+function ring(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number): string {
+  const point = (radius: number, angle: number) =>
+    `${cx + radius * Math.cos(angle)} ${cy + radius * Math.sin(angle)}`;
+  const large = a1 - a0 > Math.PI ? 1 : 0;
+  return `M ${point(r1, a0)} A ${r1} ${r1} 0 ${large} 1 ${point(r1, a1)} L ${point(r0, a1)} A ${r0} ${r0} 0 ${large} 0 ${point(r0, a0)} Z`;
+}
+
+function anchor(angle: number): "start" | "middle" | "end" {
+  const cos = Math.cos(angle);
+  if (cos > 0.4) return "start";
+  if (cos < -0.4) return "end";
+  return "middle";
+}
+
+function tone(percent: number): string {
+  if (percent >= 80) return "#1c6b45";
+  if (percent >= 40) return "#8a5a00";
+  return "#8e2a2a";
+}
+
+function domainList(domains: DomainScore[]): HTMLElement {
+  const ui = copy();
+  const order = new Map(domains.map((domain, index) => [domain.id, index]));
+  const sorted = domains
+    .slice()
+    .sort((a, b) => a.percent - b.percent || (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  const floor = sorted[0]?.percent ?? 0;
+  let opened = 0;
+  const list = el("div", "flex flex-col gap-2");
+  for (const domain of sorted) {
+    const open = domain.percent === floor && opened < 3 && domain.percent < 100;
+    if (open) opened += 1;
+    const details = document.createElement("details");
+    details.className = "coverage-domain rounded-2xl border border-line bg-paper px-3 py-2";
+    details.open = open;
+    const summary = document.createElement("summary");
+    summary.className = "flex cursor-pointer items-center justify-between gap-3";
+    const name = el("span", "font-medium", ui.domainName[domain.id] ?? domain.id);
+    const percent = el("span", "stat-value text-sm font-semibold", `${domain.percent}%`);
+    percent.style.color = domain.percent === 0 ? "#8e2a2a" : tone(domain.percent);
+    summary.append(name, percent);
+    const meter = el("div", "coverage-meter mt-2");
+    const fill = document.createElement("span");
+    fill.style.width = `${domain.percent}%`;
+    fill.style.background = domain.percent === 0 ? "transparent" : tone(domain.percent);
+    meter.append(fill);
+    const labs = el("ul", "mt-2 mb-1 flex flex-col gap-1");
+    for (const lab of domain.labs) {
+      const title = labById(lab.labId, pageLocale())?.title ?? lab.labId;
+      const li = el("li", "flex items-baseline justify-between gap-3 text-sm");
+      li.append(el("span", "", title), el("span", "shrink-0 text-muted", kindLabel(lab.kind)));
+      labs.append(li);
+    }
+    details.append(summary, meter, labs);
+    list.append(details);
+  }
+  return list;
+}
+
+function kindLabel(kind: CoverageKind): string {
+  const ui = copy();
+  if (kind === "done") return ui.coverageDone;
+  if (kind === "help") return ui.coverageHelp;
+  if (kind === "revisit") return ui.coverageRevisit;
+  return ui.coverageMissing;
 }
 
 function totals(runs: Run[]): HTMLElement {
@@ -226,6 +403,17 @@ function history(runs: Run[]): HTMLElement {
         `${formatClock(wallSec(run))} · ${copy().tally({ done, revisit, redo, skipped, help })}`,
       ),
     );
+    const actions = el("div", "flex flex-wrap gap-2");
+    if (run.status === "abandoned") {
+      const resume = button(copy().resumeAbandoned, "btn btn-primary");
+      resume.addEventListener("click", () => {
+        const running = activeRun();
+        if (running && !confirm(copy().confirmResumeOther)) return;
+        reopenRun(run.id);
+        location.href = to("practice");
+      });
+      actions.append(resume);
+    }
     const remove = button(copy().delete, "btn btn-quiet");
     remove.addEventListener("click", () => {
       const which = run.status === "in_progress" ? copy().thisRunning : copy().thisSaved;
@@ -234,7 +422,8 @@ function history(runs: Run[]): HTMLElement {
       const host = document.getElementById("stats-root");
       if (host) mountStats(host);
     });
-    li.append(text, remove);
+    actions.append(remove);
+    li.append(text, actions);
     list.append(li);
   }
   section.append(list);
