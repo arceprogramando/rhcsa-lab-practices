@@ -902,25 +902,48 @@ function renderCommands(items: LabCommand[]): HTMLElement {
   return list;
 }
 
+function choiceOptions(group: LabCommand[]): LabCommand[][] {
+  const options: LabCommand[][] = [];
+  for (const item of group) {
+    const last = options.at(-1);
+    if (last && item.orName && last[0].orName === item.orName) last.push(item);
+    else options.push([item]);
+  }
+  return options;
+}
+
 function renderChoiceGroup(group: LabCommand[]): HTMLElement {
   const wrap = el("li", "help-choice");
-  const asWho = group.find((item) => item.as)?.as;
-  if (asWho) {
+  const options = choiceOptions(group);
+  const sharedAs = group.every((item) => item.as && item.as === group[0].as);
+  if (sharedAs && group[0].as) {
     wrap.append(
       el(
         "p",
         "mb-2 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
-        copy().asWho(asWho),
+        copy().asWho(group[0].as),
       ),
     );
   }
   wrap.append(el("p", "help-choice-banner", copy().helpPickOne));
   const inner = el("div", "help-choice-list");
-  group.forEach((item, index) => {
+  options.forEach((steps, index) => {
     const card = el("div", "help-choice-card");
-    card.append(el("p", "help-choice-label", copy().helpOption(index + 1, item.orName)));
-    card.append(commandRow(item.cmd));
-    card.append(el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
+    card.append(el("p", "help-choice-label", copy().helpOption(index + 1, steps[0].orName)));
+    steps.forEach((item) => {
+      const step = el("div", "help-choice-step");
+      if (!sharedAs && item.as) {
+        step.append(
+          el(
+            "p",
+            "mb-1 text-xs font-semibold tracking-[0.14em] text-warn uppercase",
+            copy().asWho(item.as),
+          ),
+        );
+      }
+      step.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
+      card.append(step);
+    });
     inner.append(card);
   });
   wrap.append(inner);

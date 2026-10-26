@@ -171,6 +171,10 @@
   color: var(--color-ink);
 }
 
+.help-choice-step + .help-choice-step {
+  margin-top: 0.85rem;
+}
+
 .diff-pill {
   display: inline-flex;
   cursor: pointer;
