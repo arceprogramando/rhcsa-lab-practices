@@ -129,6 +129,39 @@ const es: GlossaryEntry[] = [
       "El primer dígito de chmod no es dueño/grupo/otros: es el bit especial. 4 setuid, 2 setgid, 1 sticky. Se pueden sumar (3 = setgid+sticky, 6 = setuid+setgid, 7 = los tres). Después van los tres dígitos normales (ej. 2770 = setgid + rwxrwx---).",
     example: "4 setuid · 2 setgid · 1 sticky",
   },
+  {
+    term: "LVM",
+    definition:
+      "Logical Volume Manager. Apila disco, grupo y volumen. Orden al crear: Physical Volume (PV), después Volume Group (VG), después Logical Volume (LV). El tamaño se cuenta en Physical Extent (PE). Encima del LV va el sistema de archivos (en el lab, ext4) y el montaje; eso ya no es LVM.",
+    example: "disco extra → pvcreate → vgcreate wgroup → lvcreate wshare → mkfs.ext4 → montar /mnt/wshare",
+  },
+  {
+    term: "Physical Volume (PV)",
+    definition:
+      "Volumen físico. Un disco o una partición marcados con pvcreate para que LVM los pueda usar. Todavía no tiene nombre de grupo ni de volumen. En el lab es el disco extra de 1 GB, no el disco que tiene / y /boot.",
+    example: "pvcreate /dev/DISCO",
+    tldr: { page: "pvcreate", platform: "linux" },
+  },
+  {
+    term: "Volume Group (VG)",
+    definition:
+      "Grupo de volúmenes. Junta uno o más PV en un grupo con nombre. wgroup es el VG del lab. -s 8M fija el tamaño de cada PE de ese grupo.",
+    example: "vgcreate -s 8M wgroup /dev/DISCO",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "Logical Volume (LV)",
+    definition:
+      "Volumen lógico. Se corta del VG. wshare es el LV del lab: 50 extents. El dispositivo queda en /dev/wgroup/wshare (VG/LV). -l pide extents, no megabytes.",
+    example: "lvcreate -n wshare -l 50 wgroup → 50 × 8 MB = 400 MB",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "Physical Extent (PE)",
+    definition:
+      "Pedazo en el que se parte el VG. No es otro disco. En el lab cada PE mide 8 MB. 50 extents son 50 de esos pedazos (400 MB), no 50 MB.",
+    example: "vgcreate -s 8M wgroup … → cada PE mide 8 MB · lvcreate -l 50 → usa 50 PE",
+  },
 ];
 
 const en: GlossaryEntry[] = [
@@ -237,6 +270,39 @@ const en: GlossaryEntry[] = [
     definition:
       "The first digit of chmod is not owner/group/others: it is the special bit. 4 setuid, 2 setgid, 1 sticky. They can be added (3 = setgid+sticky, 6 = setuid+setgid, 7 = all three). Then come the three normal digits (e.g. 2770 = setgid + rwxrwx---).",
     example: "4 setuid · 2 setgid · 1 sticky",
+  },
+  {
+    term: "LVM",
+    definition:
+      "Logical Volume Manager. Stacks disk, group, and volume. Create order: Physical Volume (PV), then Volume Group (VG), then Logical Volume (LV). Size is counted in Physical Extents (PE). The filesystem (ext4 in the lab) and the mount sit on top of the LV; that part is no longer LVM.",
+    example: "extra disk → pvcreate → vgcreate wgroup → lvcreate wshare → mkfs.ext4 → mount /mnt/wshare",
+  },
+  {
+    term: "Physical Volume (PV)",
+    definition:
+      "A disk or partition marked with pvcreate so LVM can use it. It does not have a group or volume name yet. In the lab it is the extra 1 GB disk, not the disk that has / and /boot.",
+    example: "pvcreate /dev/DISCO",
+    tldr: { page: "pvcreate", platform: "linux" },
+  },
+  {
+    term: "Volume Group (VG)",
+    definition:
+      "A named pool of one or more PVs. wgroup is the lab VG. -s 8M sets the size of each PE in that group.",
+    example: "vgcreate -s 8M wgroup /dev/DISCO",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "Logical Volume (LV)",
+    definition:
+      "A slice cut from the VG. wshare is the lab LV: 50 extents. The device is /dev/wgroup/wshare (VG/LV). -l asks for extents, not megabytes.",
+    example: "lvcreate -n wshare -l 50 wgroup → 50 × 8 MB = 400 MB",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "Physical Extent (PE)",
+    definition:
+      "The chunk the VG is split into. It is not another disk. In the lab each PE is 8 MB. 50 extents are 50 of those chunks (400 MB), not 50 MB.",
+    example: "vgcreate -s 8M wgroup … → each PE is 8 MB · lvcreate -l 50 → uses 50 PE",
   },
 ];
 

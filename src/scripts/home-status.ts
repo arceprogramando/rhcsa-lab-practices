@@ -1,4 +1,5 @@
 import { getUI, pageLocale, routePath } from "../lib/i18n";
+import { loadEdition, saveEdition, type Edition } from "../lib/labs";
 import {
   activeRun,
   closedRuns,
@@ -45,7 +46,7 @@ export function mountHome(): void {
     pausable.textContent = running ? ui.startPausableAnother : ui.startPausable;
     pausable.addEventListener("click", () => {
       if (running && !confirm(ui.confirmReplace)) return;
-      startRun("pausable");
+      startRun("pausable", loadEdition());
       location.href = routePath(locale, "practice");
     });
   }
@@ -53,10 +54,12 @@ export function mountHome(): void {
     fixed.textContent = running ? ui.startFixedAnother : ui.startFixed;
     fixed.addEventListener("click", () => {
       if (running && !confirm(ui.confirmReplace)) return;
-      startRun("fixed");
+      startRun("fixed", loadEdition());
       location.href = routePath(locale, "practice");
     });
   }
+
+  paintEdition(loadEdition());
 
   const store = loadStore();
   fillModeSummary(store, "fixed", "stat-fixed");
@@ -72,7 +75,7 @@ export function mountHome(): void {
   const detail = lastBox.querySelector("[data-detail]");
   if (when) when.textContent = formatWhen(last.startedAt, locale);
   if (detail) {
-    const scored = countedLabs(last.labs);
+    const scored = countedLabs(last.labs, last.edition);
     const done = scored.filter((lab) => lab.status === "done").length;
     const revisit = scored.filter((lab) => lab.status === "revisit").length;
     const passed = scored.filter((lab) => lab.status === "skipped").length;
@@ -83,15 +86,30 @@ export function mountHome(): void {
   }
 }
 
+function paintEdition(edition: Edition): void {
+  for (const id of ["v10", "v9"] as const) {
+    const button = document.getElementById(`edition-${id}`);
+    if (!button) continue;
+    const on = edition === id;
+    button.classList.toggle("btn-primary", on);
+    button.classList.toggle("btn-quiet", !on);
+    button.setAttribute("aria-pressed", on ? "true" : "false");
+    button.onclick = () => {
+      saveEdition(id);
+      paintEdition(id);
+    };
+  }
+}
+
 function fillModeSummary(store: Store, mode: ExamMode, prefix: string): void {
   const scoped = filterRuns(store, mode);
   const comparable = scoped.runs
     .filter((run) => run.status === "completed" || run.status === "timed_out")
     .sort((a, b) => Date.parse(a.startedAt) - Date.parse(b.startedAt));
   const best = comparable.filter((run) => run.status === "completed").sort((a, b) => wallSec(a) - wallSec(b))[0];
-  const help = scoped.runs.reduce((sum, run) => sum + countedLabs(run.labs).filter((lab) => lab.usedHelp).length, 0);
+  const help = scoped.runs.reduce((sum, run) => sum + countedLabs(run.labs, run.edition).filter((lab) => lab.usedHelp).length, 0);
   const skipped = scoped.runs.reduce(
-    (sum, run) => sum + countedLabs(run.labs).filter((lab) => lab.status === "skipped").length,
+    (sum, run) => sum + countedLabs(run.labs, run.edition).filter((lab) => lab.status === "skipped").length,
     0,
   );
 

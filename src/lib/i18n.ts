@@ -43,7 +43,7 @@ export function localePath(locale: Locale, path = "/"): string {
  */
 export const ROUTES = {
   home: { es: "", en: "" },
-  practice: { es: "simulacro", en: "practice" },
+  practice: { es: "practica", en: "personal-practice" },
   stats: { es: "estadisticas", en: "stats" },
   glossary: { es: "glosario", en: "glossary" },
 } as const;
@@ -115,6 +115,10 @@ export interface Copy {
   leadAfter: string;
   start: string;
   startAnother: string;
+  editionLabel: string;
+  editionV10: string;
+  editionV9: string;
+  editionNote: string;
   startModesLabel: string;
   startPausable: string;
   startPausableAnother: string;
@@ -313,12 +317,16 @@ const es: Copy = {
   leadAfter: ". Los puntos rápidos van primero. Si algo te traba, lo marcás y seguís.",
   start: "Empezá la práctica",
   startAnother: "Empezar otra",
+  editionLabel: "Versión a practicar",
+  editionV10: "RHCSA 10 · Flatpak",
+  editionV9: "RHCSA 9 · Podman",
+  editionNote: "No sabemos cómo es el examen. En lo publicado, el cambio de la 10 respecto de la 9 es el tema de contenedores: en la 10 Flatpak entra en la lista y Podman queda en extras, sin contar como pendiente. En la 9 es al revés.",
   startModesLabel: "Empezar una práctica",
   startPausable: "Práctica con pausas",
   startPausableAnother: "Otra con pausas",
   startFixed: "Empezar sin pausas",
   startFixedAnother: "Otro sin pausas",
-  startFixedHint: "El modo importante: 3 horas de corrido, como el examen real.",
+  startFixedHint: "El modo para medir tiempos: 3 horas de corrido, sin pausas.",
   modesNote: "Sin pausas es el que importa para medir cómo vas. Con pausas es solo práctica: el reloj se puede frenar.",
   resume: "Seguí donde quedaste",
   startAnotherLabel: "O empezar otro",
@@ -519,12 +527,16 @@ const en: Copy = {
   leadAfter: ". Quick points go first. If something stalls you, mark it and move on.",
   start: "Start practice",
   startAnother: "Start another",
+  editionLabel: "Version to practice",
+  editionV10: "RHCSA 10 · Flatpak",
+  editionV9: "RHCSA 9 · Podman",
+  editionNote: "We don't know what the exam is like. From what's published, the change in 10 compared with 9 is the container topic: on 10, Flatpak is on the main list and Podman stays in extras, not counted as missing. On 9 it is the other way around.",
   startModesLabel: "Start a practice",
   startPausable: "Practice with pauses",
   startPausableAnother: "Another with pauses",
   startFixed: "Start without pauses",
   startFixedAnother: "Another without pauses",
-  startFixedHint: "The important mode: 3 hours straight, like the real exam.",
+  startFixedHint: "The mode for measuring time: 3 hours straight, without pauses.",
   modesNote: "Without pauses is what matters for measuring progress. With pauses is only practice: you can stop the clock.",
   resume: "Continue where you left off",
   startAnotherLabel: "Or start another",

@@ -20,6 +20,7 @@ const YT = {
   nmtui: yt("fhrYQwGrjZw"),
   nmcli: yt("BMRXlUFAOA8"),
   repos: yt("PrJT4y1sk-g"),
+  reposLocal: yt("Z_ajOZjmYTM"),
   selinuxPort: yt("71BWFUvLXZI"),
   users: yt("iy3YU6IDQAc"),
   setgid: yt("CYdEgCMUz-Q"),
@@ -63,6 +64,33 @@ export interface LabCommand {
   orGroup?: string;
   /** Short label next to Opción N, e.g. cp --parents */
   orName?: string;
+}
+
+export type Edition = "v10" | "v9";
+
+const PODMAN_IDS = new Set(["lab-20", "lab-21", "lab-22"]);
+const FLATPAK_IDS = new Set(["extra-04"]);
+const EDITION_KEY = "arceprog:rhcsa-edition";
+
+export function loadEdition(): Edition {
+  if (typeof localStorage === "undefined") return "v10";
+  return localStorage.getItem(EDITION_KEY) === "v9" ? "v9" : "v10";
+}
+
+export function saveEdition(edition: Edition): void {
+  localStorage.setItem(EDITION_KEY, edition);
+}
+
+/** v10: Flatpak in the main list, Podman in extras. v9 keeps the original tracks. */
+export function trackFor(lab: Lab, edition: Edition): Lab["track"] {
+  if (edition === "v10" && PODMAN_IDS.has(lab.id)) return "extra";
+  if (edition === "v10" && FLATPAK_IDS.has(lab.id)) return "pdf";
+  return lab.track;
+}
+
+/** The container topic that is not the one you are practicing. It stays visible as an extra and does not count as missing. */
+export function isOffEdition(labId: string, edition: Edition): boolean {
+  return edition === "v10" ? PODMAN_IDS.has(labId) : FLATPAK_IDS.has(labId);
 }
 
 export interface Lab {
@@ -260,8 +288,14 @@ export const LABS: Lab[] = [
     note: "En el examen casi no hay internet: el repo suele ser interno (DVD/ISO montada con file://, o un http:// del lab). En este Vagrant, si no montás una ISO, podés usar los repos que ya trae la box o un mirror que responda. Los labs que instalan (acl, chrony, words, tuned, …) asumen que en ESA máquina ya corriste este paso.",
     help: {
       tip: "Como en el video Q03: dnf lee solo archivos en /etc/yum.repos.d/ que terminen en .repo (ej. local.repo). Entrás ahí (cd /etc/yum.repos.d/), creás el archivo a mano con dos bloques BaseOS y AppStream, y memorizás la forma: [id], name=, baseurl= (la URL o file:// del enunciado, copiar/pegar), enabled=1, gpgcheck=0. Sin repos, el resto del examen se traba. Un baseurl que no existe deja dnf muerto. En Vagrant, si dnf ya lista paquetes, no rompas los .repo; si practicás ISO, usá el mount + file:// de abajo.",
-      videoHint: "Video de este lab: Q03.",
-      videos: [{ title: "Q03: Repositorios YUM/DNF", url: YT.repos }],
+      videoHint: "Videos de este lab: Q03, y otro canal (Mingtao SUN) con el repo local a mano, sin internet.",
+      videos: [
+        { title: "Q03: Repositorios YUM/DNF", url: YT.repos },
+        {
+          title: "RHCSA Exam: How to Manually Configure a Local YUM/DNF Repository (No Internet!) · Mingtao SUN",
+          url: YT.reposLocal,
+        },
+      ],
       commands: [
         { cmd: "cd /etc/yum.repos.d/ && ls", why: "Primero: entrar a la carpeta de los repos (dnf/yum la usan igual). Hay que saberla de memoria. Ahí se crea el .repo; si el archivo no termina en .repo, dnf lo ignora.", as: "root" },
         { cmd: "dnf repolist", why: "Ver qué repos están enabled ahora en ESTA máquina (antes y después de crear el archivo).", as: "root" },
@@ -294,12 +328,12 @@ export const LABS: Lab[] = [
       videoHint: "Video de este lab: Q04.",
       videos: [{ title: "Q04: SELinux, Apache en el puerto 82", url: YT.selinuxPort }],
       commands: [
-        { cmd: "getenforce", why: "Tiene que decir Enforcing cuando termines.", as: "root" },
-        { cmd: "semanage port -l | grep http", why: "Ver qué puertos ya son http_port_t.", as: "root" },
-        { cmd: "semanage port -a -t http_port_t -p tcp 82", why: "Autorizar el puerto sin tocar los archivos de /var/www/html.", as: "root" },
-        { cmd: "grep -n Listen /etc/httpd/conf/httpd.conf", why: "Cambiar el Listen a 82.", as: "root" },
-        { cmd: "firewall-cmd --add-port=82/tcp --permanent && firewall-cmd --reload", why: "Abrir el puerto y dejarlo permanente.", as: "root" },
-        { cmd: "systemctl restart httpd && ss -ltnp | grep 82", why: "Ver que quedó escuchando.", as: "root" },
+        { cmd: "getenforce", why: "No cambia nada. Pregunta el modo de SELinux e imprime una sola palabra.\nEnforcing: bloquea lo que la política no permite. Si Apache intenta el 82 sin permiso, no lo abre.\nPermissive: lo anota en el log y lo deja pasar.\nDisabled: SELinux no está corriendo.\nAl terminar tiene que decir Enforcing. Pasarlo a Permissive para que Apache arranque no cumple el lab.", as: "root" },
+        { cmd: "semanage port -l | grep http", why: "No cambia nada. Lista los puertos que SELinux ya etiquetó y deja solo las líneas de http.\nhttp_port_t es la etiqueta de los puertos donde Apache puede escuchar.\nSi 82 no aparece ahí, en Enforcing Apache no puede usarlo, aunque httpd.conf diga Listen 82.", as: "root" },
+        { cmd: "semanage port -a -t http_port_t -p tcp 82", why: "Agrega el 82 a la etiqueta http_port_t, en TCP. -a agrega, -t es el tipo y -p tcp es el protocolo.\nQueda en la política y sigue después del reboot. No toca los archivos de /var/www/html: acá el bloqueo es el puerto.\nSi dice que el puerto ya está definido, ya estaba. No hace falta correrlo de nuevo.", as: "root" },
+        { cmd: "grep -n Listen /etc/httpd/conf/httpd.conf", why: "No cambia el puerto. Muestra la línea donde Apache dice en qué puerto escucha, con su número.\nSuele decir Listen 80. Hay que editar esa línea y dejar Listen 82.\nSin ese cambio, Apache sigue en el 80 aunque SELinux y el firewall ya permitan el 82.", as: "root" },
+        { cmd: "firewall-cmd --add-port=82/tcp --permanent && firewall-cmd --reload", why: "firewalld es otra barrera, aparte de SELinux.\n--add-port=82/tcp abre el 82.\n--permanent lo guarda en disco. Sin eso, al reboot el puerto se cierra.\n--reload aplica ahora lo guardado. Hasta el reload, el cambio permanente no entra en vigor.", as: "root" },
+        { cmd: "systemctl restart httpd && ss -ltnp | grep 82", why: "restart corta Apache y lo vuelve a levantar para que lea Listen 82. Si el puerto o SELinux están mal, el restart falla.\nss -ltnp lista qué procesos escuchan en TCP. grep 82 deja solo esa línea.\nSi aparece httpd en :82, está escuchando. Si no hay línea, no quedó.", as: "root" },
       ],
     },
   },
@@ -633,16 +667,16 @@ export const LABS: Lab[] = [
   {
     id: "lab-15",
     track: "pdf",
-    title: "LVM wgroup / wshare",
+    title: "LVM wgroup (VG) / wshare (LV)",
     objective: [
-      "VG wgroup, PE 8 MB.",
-      "LV wshare de 50 extents, ext4.",
+      "wgroup (VG), PE 8 MB.",
+      "wshare (LV) de 50 extents, ext4.",
       "Montado en /mnt/wshare por UUID al boot.",
     ],
     where: "server · disco extra de 1 GB",
     steps: [
-      "Volume group wgroup, extent físico de 8 MB.",
-      "Logical volume wshare de 50 extents.",
+      "wgroup (VG), extent físico de 8 MB.",
+      "wshare (LV) de 50 extents.",
       "Formato ext4, montado en /mnt/wshare.",
       "Montaje automático al boot, por UUID.",
     ],
@@ -737,16 +771,16 @@ export const LABS: Lab[] = [
       "Aplicar el perfil recomendado.",
       "Tiene que quedar elegido después de reboot.",
     ],
-    note: "El punto es cambiar el profile y que quede permanente. tuned-adm profile lo guarda. El servicio tuned tiene que estar enable, si no, al reboot vuelve atrás.",
+    note: "El punto es cambiar el profile y que quede permanente. tuned-adm profile lo escribe en /etc/tuned/active_profile. Al reiniciar, el servicio tuned tiene que estar enable para leer ese archivo y volver a aplicarlo. Sin enable, el archivo puede quedar y el perfil igual no vuelve.",
     help: {
-      tip: "recommend y profile no son el mismo comando. recommend te dice cuál. profile lo deja puesto, y queda guardado. Sin systemctl enable --now tuned, el reboot lo pierde.",
+      tip: "recommend solo imprime un nombre: no lo guarda. profile NOMBRE lo aplica ahora y lo deja escrito en /etc/tuned/active_profile. enable --now tuned arranca el servicio y lo deja para el boot: al reiniciar, tuned lee ese archivo y vuelve a poner el mismo perfil. Comprobación: reboot y tuned-adm active tiene que mostrar el mismo nombre.",
       videoHint: "Video de este lab: Q18.",
       videos: [{ title: "Q18: Perfil recomendado de tuned", url: YT.tuned }],
       commands: [
-        { cmd: "dnf repolist && dnf install -y tuned && systemctl enable --now tuned", why: "Primero repos en el client; después install. El servicio tiene que quedar habilitado.", as: "root" },
-        { cmd: "tuned-adm recommend", why: "El perfil que pide el enunciado, no uno al azar.", as: "root" },
-        { cmd: "tuned-adm profile NOMBRE", why: "Aplicar el que recommend imprimió.", as: "root" },
-        { cmd: "tuned-adm active", why: "Confirmar, y de nuevo después de reboot.", as: "root" },
+        { cmd: "dnf repolist && dnf install -y tuned && systemctl enable --now tuned", why: "Primero repos en el client; después install. enable --now lo arranca ya y lo deja para el próximo boot. Sin enable, al reiniciar tuned no vuelve y el perfil no se reaplica.", as: "root" },
+        { cmd: "tuned-adm recommend", why: "Solo dice cuál conviene. No cambia nada y no lo guarda.", as: "root" },
+        { cmd: "tuned-adm profile NOMBRE", why: "NOMBRE es el que imprimió recommend. Lo aplica ahora y lo guarda en /etc/tuned/active_profile. Ese archivo es lo que sobrevive al reboot.", as: "root" },
+        { cmd: "tuned-adm active", why: "Tiene que mostrar el mismo nombre. Después de reboot, repetilo: si el servicio quedó enable, lee active_profile y sigue igual.", as: "root" },
       ],
     },
   },
@@ -795,7 +829,7 @@ export const LABS: Lab[] = [
       "Etiquetarla localhost/text2pdf:latest.",
       "Verificar que la imagen existe en la máquina.",
     ],
-    note: "Está en el PDF. En el EX200 v10 no es prioridad: entra Flatpak, y ese lab está en los extras. Si no hay salida a internet, este paso no se puede clonar.",
+    note: "Está en el PDF. En RHCSA 10 no es prioridad: el tema de contenedores es Flatpak. Si practicás la 9, este lab sí entra en la lista. Sin internet no se puede clonar.",
     help: {
       tip: "El nombre que pide el lab es el tag completo localhost/text2pdf:latest. podman images tiene que mostrar esa línea.",
       videoHint: "Q20a/b son registry privado. Q21 arma la imagen y el autostart. Para v10 priorizá Flatpak.",

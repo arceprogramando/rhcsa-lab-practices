@@ -125,9 +125,9 @@ function headline(
 }
 
 function totals(runs: Run[]): HTMLElement {
-  const help = runs.reduce((sum, run) => sum + countedLabs(run.labs).filter((lab) => lab.usedHelp).length, 0);
-  const skipped = runs.reduce((sum, run) => sum + countedLabs(run.labs).filter((lab) => lab.status === "skipped").length, 0);
-  const done = runs.reduce((sum, run) => sum + countedLabs(run.labs).filter((lab) => lab.status === "done").length, 0);
+  const help = runs.reduce((sum, run) => sum + countedLabs(run.labs, run.edition).filter((lab) => lab.usedHelp).length, 0);
+  const skipped = runs.reduce((sum, run) => sum + countedLabs(run.labs, run.edition).filter((lab) => lab.status === "skipped").length, 0);
+  const done = runs.reduce((sum, run) => sum + countedLabs(run.labs, run.edition).filter((lab) => lab.status === "done").length, 0);
   const finished = runs.filter((run) => run.status === "completed" || run.status === "timed_out");
   const best = finished.filter((run) => run.status === "completed").sort((a, b) => wallSec(a) - wallSec(b))[0];
   const grid = el("section", "grid gap-3 sm:grid-cols-2 lg:grid-cols-5");
@@ -210,7 +210,7 @@ function history(runs: Run[]): HTMLElement {
   }
   const list = el("ul", "mt-3 divide-y divide-line");
   for (const run of runs) {
-    const scored = countedLabs(run.labs);
+    const scored = countedLabs(run.labs, run.edition);
     const done = scored.filter((lab) => lab.status === "done").length;
     const revisit = scored.filter((lab) => lab.status === "revisit").length;
     const redo = scored.filter((lab) => lab.status === "done" && isHard(lab.difficulty)).length;
@@ -249,7 +249,7 @@ function tools(): HTMLElement {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "rhcsa-simulacro-arceprog.json";
+    a.download = "rhcsa-practica-arceprog.json";
     a.click();
     URL.revokeObjectURL(url);
   });

@@ -1,4 +1,4 @@
-import { LABS } from "./labs";
+import { LABS, isOffEdition, type Edition } from "./labs";
 import { EXAM_LIMIT_SEC } from "./time";
 
 export const STORAGE_KEY = "arceprog:rhcsa-exam:v1";
@@ -30,6 +30,8 @@ export interface Run {
   finishedAt: string | null;
   globalLimitSec: number;
   mode: ExamMode;
+  /** v10 = Flatpak in the main list. Missing on older runs means v9. */
+  edition?: Edition;
   pausedAt: string | null;
   pausedSec: number;
   status: RunStatus;
@@ -62,8 +64,8 @@ export function saveStore(store: Store): void {
 
 const SETUP_IDS = new Set(LABS.filter((lab) => lab.track === "setup").map((lab) => lab.id));
 
-export function countedLabs(labs: LabRecord[]): LabRecord[] {
-  return labs.filter((lab) => !SETUP_IDS.has(lab.labId));
+export function countedLabs(labs: LabRecord[], edition?: Edition): LabRecord[] {
+  return labs.filter((lab) => !SETUP_IDS.has(lab.labId) && !(edition && isOffEdition(lab.labId, edition)));
 }
 
 export function activeRun(store: Store = loadStore()): Run | undefined {
@@ -87,6 +89,7 @@ export function wallSec(run: Run, now = Date.now()): number {
 
 function alignRun(run: Run): void {
   if (run.mode !== "fixed" && run.mode !== "pausable") run.mode = "pausable";
+  if (run.edition !== "v10" && run.edition !== "v9") run.edition = "v9";
   if (typeof run.pausedSec !== "number") run.pausedSec = 0;
   if (!run.pausedAt) run.pausedAt = null;
   if (!Array.isArray(run.labs)) {
@@ -115,7 +118,7 @@ function blankLab(labId: string): LabRecord {
   };
 }
 
-export function startRun(mode: ExamMode = "fixed"): Run {
+export function startRun(mode: ExamMode = "fixed", edition: Edition = "v10"): Run {
   const store = loadStore();
   const nowIso = new Date().toISOString();
   for (const run of store.runs) {
@@ -134,6 +137,7 @@ export function startRun(mode: ExamMode = "fixed"): Run {
     finishedAt: null,
     globalLimitSec: EXAM_LIMIT_SEC,
     mode,
+    edition,
     pausedAt: null,
     pausedSec: 0,
     status: "in_progress",

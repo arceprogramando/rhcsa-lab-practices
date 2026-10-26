@@ -1,5 +1,5 @@
 import { difficultyLabel, getUI, pageLocale, routePath, type RouteId } from "../lib/i18n";
-import { labsFor, REDHAT_EXAM_VIDEO, type Lab, type LabCommand } from "../lib/labs";
+import { labsFor, loadEdition, trackFor, REDHAT_EXAM_VIDEO, type Lab, type LabCommand } from "../lib/labs";
 import {
   countedLabs,
   isHard,
@@ -20,7 +20,8 @@ function copy() {
 }
 
 function labs(): Lab[] {
-  return labsFor(pageLocale());
+  const edition = current()?.edition ?? loadEdition();
+  return labsFor(pageLocale()).map((lab) => ({ ...lab, track: trackFor(lab, edition) }));
 }
 
 function to(route: RouteId): string {
@@ -253,6 +254,12 @@ function strategyNote(): HTMLElement {
   credit.append(anchor(REDHAT_EXAM_VIDEO, copy().videoTitle));
   credit.append(".");
   note.append(credit);
+  const editionLine = el(
+    "p",
+    "mt-2 text-sm text-muted",
+    current()?.edition === "v9" ? copy().editionV9 : copy().editionV10,
+  );
+  note.append(editionLine);
   return note;
 }
 
@@ -415,7 +422,7 @@ function radioMark(index: number, value: "revisit" | "done", label: string, chec
 function clockBar(run: Run, showLab: boolean): HTMLElement {
   const bar = el("section", "rounded-3xl border border-line bg-card p-4 sm:p-5");
   const counts = el("dl", "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6");
-  const scored = countedLabs(run.labs);
+  const scored = countedLabs(run.labs, run.edition);
   const leftTasks = scored.filter((item) => item.status !== "done" && item.status !== "skipped").length;
   const revisit = scored.filter((item) => item.status === "revisit").length;
   const done = scored.filter((item) => item.status === "done").length;
@@ -670,7 +677,7 @@ function undoBar(): HTMLElement {
 }
 
 function summaryView(run: Run): HTMLElement {
-  const scored = countedLabs(run.labs);
+  const scored = countedLabs(run.labs, run.edition);
   const done = scored.filter((item) => item.status === "done").length;
   const redo = scored.filter((item) => item.status === "done" && isHard(item.difficulty)).length;
   const skipped = scored.filter((item) => item.status === "skipped").length;
@@ -913,7 +920,7 @@ function renderChoiceGroup(group: LabCommand[]): HTMLElement {
     const card = el("div", "help-choice-card");
     card.append(el("p", "help-choice-label", copy().helpOption(index + 1, item.orName)));
     card.append(commandRow(item.cmd));
-    card.append(el("p", "mt-1 text-sm text-muted", item.why));
+    card.append(el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
     inner.append(card);
   });
   wrap.append(inner);
@@ -931,7 +938,7 @@ function renderCommandItem(item: LabCommand): HTMLElement {
       ),
     );
   }
-  li.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted", item.why));
+  li.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
   return li;
 }
 

@@ -11,6 +11,11 @@ export default defineConfig({
     routing: { prefixDefaultLocale: false },
   },
   server: { port: 4322, host: "127.0.0.1" },
+  redirects: {
+    "/simulacro": "/practica/",
+    "/en/simulacro": "/en/personal-practice/",
+    "/en/practice": "/en/personal-practice/",
+  },
   vite: {
     plugins: [tailwindcss()],
   },
