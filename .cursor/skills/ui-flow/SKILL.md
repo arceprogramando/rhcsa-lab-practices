@@ -1,10 +1,11 @@
 ---
 name: ui-flow
 description: >-
-  Reviews whether a screen's controls match what the person is trying to do.
-  Use when the user asks for a UI or UX review, when a control looks like the
-  main action but is only a choice, when a flow is confusing, or when they
-  mention buttons, toggles, hierarchy, affordance, or "no se entiende qué hacer".
+  Reviews whether a screen's controls and copy match what the person is trying
+  to do. Use when the user asks for a UI, UX, or copy review, when a control
+  looks like the main action but is only a choice, when a flow or a sentence
+  is confusing, or when they mention buttons, toggles, wording, or "no se
+  entiende".
 ---
 
 # UI flow
@@ -27,6 +28,14 @@ A filled pill is the continue action. A choice that uses that same fill is read 
 - The other options stay visible in that same track. Hiding them, or styling only one as a button, reads as "there is nothing to switch".
 - A paragraph under the control does not fix a shape that already said the wrong thing.
 - In a timed practice with no pauses, do not add a hint the real exam would not show. A choice made before the clock starts is fine.
+
+## Copy
+
+Copy is the text on the control.
+
+- The button names the result, including which version.
+- If a choice changes that result, the button text changes with the choice.
+- One sentence under the control. Delete the sentence that repeats the button.
 
 ## Answer
 

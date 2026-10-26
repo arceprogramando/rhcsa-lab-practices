@@ -25,19 +25,19 @@ const statsPausable = `${routePath(locale, "stats")}?mode=pausable`;
         <p class="mt-3 max-w-xl text-sm text-muted">{ui.hello}</p>
 
         <div class="mt-8 rounded-3xl border-2 border-ink bg-card p-5 sm:p-6">
-          <p class="text-sm font-semibold tracking-[0.14em] text-muted uppercase">{ui.editionLabel}</p>
+          <p class="text-sm font-semibold text-muted uppercase sm:tracking-[0.14em]">{ui.editionLabel}</p>
           <div class="choice mt-2" role="group" aria-label={ui.editionLabel}>
             <button id="edition-v10" class="choice-option is-on" type="button" aria-pressed="true">{ui.editionV10}</button>
             <button id="edition-v9" class="choice-option" type="button" aria-pressed="false">{ui.editionV9}</button>
           </div>
           <p class="mt-2 text-sm text-muted">{ui.editionNote}</p>
-          <p id="edition-next" class="mt-2 hidden text-sm text-ink">{ui.editionAppliesNext}</p>
+          <p id="edition-next" class="mt-2 hidden text-sm text-ink"></p>
           <div id="resume-wrap" class="mt-6 hidden border-t border-line pt-6">
             <button id="resume-exam" class="btn btn-primary w-full sm:w-auto" type="button">{ui.resume}</button>
             <p id="start-note" class="mt-2 text-sm text-muted"></p>
           </div>
           <div id="start-wrap">
-            <p id="start-modes-label" class="mt-5 text-sm font-semibold tracking-[0.14em] text-muted uppercase">{ui.startModesLabel}</p>
+            <p id="start-modes-label" class="mt-5 text-sm font-semibold text-muted uppercase sm:tracking-[0.14em]">{ui.startModesLabel}</p>
             <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <button id="start-fixed" class="btn btn-primary" type="button">{ui.startFixed}</button>
               <button id="start-pausable" class="btn btn-quiet" type="button">{ui.startPausable}</button>

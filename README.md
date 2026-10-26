@@ -38,8 +38,8 @@ Quiere medir una práctica o retomar la que dejó. Ve la edición (10 o 9), dos 
 |---|---|
 | Empezar sin pausas | Entra a la lista. Reloj de 3 horas, sin botón de pausa. |
 | Práctica con pausas | Entra a la lista. El reloj flotante tiene Pausa. |
-| Seguí donde quedaste | Vuelve a la misma práctica. La edición del inicio no la reescribe. |
-| Empezar otra, con una en curso | No se puede desde el inicio. Hay que cerrarla desde la lista. Si una quedó abandonada, en Estadísticas está Seguir esta. |
+| Seguí donde quedaste | Si la versión elegida es la de la práctica abierta, el botón dice seguir en esa versión. |
+| Empezar otra versión | Si elegís la otra, los botones de abajo abren una práctica nueva y la abierta queda en el historial. |
 
 La edición 10 cuenta Flatpak y deja Podman afuera de lo pendiente. La 9 hace al revés. Elegirla en el inicio no cambia una práctica ya abierta.
 

@@ -63,19 +63,21 @@ function view(): HTMLElement {
 
 function modeTabs(mode: ExamMode): HTMLElement {
   const ui = copy();
-  const row = el("div", "flex flex-col gap-2 sm:flex-row sm:flex-wrap");
-  row.append(
-    link(
-      modeHref("fixed"),
-      ui.statsModeFixed,
-      mode === "fixed" ? "btn btn-primary" : "btn btn-quiet",
-    ),
-    link(
-      modeHref("pausable"),
-      ui.statsModePausable,
-      mode === "pausable" ? "btn btn-primary" : "btn btn-quiet",
-    ),
+  const row = el("div", "choice");
+  row.setAttribute("role", "group");
+  row.setAttribute("aria-label", ui.statsHeading);
+  const fixed = link(
+    modeHref("fixed"),
+    ui.statsModeFixed,
+    mode === "fixed" ? "choice-option is-on" : "choice-option",
   );
+  const pausable = link(
+    modeHref("pausable"),
+    ui.statsModePausable,
+    mode === "pausable" ? "choice-option is-on" : "choice-option",
+  );
+  (mode === "fixed" ? fixed : pausable).setAttribute("aria-current", "page");
+  row.append(fixed, pausable);
   return row;
 }
 

@@ -10,6 +10,7 @@ import {
   startRun,
   wallSec,
   type ExamMode,
+  type Run,
   type Store,
 } from "../lib/storage";
 import { deltaLabel, formatClock, formatDelta, formatWhen } from "../lib/time";
@@ -18,50 +19,26 @@ export function mountHome(): void {
   const pausable = document.getElementById("start-pausable");
   const fixed = document.getElementById("start-fixed");
   const resume = document.getElementById("resume-exam");
-  const resumeWrap = document.getElementById("resume-wrap");
-  const startLabel = document.getElementById("start-modes-label");
-  const startHints = document.getElementById("start-hints");
-  const editionNext = document.getElementById("edition-next");
-  const note = document.getElementById("start-note");
-  const running = activeRun();
   const ui = getUI(pageLocale());
   const locale = pageLocale();
 
-  if (running && resume && resumeWrap) {
-    resumeWrap.classList.remove("hidden");
-    if (startLabel) startLabel.hidden = true;
-    if (startHints) startHints.hidden = true;
-    if (editionNext) editionNext.classList.remove("hidden");
-    resume.addEventListener("click", () => {
-      location.href = routePath(pageLocale(), "practice");
-    });
-    if (note) {
-      const when = formatWhen(running.startedAt, locale);
-      note.textContent = running.pausedAt
-        ? ui.startedPausedNote(when)
-        : running.mode === "fixed"
-          ? ui.startedNote(when)
-          : ui.startedPausableNote(when);
+  resume?.addEventListener("click", () => {
+    location.href = routePath(pageLocale(), "practice");
+  });
+  const begin = (mode: ExamMode) => {
+    const running = activeRun();
+    const selected = loadEdition();
+    if (running && (running.edition ?? "v9") !== selected) {
+      const ok = confirm(ui.confirmStartOther(editionName(running.edition), editionName(selected)));
+      if (!ok) return;
+    } else if (running) {
+      return;
     }
-  }
-  if (pausable) {
-    pausable.hidden = Boolean(running);
-    pausable.textContent = ui.startPausable;
-    pausable.addEventListener("click", () => {
-      if (activeRun()) return;
-      startRun("pausable", loadEdition());
-      location.href = routePath(locale, "practice");
-    });
-  }
-  if (fixed) {
-    fixed.hidden = Boolean(running);
-    fixed.textContent = ui.startFixed;
-    fixed.addEventListener("click", () => {
-      if (activeRun()) return;
-      startRun("fixed", loadEdition());
-      location.href = routePath(locale, "practice");
-    });
-  }
+    startRun(mode, selected);
+    location.href = routePath(locale, "practice");
+  };
+  pausable?.addEventListener("click", () => begin("pausable"));
+  fixed?.addEventListener("click", () => begin("fixed"));
 
   paintEdition(loadEdition());
 
@@ -102,6 +79,73 @@ function paintEdition(edition: Edition): void {
       paintEdition(id);
     };
   }
+  syncHomeActions();
+}
+
+function editionName(edition: Edition | undefined): string {
+  const ui = getUI(pageLocale());
+  return edition === "v9" ? ui.editionV9 : ui.editionV10;
+}
+
+function openNote(running: Run): string {
+  const ui = getUI(pageLocale());
+  const when = formatWhen(running.startedAt, pageLocale());
+  if (running.pausedAt) return ui.startedPausedNote(when);
+  if (running.mode === "fixed") return ui.startedNote(when);
+  return ui.startedPausableNote(when);
+}
+
+function syncHomeActions(): void {
+  const running = activeRun();
+  const selected = loadEdition();
+  const ui = getUI(pageLocale());
+  const same = Boolean(running && (running.edition ?? "v9") === selected);
+  const resumeWrap = document.getElementById("resume-wrap");
+  const resume = document.getElementById("resume-exam");
+  const startLabel = document.getElementById("start-modes-label");
+  const startHints = document.getElementById("start-hints");
+  const editionNext = document.getElementById("edition-next");
+  const note = document.getElementById("start-note");
+  const fixed = document.getElementById("start-fixed");
+  const pausable = document.getElementById("start-pausable");
+
+  if (!running) {
+    resumeWrap?.classList.add("hidden");
+    editionNext?.classList.add("hidden");
+    if (startLabel) {
+      startLabel.hidden = false;
+      startLabel.textContent = ui.startModesLabel;
+    }
+    if (startHints) startHints.hidden = false;
+    if (fixed) fixed.hidden = false;
+    if (pausable) pausable.hidden = false;
+    return;
+  }
+
+  if (same) {
+    resumeWrap?.classList.remove("hidden");
+    editionNext?.classList.add("hidden");
+    if (resume) resume.textContent = ui.resumeEdition(editionName(selected));
+    if (note) note.textContent = openNote(running);
+    if (startLabel) startLabel.hidden = true;
+    if (startHints) startHints.hidden = true;
+    if (fixed) fixed.hidden = true;
+    if (pausable) pausable.hidden = true;
+    return;
+  }
+
+  resumeWrap?.classList.add("hidden");
+  if (editionNext) {
+    editionNext.classList.remove("hidden");
+    editionNext.textContent = ui.editionSwitch(editionName(running.edition), editionName(selected));
+  }
+  if (startLabel) {
+    startLabel.hidden = false;
+    startLabel.textContent = ui.startModesLabel;
+  }
+  if (startHints) startHints.hidden = true;
+  if (fixed) fixed.hidden = false;
+  if (pausable) pausable.hidden = false;
 }
 
 function fillModeSummary(store: Store, mode: ExamMode, prefix: string): void {

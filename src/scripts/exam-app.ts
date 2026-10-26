@@ -231,13 +231,13 @@ function examView(run: Run): HTMLElement {
 function boardView(run: Run): HTMLElement {
   const page = el("div", "flex flex-col gap-6 pb-12");
   page.append(clockBar(run, false), strategyNote(), taskList(run));
-  const actionsRow = el("div", "flex flex-col gap-3 sm:flex-row");
+  const foot = el("div", "flex flex-col items-start gap-2");
   const close = button(copy().closeRun, "btn btn-quiet w-fit");
   close.addEventListener("click", () => closeRun());
-  const remove = button(copy().deleteRun, "btn btn-quiet w-fit");
+  const remove = button(copy().deleteRun, "btn btn-danger w-fit");
   remove.addEventListener("click", () => deleteCurrent());
-  actionsRow.append(close, remove);
-  page.append(actionsRow);
+  foot.append(close, el("p", "text-sm text-muted", copy().closeKept), remove);
+  page.append(foot);
   if (undoSnapshot) page.append(undoBar());
   return page;
 }
@@ -697,14 +697,13 @@ function summaryView(run: Run): HTMLElement {
     el("p", "mt-2 text-sm text-muted", copy().summaryHint),
   );
   const row = el("div", "mt-6 flex flex-col gap-3 sm:flex-row");
-  const remove = button(copy().deleteRun, "btn btn-quiet");
-  remove.addEventListener("click", () => deleteCurrent());
   row.append(
     link(to("stats"), copy().seeStats, "btn btn-primary"),
     link(to("home"), copy().backHome, "btn btn-quiet"),
-    remove,
   );
-  head.append(row);
+  const remove = button(copy().deleteRun, "btn btn-danger mt-4 w-fit");
+  remove.addEventListener("click", () => deleteCurrent());
+  head.append(row, remove);
   page.append(head);
 
   const table = el("div", "overflow-hidden rounded-3xl border border-line bg-card");

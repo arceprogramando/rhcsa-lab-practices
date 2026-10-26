@@ -116,7 +116,8 @@ export interface Copy {
   start: string;
   startAnother: string;
   editionLabel: string;
-  editionAppliesNext: string;
+  editionSwitch: (openVersion: string, nextVersion: string) => string;
+  confirmStartOther: (openVersion: string, nextVersion: string) => string;
   editionV10: string;
   editionV9: string;
   editionNote: string;
@@ -128,6 +129,7 @@ export interface Copy {
   startFixedHint: string;
   modesNote: string;
   resume: string;
+  resumeEdition: (version: string) => string;
   startAnotherLabel: string;
   seeStats: string;
   seeStatsFixed: string;
@@ -229,6 +231,7 @@ export interface Copy {
   undoText: string;
   undo: string;
   closeRun: string;
+  closeKept: string;
   deleteRun: string;
   summaryHint: string;
   backHome: string;
@@ -334,10 +337,13 @@ const es: Copy = {
   start: "Empezá la práctica",
   startAnother: "Empezar otra",
   editionLabel: "Versión a practicar",
-  editionAppliesNext: "Esta versión es para la próxima. La práctica abierta no cambia.",
+  editionSwitch: (openVersion, nextVersion) =>
+    `La abierta es ${openVersion}. Abajo empezás una nueva con ${nextVersion}. La abierta queda en el historial.`,
+  confirmStartOther: (openVersion, nextVersion) =>
+    `La práctica de ${openVersion} queda en el historial. ¿Empezás una nueva con ${nextVersion}?`,
   editionV10: "RHCSA 10 · Flatpak",
   editionV9: "RHCSA 9 · Podman",
-  editionNote: "No sabemos cómo es el examen. En lo publicado, el cambio de la 10 respecto de la 9 es el tema de contenedores: en la 10 Flatpak entra en la lista y Podman queda en extras, sin contar como pendiente. En la 9 es al revés.",
+  editionNote: "No sabemos cómo es el examen. En lo publicado, la 10 practica Flatpak y la 9 practica Podman.",
   startModesLabel: "Empezar una práctica",
   startPausable: "Práctica con pausas",
   startPausableAnother: "Otra con pausas",
@@ -346,6 +352,7 @@ const es: Copy = {
   startFixedHint: "El modo para medir tiempos: 3 horas de corrido, sin pausas.",
   modesNote: "Sin pausas es el que importa para medir cómo vas. Con pausas es solo práctica: el reloj se puede frenar.",
   resume: "Seguí donde quedaste",
+  resumeEdition: (version) => `Seguí donde quedaste · ${version}`,
   startAnotherLabel: "O empezar otro",
   seeStats: "Ver mis tiempos",
   seeStatsFixed: "Tiempos sin pausas",
@@ -386,9 +393,9 @@ const es: Copy = {
   confirmReplace: "Hay uno en curso. Si empezás otro, ese queda guardado como abandonado.",
   resumeAbandoned: "Seguir esta",
   confirmResumeOther: "Hay otra práctica en curso. Si seguís esta, esa otra pasa al historial y también se puede retomar.",
-  startedNote: (when) => `Hay uno empezado el ${when}. El reloj sigue desde ese momento. Para empezar otra, cerrala desde la lista.`,
-  startedPausedNote: (when) => `Hay uno en pausa, empezado el ${when}. El reloj está frenado. Para empezar otra, cerrala desde la lista.`,
-  startedPausableNote: (when) => `Hay uno con pausas, empezado el ${when}. Pausar frena el reloj. Para empezar otra, cerrala desde la lista.`,
+  startedNote: (when) => `Empezada el ${when}, con el reloj andando.`,
+  startedPausedNote: (when) => `Empezada el ${when}, con el reloj frenado.`,
+  startedPausableNote: (when) => `Empezada el ${when}, y podés frenar el reloj.`,
   firstClose: (clock) => `Primer cierre: ${clock}. El próximo se compara contra este.`,
   openRun: "Hay una práctica sin cerrar. La mejora aparece cuando termina o se acaba el tiempo.",
   noCloseYet: "Cuando cierres la primera, acá vas a ver si la siguiente fue más corta.",
@@ -469,7 +476,8 @@ const es: Copy = {
     "Revisit (volver después) te saca de esta tarea y la deja marcada para volver. Done (ya está) es cuando ya está: ahí elegís la dificultad del puntaje. Alto y muy alto quedan para rehacer. La ayuda no se abre hasta que la pedís.",
   undoText: "Listo. Si fue sin querer, podés volver.",
   undo: "Deshacer",
-  closeRun: "Cerrar práctica",
+  closeRun: "Terminar y guardar",
+  closeKept: "Los tiempos quedan en este navegador.",
   deleteRun: "Eliminar esta práctica",
   summaryHint: "El detalle y la comparación contra otros intentos están en estadísticas.",
   backHome: "Volver al inicio",
@@ -483,7 +491,7 @@ const es: Copy = {
   statusNone: "Sin marcar",
   attempt: (n) => `Intento ${n} de este lab. El reloj del lab volvió a cero.`,
   confirmDelete: "¿Eliminar esta práctica? Se borran sus tiempos de este navegador.",
-  confirmClose: "¿Cerrar la práctica con lo que marcaste hasta ahora?",
+  confirmClose: "¿Terminar y guardar lo que marcaste hasta ahora?",
   statsTitle: "Estadísticas de la práctica",
   statsDescription: "Tiempos por lab, promedio, ayuda pedida y mejora contra la práctica anterior. Guardado en este navegador.",
   statsHeading: "Estadísticas",
@@ -583,10 +591,13 @@ const en: Copy = {
   start: "Start practice",
   startAnother: "Start another",
   editionLabel: "Version to practice",
-  editionAppliesNext: "This version is for the next one. The open practice stays as it is.",
+  editionSwitch: (openVersion, nextVersion) =>
+    `The open one is ${openVersion}. Below you start a new one with ${nextVersion}. The open one stays in the history.`,
+  confirmStartOther: (openVersion, nextVersion) =>
+    `The ${openVersion} practice stays in the history. Start a new one with ${nextVersion}?`,
   editionV10: "RHCSA 10 · Flatpak",
   editionV9: "RHCSA 9 · Podman",
-  editionNote: "We don't know what the exam is like. From what's published, the change in 10 compared with 9 is the container topic: on 10, Flatpak is on the main list and Podman stays in extras, not counted as missing. On 9 it is the other way around.",
+  editionNote: "We don't know what the exam is like. From what's published, 10 practices Flatpak and 9 practices Podman.",
   startModesLabel: "Start a practice",
   startPausable: "Practice with pauses",
   startPausableAnother: "Another with pauses",
@@ -595,6 +606,7 @@ const en: Copy = {
   startFixedHint: "The mode for measuring time: 3 hours straight, without pauses.",
   modesNote: "Without pauses is what matters for measuring progress. With pauses is only practice: you can stop the clock.",
   resume: "Continue where you left off",
+  resumeEdition: (version) => `Continue where you left off · ${version}`,
   startAnotherLabel: "Or start another",
   seeStats: "View my times",
   seeStatsFixed: "Times without pauses",
@@ -635,9 +647,9 @@ const en: Copy = {
   confirmReplace: "One is already running. If you start another, that one is saved as abandoned.",
   resumeAbandoned: "Continue this one",
   confirmResumeOther: "Another practice is in progress. If you continue this one, that other one goes to the history and can be continued too.",
-  startedNote: (when) => `One started on ${when}. The clock continues from that moment. To start another, close this one from the list.`,
-  startedPausedNote: (when) => `One is paused, started on ${when}. The clock is stopped. To start another, close this one from the list.`,
-  startedPausableNote: (when) => `One with pauses started on ${when}. Pause stops the clock. To start another, close this one from the list.`,
+  startedNote: (when) => `Started on ${when}. The clock is running.`,
+  startedPausedNote: (when) => `Started on ${when}. The clock is stopped.`,
+  startedPausableNote: (when) => `Started on ${when}. You can stop the clock.`,
   firstClose: (clock) => `First close: ${clock}. The next one is compared with this.`,
   openRun: "A practice run is still open. The comparison appears when it ends or the time runs out.",
   noCloseYet: "After you close the first one, this shows whether the next was shorter.",
@@ -718,7 +730,8 @@ const en: Copy = {
     "Revisit (come back later) leaves this task and keeps it marked so you can return. Done (finished) means it is done: then you set how hard the points felt. High and very high stay marked to redo. Help stays closed until you ask.",
   undoText: "Saved. If that was a mistake, you can go back.",
   undo: "Undo",
-  closeRun: "Close practice",
+  closeRun: "Finish and save",
+  closeKept: "The times stay in this browser.",
   deleteRun: "Delete this practice",
   summaryHint: "The detail and the comparison with other attempts are in stats.",
   backHome: "Back home",
@@ -732,7 +745,7 @@ const en: Copy = {
   statusNone: "Unmarked",
   attempt: (n) => `Attempt ${n} of this lab. The lab clock went back to zero.`,
   confirmDelete: "Delete this practice? Its times are removed from this browser.",
-  confirmClose: "Close the practice with what you have marked so far?",
+  confirmClose: "Finish and save what you have marked so far?",
   statsTitle: "Practice stats",
   statsDescription: "Time per lab, average, help requested, and improvement against the previous attempt. Stored in this browser.",
   statsHeading: "Stats",
