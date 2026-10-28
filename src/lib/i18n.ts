@@ -145,12 +145,6 @@ export interface Copy {
   withHelp: string;
   passed: string;
   lastClose: string;
-  howTitle: string;
-  how: string[];
-  helpTitle: string;
-  helpBody: string;
-  vmsTitle: string;
-  vmsBody: string;
   footerBefore: string;
   footerPlaylist: string;
   footerAndRepo: string;
@@ -197,9 +191,6 @@ export interface Copy {
   kitBody: string;
   kitItems: string[];
   kitCaveat: string;
-  updatesTitle: string;
-  updatesIntro: string;
-  updates: string[];
   groupClient: string;
   groupServer: string;
   groupBoth: string;
@@ -228,8 +219,6 @@ export interface Copy {
   redo: string;
   skipTask: string;
   actionsHint: string;
-  undoText: string;
-  undo: string;
   closeRun: string;
   closeKept: string;
   deleteRun: string;
@@ -326,10 +315,10 @@ const es: Copy = {
   glossaryPopupClose: "Cerrar",
   glossaryShortcut: "Ctrl+K abre el glosario",
   cv: "Sobre mí",
-  banner: "Práctica personal para el RHCSA del 30 de octubre. No es el examen oficial ni un sitio de Red Hat.",
+  banner: "Práctica personal para el RHCSA del 6 de noviembre. No es el examen oficial ni un sitio de Red Hat.",
   homeTitle: "Práctica personal para el examen RHCSA",
-  homeDescription: "Hola, me estoy preparando para rendir el RHCSA el 30 de octubre y estoy usando esto como práctica personal.",
-  hello: "Hola, me estoy preparando para rendir el examen RHCSA el 30 de octubre, y estoy usando esto como práctica personal.",
+  homeDescription: "Hola, me estoy preparando para rendir el RHCSA el 6 de noviembre y estoy usando esto como práctica personal.",
+  hello: "Hola, me estoy preparando para rendir el examen RHCSA el 6 de noviembre, y estoy usando esto como práctica personal.",
   kicker: "Práctica personal · EX200",
   headline: "Primero lo que ya sabés hacer.",
   leadBefore: "La estructura (reloj de 3 horas, Revisit y Done) está basada en el video público de Red Hat ",
@@ -368,19 +357,6 @@ const es: Copy = {
   withHelp: "Con ayuda",
   passed: "Pasados",
   lastClose: "Último cierre",
-  howTitle: "Cómo se rinde",
-  how: [
-    "Lo principal es sin pausas: 3 horas de corrido como el examen. Con pausas es práctica opcional.",
-    "Hacé primero lo que ya sabés. Esos son los puntos rápidos.",
-    "Revisit (volver después): te trabaste, lo dejás marcado y seguís con otro.",
-    "Done (ya está): ese ya está. Lo que no tiene marca es lo que falta.",
-    "No hace falta ir en orden.",
-  ],
-  helpTitle: "Ayuda",
-  helpBody: "Cada lab muestra el título y los datos exactos a cumplir. El detalle paso a paso, los comandos y los videos aparecen recién con Pedí ayuda, y ese lab queda contado como resuelto con ayuda.",
-  vmsTitle: "Las dos VMs",
-  vmsBody:
-    "Para practicar uso dos máquinas virtuales. A una la trato como client y a la otra como server: en cada lab dice en cuál trabajar. En la red del lab quedan así las IPs; el gateway y el DNS son el mismo host.",
   footerBefore: "Material de práctica: ",
   footerPlaylist: "lista de YouTube",
   footerAndRepo: " y ",
@@ -428,7 +404,7 @@ const es: Copy = {
   setupAside: "No cuenta como lab.",
   kitTitle: "Para el día del examen",
   kitBody:
-    "La ISO llega por Gmail. Esa ISO te da un tiempo para hacer pruebas. No hay una demo de cómo configurarla ni de cómo va a funcionar, y no se sabe si se puede probar el equipo antes. Conviene ir preparado.",
+    "La ISO en teoria llega por Gmail. Esa ISO te da un tiempo para hacer pruebas. No hay una demo de cómo configurarla ni de cómo va a funcionar, y no se sabe si se puede probar el equipo antes. Conviene ir preparado.",
   kitItems: [
     "Teclado con cable.",
     "Cámara con cable.",
@@ -436,15 +412,6 @@ const es: Copy = {
     "USB booteable con la ISO del examen.",
   ],
   kitCaveat: "Esta información la saqué de distintos lados. Todavía no rendí el examen, así que no está confirmada.",
-  updatesTitle: "Info nueva que fui juntando",
-  updatesIntro: "Cosas que encontré después sobre la preparación del EX200 v10. No es el enunciado oficial.",
-  updates: [
-    "Agrandar un VG, la partición de swap y crear un LV nuevo: practicarlos hasta poder hacerlo sin abrir la ayuda.",
-    "Flatpak de un usuario concreto: tiene que quedar en ese usuario, no en el --user de root.",
-    "tuned: cambiar el profile y que siga puesto después del reboot.",
-    "Recuperar root: hay que saber rd.break e init=/bin/bash. Si /sysroot no existe, el segundo.",
-    "Autofs puede comerse el tiempo: no lo dejes para el final del reloj.",
-  ],
   groupClient: "En el client",
   groupServer: "En el server",
   groupBoth: "En las dos",
@@ -474,8 +441,6 @@ const es: Copy = {
   skipTask: "No lo entiendo",
   actionsHint:
     "Revisit (volver después) te saca de esta tarea y la deja marcada para volver. Done (ya está) es cuando ya está: ahí elegís la dificultad del puntaje. Alto y muy alto quedan para rehacer. La ayuda no se abre hasta que la pedís.",
-  undoText: "Listo. Si fue sin querer, podés volver.",
-  undo: "Deshacer",
   closeRun: "Terminar y guardar",
   closeKept: "Los tiempos quedan en este navegador.",
   deleteRun: "Eliminar esta práctica",
@@ -580,10 +545,10 @@ const en: Copy = {
   glossaryPopupClose: "Close",
   glossaryShortcut: "Ctrl+K opens the glossary",
   cv: "About me",
-  banner: "Personal practice for the October 30 RHCSA. This is not the official exam and not a Red Hat site.",
+  banner: "Personal practice for the November 6 RHCSA. This is not the official exam and not a Red Hat site.",
   homeTitle: "Personal practice for the RHCSA exam",
-  homeDescription: "I am preparing for the RHCSA on October 30, and I am using this as personal practice.",
-  hello: "I am preparing to take the RHCSA exam on October 30, and I am using this as personal practice.",
+  homeDescription: "I am preparing for the RHCSA on November 6, and I am using this as personal practice.",
+  hello: "I am preparing to take the RHCSA exam on November 6, and I am using this as personal practice.",
   kicker: "Personal practice · EX200",
   headline: "Do what you already know first.",
   leadBefore: "The structure (3-hour clock, Revisit and Done) is based on the public Red Hat video ",
@@ -622,19 +587,6 @@ const en: Copy = {
   withHelp: "With help",
   passed: "Skipped",
   lastClose: "Last close",
-  howTitle: "How to take it",
-  how: [
-    "The main one is without pauses: 3 hours straight like the exam. With pauses is optional practice.",
-    "Do what you already know first. Those are the quick points.",
-    "Revisit (come back later): you got stuck, leave it marked, and move on.",
-    "Done (finished): that one is done. Anything unmarked is still left.",
-    "You do not have to go in order.",
-  ],
-  helpTitle: "Help",
-  helpBody: "Each lab shows the title and the exact data to meet. Step-by-step detail, commands, and videos appear only after Ask for help, and that lab is counted as solved with help.",
-  vmsTitle: "The two VMs",
-  vmsBody:
-    "For practice I use two virtual machines. One I treat as client and the other as server: each lab says which one to work on. On the lab network the IPs look like this; gateway and DNS are the same host.",
   footerBefore: "Practice material: ",
   footerPlaylist: "YouTube playlist",
   footerAndRepo: " and ",
@@ -682,7 +634,7 @@ const en: Copy = {
   setupAside: "Does not count as a lab.",
   kitTitle: "For exam day",
   kitBody:
-    "They send the ISO by Gmail. That ISO gives you a window to run practice tests. There is no demo of how to set it up or how it will work, and it is not clear whether you can try the machine beforehand. Go prepared.",
+    "In theory the ISO arrives by Gmail. That ISO gives you a window to run practice tests. There is no demo of how to set it up or how it will work, and it is not clear whether you can try the machine beforehand. Go prepared.",
   kitItems: [
     "A wired keyboard.",
     "A wired camera.",
@@ -690,15 +642,6 @@ const en: Copy = {
     "A bootable USB with the exam ISO.",
   ],
   kitCaveat: "I gathered this from different places. I have not taken the exam yet, so it is not confirmed.",
-  updatesTitle: "Newer info I gathered",
-  updatesIntro: "Things I found later about preparing for EX200 v10. Not the official exam wording.",
-  updates: [
-    "Grow a VG, the swap partition, and create a new LV: practice until you can do them without opening help.",
-    "A Flatpak for one specific user: it has to belong to that user, not to root's --user.",
-    "tuned: change the profile and leave it in place after a reboot.",
-    "Recovering root: know both rd.break and init=/bin/bash. If /sysroot does not exist, use the second.",
-    "Autofs can eat the clock: do not leave it for the end.",
-  ],
   groupClient: "On the client",
   groupServer: "On the server",
   groupBoth: "On both",
@@ -728,8 +671,6 @@ const en: Copy = {
   skipTask: "I don't get it",
   actionsHint:
     "Revisit (come back later) leaves this task and keeps it marked so you can return. Done (finished) means it is done: then you set how hard the points felt. High and very high stay marked to redo. Help stays closed until you ask.",
-  undoText: "Saved. If that was a mistake, you can go back.",
-  undo: "Undo",
   closeRun: "Finish and save",
   closeKept: "The times stay in this browser.",
   deleteRun: "Delete this practice",

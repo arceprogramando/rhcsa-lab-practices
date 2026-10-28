@@ -9,6 +9,9 @@ export type ExtrasChoice = "pending" | "continue" | "stop";
 export type Difficulty = "very_low" | "low" | "normal" | "high" | "very_high";
 export type ExamMode = "pausable" | "fixed";
 
+/** Practice with pauses stays saved. Set this to true to show that mode again. */
+export const PAUSABLE_ENABLED = false;
+
 export function isHard(value: Difficulty | null | undefined): boolean {
   return value === "high" || value === "very_high";
 }

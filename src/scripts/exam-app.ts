@@ -30,8 +30,6 @@ function to(route: RouteId): string {
 
 let root: HTMLElement;
 let runId = "";
-let undoSnapshot: Run | null = null;
-let undoTimer = 0;
 let tickTimer = 0;
 let globalClock: HTMLElement | null = null;
 let labClock: HTMLElement | null = null;
@@ -102,17 +100,6 @@ function commit(next: Run): void {
   replaceRun(next);
 }
 
-function snapshot(run = current()): void {
-  if (!run || run.status !== "in_progress") return;
-  undoSnapshot = structuredClone(run);
-  window.clearTimeout(undoTimer);
-  undoTimer = window.setTimeout(() => {
-    undoSnapshot = null;
-    const bar = root.querySelector("[data-undo]");
-    bar?.remove();
-  }, 10000);
-}
-
 function expireIfNeeded(): void {
   const run = current();
   if (!run || run.status !== "in_progress" || run.pausedAt || remainingSec(run) > 0) return;
@@ -123,7 +110,6 @@ function expireIfNeeded(): void {
   if (open?.startedAt && !open.finishedAt) {
     open.durationSec = Math.max(0, (Date.parse(finishedAt) - Date.parse(open.startedAt)) / 1000);
   }
-  undoSnapshot = null;
   commit(run);
 }
 
@@ -224,7 +210,6 @@ function examView(run: Run): HTMLElement {
   const back = button(copy().backToList, "btn btn-quiet w-fit");
   back.addEventListener("click", () => backToBoard());
   page.append(clockBar(run, true), back, labCard(lab, record), actions(run));
-  if (undoSnapshot) page.append(undoBar());
   return page;
 }
 
@@ -238,41 +223,40 @@ function boardView(run: Run): HTMLElement {
   remove.addEventListener("click", () => deleteCurrent());
   foot.append(close, el("p", "text-sm text-muted", copy().closeKept), remove);
   page.append(foot);
-  if (undoSnapshot) page.append(undoBar());
   return page;
 }
 
 function strategyNote(): HTMLElement {
-  const note = el("section", "rounded-3xl border border-line bg-card p-5 sm:p-6");
-  note.append(
-    el("h1", "text-2xl font-semibold tracking-tight", copy().strategyTitle),
-    el("p", "mt-2 text-muted", copy().strategyBody),
-    el("p", "mt-2 text-sm text-muted", copy().enterHint),
+  const ui = copy();
+  const note = el("section", "rounded-3xl border border-line bg-card px-5 py-4 sm:px-6");
+  const fold = el("details", "fold-bare");
+  const summary = document.createElement("summary");
+  summary.append(el("span", "text-lg", ui.strategyTitle));
+  summary.append(
+    el("span", "text-sm font-normal text-muted", current()?.edition === "v9" ? ui.editionV9 : ui.editionV10),
   );
+  const body = el("div", "fold-body");
+  body.append(el("p", "text-muted", ui.strategyBody));
   const credit = el("p", "mt-3 text-sm");
-  credit.append(copy().listCreditBefore);
-  credit.append(anchor(REDHAT_EXAM_VIDEO, copy().videoTitle));
+  credit.append(ui.listCreditBefore);
+  credit.append(anchor(REDHAT_EXAM_VIDEO, ui.videoTitle));
   credit.append(".");
-  note.append(credit);
-  const editionLine = el(
-    "p",
-    "mt-2 text-sm text-muted",
-    current()?.edition === "v9" ? copy().editionV9 : copy().editionV10,
-  );
-  note.append(editionLine);
+  body.append(credit);
+  fold.append(summary, body);
+  note.append(fold, el("p", "mt-2 text-sm text-muted", ui.enterHint));
   return note;
 }
 
 function taskList(run: Run): HTMLElement {
   const wrap = el("div", "flex flex-col gap-6");
   const indexed = labs().map((lab, index) => ({ lab, index }));
-  wrap.append(machineGroup(indexed.filter((item) => item.lab.track === "setup")));
   const pdf = indexed.filter((item) => item.lab.track === "pdf");
   wrap.append(taskGroup(run, copy().groupClient, pdf.filter((item) => machineOf(item.lab) === "client")));
   wrap.append(taskGroup(run, copy().groupServer, pdf.filter((item) => machineOf(item.lab) === "server")));
   wrap.append(taskGroup(run, copy().groupBoth, pdf.filter((item) => machineOf(item.lab) === "both")));
-  const extras = labs().map((lab, index) => ({ lab, index })).filter((item) => item.lab.track === "extra");
+  const extras = indexed.filter((item) => item.lab.track === "extra");
   wrap.append(taskGroup(run, copy().groupExtras, extras));
+  wrap.append(machineGroup(indexed.filter((item) => item.lab.track === "setup")));
   return wrap;
 }
 
@@ -296,26 +280,33 @@ function machineGroup(items: { lab: Lab; index: number }[]): HTMLElement {
 }
 
 function setupBlock(lab: Lab): HTMLElement {
-  const block = el("div", "border-t border-line px-4 py-4 sm:px-5");
-  block.append(
-    el("h3", "font-semibold", lab.title),
-    el("p", "mt-1 text-sm text-muted", lab.where),
-    objectiveList(lab.objective, "mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed"),
-  );
+  const block = el("details", "fold-line");
+  const summary = document.createElement("summary");
+  const text = el("span", "flex min-w-0 flex-col");
+  text.append(el("span", "", lab.title));
+  text.append(el("span", "text-sm font-normal text-muted", lab.where));
+  summary.append(text);
+  const body = el("div", "fold-body");
+  body.append(objectiveList(lab.objective, "list-disc space-y-1 pl-5 text-sm leading-relaxed"));
   const list = el("ol", "mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed");
   for (const step of lab.steps) list.append(el("li", "", step));
-  block.append(list);
-  if (lab.note) block.append(el("p", "mt-3 text-sm leading-relaxed text-muted", lab.note));
+  body.append(list);
+  if (lab.note) body.append(el("p", "mt-3 text-sm leading-relaxed text-muted", lab.note));
+  block.append(summary, body);
   return block;
 }
 
 function kitNote(): HTMLElement {
   const ui = copy();
-  const note = el("div", "border-b border-line px-4 py-4 sm:px-5");
-  note.append(el("h3", "font-semibold", ui.kitTitle), el("p", "mt-2 text-sm leading-relaxed text-muted", ui.kitBody));
+  const note = el("details", "fold-line");
+  const summary = document.createElement("summary");
+  summary.append(el("span", "", ui.kitTitle));
+  const body = el("div", "fold-body");
+  body.append(el("p", "text-sm leading-relaxed text-muted", ui.kitBody));
   const list = el("ul", "mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed");
   for (const item of ui.kitItems) list.append(el("li", "", item));
-  note.append(list, el("p", "mt-3 text-sm leading-relaxed text-muted", ui.kitCaveat));
+  body.append(list, el("p", "mt-3 text-sm leading-relaxed text-muted", ui.kitCaveat));
+  note.append(summary, body);
   return note;
 }
 
@@ -421,7 +412,8 @@ function radioMark(index: number, value: "revisit" | "done", label: string, chec
 
 function clockBar(run: Run, showLab: boolean): HTMLElement {
   const bar = el("section", "rounded-3xl border border-line bg-card p-4 sm:p-5");
-  const counts = el("dl", "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6");
+  const counts = el("dl", "clock-counts");
+  counts.style.setProperty("--clock-count", showLab ? "6" : "5");
   const scored = countedLabs(run.labs, run.edition);
   const leftTasks = scored.filter((item) => item.status !== "done" && item.status !== "skipped").length;
   const revisit = scored.filter((item) => item.status === "revisit").length;
@@ -559,7 +551,7 @@ function bindFloatDrag(panel: HTMLElement, handle: HTMLElement): void {
 }
 
 function counter(label: string, value: string, isLab = false): HTMLElement {
-  const wrap = el("div", "rounded-2xl bg-paper px-3 py-2");
+  const wrap = el("div", "rounded-2xl bg-paper px-3 py-2 text-center");
   wrap.append(el("dt", "text-xs text-muted", label));
   const dd = el("dd", "stat-value text-lg font-semibold", value);
   if (isLab) {
@@ -660,22 +652,6 @@ function actions(run: Run): HTMLElement {
   return wrap;
 }
 
-function undoBar(): HTMLElement {
-  const bar = el("div", "flex items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-sm text-paper");
-  bar.dataset.undo = "true";
-  bar.append(el("p", "", copy().undoText));
-  const undo = button(copy().undo, "btn btn-quiet !text-ink");
-  undo.addEventListener("click", () => {
-    if (!undoSnapshot) return;
-    const restored = undoSnapshot;
-    undoSnapshot = null;
-    commit(restored);
-    render();
-  });
-  bar.append(undo);
-  return bar;
-}
-
 function summaryView(run: Run): HTMLElement {
   const scored = countedLabs(run.labs, run.edition);
   const done = scored.filter((item) => item.status === "done").length;
@@ -749,7 +725,6 @@ function toggleHelp(): void {
   const record = run.labs[run.currentIndex];
   if (!record) return;
   if (!record.usedHelp) {
-    snapshot();
     record.usedHelp = true;
     helpVisible = true;
     commit(run);
@@ -766,7 +741,6 @@ function redo(): void {
   if (!run || run.status !== "in_progress" || screen !== "lab") return;
   const record = run.labs[run.currentIndex];
   if (!record) return;
-  snapshot();
   record.attempts += 1;
   record.startedAt = new Date().toISOString();
   record.finishedAt = null;
@@ -811,7 +785,6 @@ function setMark(index: number, status: LabRecord["status"]): void {
   const record = run.labs[index];
   if (!record || labs()[index]?.track === "setup") return;
   if (screen === "lab" && run.currentIndex === index) flushVisit(record);
-  snapshot(run);
   record.status = status;
   if (status !== "done") record.difficulty = null;
   record.finishedAt = status === "pending" || status === "redo" ? null : new Date().toISOString();
@@ -828,7 +801,6 @@ function setDifficulty(index: number, difficulty: Difficulty): void {
   if (!run || run.status !== "in_progress") return;
   const record = run.labs[index];
   if (!record || record.status !== "done" || record.difficulty === difficulty) return;
-  snapshot(run);
   record.difficulty = difficulty;
   commit(run);
   render();
@@ -841,7 +813,6 @@ function deleteCurrent(): void {
   deleteRun(run.id);
   runId = "";
   visitStart = null;
-  undoSnapshot = null;
   screen = "board";
   helpVisible = false;
   sessionStorage.removeItem(UI_KEY);
@@ -875,7 +846,6 @@ function closeRun(): void {
   run.status = "completed";
   run.finishedAt = new Date().toISOString();
   screen = "board";
-  undoSnapshot = null;
   commit(run);
   render();
 }

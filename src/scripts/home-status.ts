@@ -7,6 +7,7 @@ import {
   filterRuns,
   isHard,
   loadStore,
+  PAUSABLE_ENABLED,
   startRun,
   wallSec,
   type ExamMode,
@@ -118,7 +119,7 @@ function syncHomeActions(): void {
     }
     if (startHints) startHints.hidden = false;
     if (fixed) fixed.hidden = false;
-    if (pausable) pausable.hidden = false;
+    if (pausable) pausable.hidden = !PAUSABLE_ENABLED;
     return;
   }
 
@@ -145,7 +146,7 @@ function syncHomeActions(): void {
   }
   if (startHints) startHints.hidden = true;
   if (fixed) fixed.hidden = false;
-  if (pausable) pausable.hidden = false;
+  if (pausable) pausable.hidden = !PAUSABLE_ENABLED;
 }
 
 function fillModeSummary(store: Store, mode: ExamMode, prefix: string): void {

@@ -10,6 +10,7 @@ import {
   isHard,
   activeRun,
   loadStore,
+  PAUSABLE_ENABLED,
   reopenRun,
   wallSec,
   type ExamMode,

@@ -162,6 +162,40 @@ const es: GlossaryEntry[] = [
       "Pedazo en el que se parte el VG. No es otro disco. En el lab cada PE mide 8 MB. 50 extents son 50 de esos pedazos (400 MB), no 50 MB.",
     example: "vgcreate -s 8M wgroup … → cada PE mide 8 MB · lvcreate -l 50 → usa 50 PE",
   },
+  {
+    term: "wgroup",
+    definition:
+      "El Volume Group de este lab. No es otro tipo de objeto: wgroup es el nombre del VG. vgcreate -s 8M lo crea y deja cada Physical Extent (PE) en 8 MB. El disco del sistema (el que tiene / y /boot) no entra acá.",
+    example: "vgcreate -s 8M wgroup /dev/DISCO",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "wshare",
+    definition:
+      "El Logical Volume de este lab. Vive adentro de wgroup. -l 50 pide 50 extents, no 50 MB: 50 × 8 MB = 400 MB. El dispositivo es /dev/wgroup/wshare. Encima va ext4 y el punto de montaje /mnt/wshare.",
+    example: "lvcreate -n wshare -l 50 wgroup",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "al boot",
+    definition:
+      "Que el montaje vuelva solo después de reiniciar. No es la partición /boot. En este lab es una línea de /etc/fstab con el UUID del LV (blkid /dev/wgroup/wshare), no con /dev/sdX, porque ese nombre puede cambiar. Sin esa línea el LV sigue existiendo, pero /mnt/wshare queda vacío al reiniciar.",
+    example: "UUID=… /mnt/wshare ext4 defaults 0 0",
+    tldr: { page: "fstab", platform: "linux" },
+  },
+  {
+    term: "tuned",
+    definition:
+      "El paquete y el servicio. systemctl enable --now tuned lo arranca y lo deja para el próximo boot. Ese proceso es el que aplica el perfil. No es el comando: el comando es tuned-adm. Los dos vienen en el mismo paquete, no se instalan por separado.",
+    example: "rpm -q tuned · systemctl enable --now tuned",
+  },
+  {
+    term: "tuned-adm",
+    definition:
+      "El comando para hablarle al servicio tuned. recommend solo imprime un nombre y no lo guarda. profile NOMBRE lo aplica ahora y lo escribe en /etc/tuned/active_profile. active muestra el perfil que está puesto. Sin el servicio tuned corriendo, no tiene a quién aplicarle el perfil.",
+    example: "tuned-adm recommend · tuned-adm profile NOMBRE · tuned-adm active",
+    tldr: { page: "tuned-adm", platform: "linux" },
+  },
 ];
 
 const en: GlossaryEntry[] = [
@@ -303,6 +337,40 @@ const en: GlossaryEntry[] = [
     definition:
       "The chunk the VG is split into. It is not another disk. In the lab each PE is 8 MB. 50 extents are 50 of those chunks (400 MB), not 50 MB.",
     example: "vgcreate -s 8M wgroup … → each PE is 8 MB · lvcreate -l 50 → uses 50 PE",
+  },
+  {
+    term: "wgroup",
+    definition:
+      "This lab's Volume Group. It is not a different kind of object: wgroup is the VG's name. vgcreate -s 8M creates it and sets each Physical Extent (PE) to 8 MB. The system disk (the one with / and /boot) does not go here.",
+    example: "vgcreate -s 8M wgroup /dev/DISCO",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "wshare",
+    definition:
+      "This lab's Logical Volume. It lives inside wgroup. -l 50 asks for 50 extents, not 50 MB: 50 × 8 MB = 400 MB. The device is /dev/wgroup/wshare. ext4 and the mount point /mnt/wshare go on top of it.",
+    example: "lvcreate -n wshare -l 50 wgroup",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "al boot",
+    definition:
+      "The mount comes back by itself after a reboot. It is not the /boot partition. In this lab it is an /etc/fstab line with the LV's UUID (blkid /dev/wgroup/wshare), not /dev/sdX, because that name can change. Without that line the LV still exists, but /mnt/wshare is empty after reboot.",
+    example: "UUID=… /mnt/wshare ext4 defaults 0 0",
+    tldr: { page: "fstab", platform: "linux" },
+  },
+  {
+    term: "tuned",
+    definition:
+      "The package and the service. systemctl enable --now tuned starts it and leaves it for the next boot. That process is what applies the profile. It is not the command: the command is tuned-adm. Both come in the same package. They are not installed separately.",
+    example: "rpm -q tuned · systemctl enable --now tuned",
+  },
+  {
+    term: "tuned-adm",
+    definition:
+      "The command that talks to the tuned service. recommend only prints a name and does not save it. profile NAME applies it now and writes it to /etc/tuned/active_profile. active shows the profile that is set. Without the tuned service running, there is nobody to apply the profile to.",
+    example: "tuned-adm recommend · tuned-adm profile NAME · tuned-adm active",
+    tldr: { page: "tuned-adm", platform: "linux" },
   },
 ];
 

@@ -37,6 +37,47 @@
 }
 
 @layer components {
+.clock-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 40rem) {
+  .clock-counts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .clock-counts {
+    grid-template-columns: repeat(var(--clock-count, 5), minmax(0, 1fr));
+  }
+}
+
+.site-header-follow {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-paper);
+}
+
+@media (min-width: 64rem) {
+  .site-header-follow ~ main aside {
+    top: 5.5rem;
+  }
+}
+
+.site-header-follow ~ main {
+  scroll-margin-top: 5.5rem;
+}
+
+@media print {
+  .site-header-follow {
+    position: static;
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -129,6 +170,76 @@
     width: auto;
     border-radius: 999px;
   }
+}
+
+.fold {
+  border: 1px solid var(--color-line);
+  border-radius: 1.5rem;
+  background: var(--color-card);
+}
+
+.fold-note {
+  border-color: color-mix(in srgb, var(--color-warn) 40%, transparent);
+  background: #f8f1e4;
+}
+
+.fold > summary,
+.fold-line > summary,
+.fold-bare > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.fold > summary::-webkit-details-marker,
+.fold-line > summary::-webkit-details-marker,
+.fold-bare > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > summary::after,
+.fold-line > summary::after,
+.fold-bare > summary::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  flex: none;
+}
+
+.fold[open] > summary::after,
+.fold-line[open] > summary::after,
+.fold-bare[open] > summary::after {
+  transform: rotate(-135deg) translateY(-2px);
+}
+
+.fold-line {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.fold-bare > summary {
+  padding: 0;
+}
+
+.fold-bare .fold-body {
+  padding: 0.75rem 0 0;
+}
+
+.fold:not([open]) > :not(summary),
+.fold-line:not([open]) > :not(summary),
+.fold-bare:not([open]) > :not(summary) {
+  display: none;
+}
+
+.fold-body {
+  padding: 0 1.25rem 1.25rem;
 }
 
 .choice-option.is-on {

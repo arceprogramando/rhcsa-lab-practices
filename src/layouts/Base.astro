@@ -21,6 +21,8 @@ interface Props {
 }
 
 const { title, description, locale = "es", route = "home" } = Astro.props;
+/** The header stays on screen while scrolling. Set to false to put it back in the page flow. */
+const HEADER_FOLLOWS = true;
 const ui = getUI(locale);
 const config = getLocaleConfig(locale);
 const other = otherLocale(locale);
@@ -66,7 +68,7 @@ const otherHref = swapLocalePath(path, other);
     <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-card focus:px-3 focus:py-2">
       {ui.skip}
     </a>
-    <header class="border-b border-line/80">
+    <header class:list={["border-b border-line/80", { "site-header-follow": HEADER_FOLLOWS }]}>
       <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4">
         <a href={home} class="group flex items-center gap-3 no-underline">
           <svg
@@ -111,10 +113,10 @@ const otherHref = swapLocalePath(path, other);
           </a>
         </nav>
       </div>
-      <p class="border-t border-line/80 px-5 py-2 text-center text-sm text-muted">
-        {ui.banner}
-      </p>
     </header>
+    <p class="border-b border-line/80 px-5 py-2 text-center text-sm text-muted">
+      {ui.banner}
+    </p>
     <main id="contenido">
       <slot />
     </main>
