@@ -65,6 +65,8 @@ export interface LabCommand {
   orGroup?: string;
   /** Short label next to Opción N, e.g. cp --parents */
   orName?: string;
+  /** Optional aside. A small mark on this command; the text shows on hover. */
+  slip?: string;
 }
 
 export type Edition = "v10" | "v9";
@@ -98,6 +100,8 @@ export interface Lab {
   id: string;
   track: "pdf" | "extra" | "setup";
   title: string;
+  /** Situación del lab, en una o dos frases. */
+  story?: string;
   objective: string[];
   where: string;
   steps: string[];
@@ -114,7 +118,8 @@ export const LABS: Lab[] = [
   {
     id: "setup-keyboard",
     track: "setup",
-    title: "Teclado",
+    title: "El teclado de la consola no coincide",
+    story: "En la ventana de la máquina virtual las teclas no salen como las ves. En el cliente se puede pasar al latinoamericano. En el servidor hay que dejar el de Estados Unidos, porque el rescate se escribe ahí.",
     objective: [
       "En vagrant ssh el teclado lo pone tu máquina.",
       "En el client podés pasar a latam / la-latin1 para la consola de la VM.",
@@ -149,13 +154,14 @@ export const LABS: Lab[] = [
   {
     id: "lab-01-root-client",
     track: "pdf",
-    title: "Recuperar root en el client",
+    title: "El cliente olvidó la contraseña de root",
+    story: "Tuvimos un percance. Esta máquina la configuró un antiguo empleado que renunció, perdimos la comunicación y la necesitamos urgente para seguir con las configuraciones.",
     objective: [
       "Reset de la contraseña de root en el client.",
       "Nueva contraseña: student.",
       "SELinux coherente antes del boot normal.",
     ],
-    where: "client · consola de VirtualBox, no SSH",
+    where: "client",
     steps: [
       "Interrumpí el boot del client y recuperá el acceso de root.",
       "Poné la contraseña de root en student (las dos veces iguales).",
@@ -173,14 +179,14 @@ export const LABS: Lab[] = [
         { cmd: "En GRUB: tecla e, al final de la línea que empieza con linux, agregar init=/bin/bash. Ctrl-x para arrancar.", why: "Es el que me funcionó. Q22b. La raíz queda en /, no en /sysroot.", as: "consola VM", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "mount -o remount,rw /", why: "Acá la raíz es /, no /sysroot. Arranca solo lectura. Sin este remount, passwd no puede guardar la contraseña.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "passwd", why: "Pide la contraseña dos veces: las dos tienen que ser student. No hace falta escribir root: en este shell ya sos root.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
-        { cmd: "touch /.autorelabel", why: "«SELinux coherente antes del boot normal» quiere decir que las etiquetas tienen que quedar bien antes de arrancar el sistema de forma normal. passwd toca /etc/shadow desde este shell y el archivo puede quedar con una etiqueta que SELinux no acepta. Este archivo vacío hace que el próximo boot reetiquete el disco. Sin eso, en enforcing nadie puede entrar, ni root con la clave nueva. Ese primer arranque tarda más.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
+        { cmd: "touch /.autorelabel", why: "La línea del enunciado «SELinux coherente antes del boot normal» es este comando. No hay otro paso para esa frase. passwd toca /etc/shadow desde este shell y el archivo puede quedar con una etiqueta que SELinux no acepta. Este archivo vacío hace que el próximo boot reetiquete el disco antes de arrancar normal. Sin eso, en enforcing nadie puede entrar, ni root con la clave nueva. Ese primer arranque tarda más.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "sync", why: "Baja a disco lo que todavía está en memoria, antes de cortar.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
-        { cmd: "exec /sbin/reboot -f", why: "Reinicia desde este shell. exec lo reemplaza. Si salís con exit, bash era el proceso 1 y aparece un kernel panic: la pantalla se queda en Kernel panic - not syncing y no hay shell. Reset de la VM. La edición de GRUB era solo de ese arranque.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
+        { cmd: "exec /sbin/reboot -f", why: "Reinicia ya. El -f no se saca. En este arranque bash es el proceso 1 y no hay systemd. Sin -f, reboot pide el cierre normal y mata ese proceso 1. El kernel se queda en Kernel panic - not syncing: Attempted to kill init. No vuelve el shell: reset de la VM. exec reemplaza el shell para que el reinicio ocupe ese proceso 1. exit hace el mismo panic. La edición de GRUB era solo de ese arranque.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "En GRUB: tecla e, al final de la línea que empieza con linux, agregar rd.break. Ctrl-x para arrancar.", why: "Es el otro video, Q22a. Puede no funcionar en v10. Si /sysroot no existe, volvé a la opción 1.", as: "consola VM", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "mount -o remount,rw /sysroot", why: "Pone escribible el sistema que rd.break dejó en /sysroot. Si dice que /sysroot no existe, este método no entró. Ahí se vuelve a la opción 1.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "chroot /sysroot", why: "Entra al sistema real. passwd y touch de abajo corren ahí, no en el shell de afuera.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "passwd", why: "Otra vez student dos veces, iguales.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
-        { cmd: "touch /.autorelabel", why: "«SELinux coherente antes del boot normal» quiere decir que las etiquetas tienen que quedar bien antes de arrancar el sistema de forma normal. passwd toca /etc/shadow y puede dejarle una etiqueta que SELinux no acepta. Sin este archivo, el boot normal en enforcing no deja entrar a nadie. El primer arranque reetiqueta el disco y tarda más.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
+        { cmd: "touch /.autorelabel", why: "La línea del enunciado «SELinux coherente antes del boot normal» es este comando. No hay otro paso para esa frase. passwd toca /etc/shadow y puede dejarle una etiqueta que SELinux no acepta. Sin este archivo, el boot normal en enforcing no deja entrar a nadie. El primer arranque reetiqueta el disco y tarda más.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "exit", why: "Sale del chroot y vuelve al shell de rd.break.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "reboot", why: "Sigue el boot. En el video de rd.break el orden es exit y después reboot.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
       ],
@@ -189,14 +195,15 @@ export const LABS: Lab[] = [
   {
     id: "lab-01",
     track: "pdf",
-    title: "Red y hostname del client",
+    title: "Hay que nombrar al cliente y sacarlo de la red principal",
+    story: "Necesitamos conectar dos computadoras fuera de la red principal. Esta es la máquina cliente: hay que ponerle nombre y configurarle la dirección, la puerta de enlace y el DNS.",
     objective: [
       "IP 172.16.1.12/24 en la interfaz del lab.",
       "Gateway 172.16.1.1 y DNS 172.16.1.1.",
       "Hostname client.rhcsa.lab.",
       "Persistente tras reboot.",
     ],
-    where: "client · 172.16.1.12",
+    where: "client",
     steps: [
       "IP 172.16.1.12/24 en la interfaz del lab (enp0s8).",
       "Gateway 172.16.1.1 y DNS 172.16.1.1.",
@@ -213,12 +220,12 @@ export const LABS: Lab[] = [
       ],
       commands: [
         { cmd: "nmcli connection show", why: "No cambia nada. Lista los perfiles guardados, una fila por perfil. NAME es el nombre que vas a escribir en el modify: puede no coincidir con la placa. DEVICE es la placa que ese perfil está usando ahora. Si ves enp0s3 y enp0s8, no se elige el primero: se elige la fila cuyo DEVICE es la placa del lab. En el ejemplo, DEVICE enp0s8 está en la fila cuyo NAME es hostonly, así que el comando usa hostonly. lo es el loopback, la máquina consigo misma. Esa fila no se edita. Tab no hace falta para esto. Si al apretarlo salen archivos de la carpeta, el shell no tiene cargadas las palabras de nmcli. En el examen no se instala nada para arreglarlo: el nombre se copia de la columna NAME.", as: "root" },
-        { cmd: "ip -br a", why: "Para saber cuál placa es la del lab. Muestra cada placa y su IP, en corto. La que tiene 172.16.1.12 es la del lab: en este Vagrant es enp0s8. Esa palabra se busca en la columna DEVICE de connection show. La NAME de esa misma fila es la que se modifica. La otra ethernet, enp0s3, suele ser la entrada (en el Vagrant, 10.0.2.15). Esa no se pasa a manual.", as: "root" },
+        { cmd: "ip -br a", why: "Para saber cuál placa es la del lab, antes de cambiar nada. El nombre enp0s3 o enp0s8 no dice el rol: es el orden en que VirtualBox enchufó las placas. La que ya tiene 10.0.2.15 es la entrada, la NAT. No se pasa a manual. La otra ethernet es la del lab. En este Vagrant suele ser enp0s8, y al principio puede tener otra IP, por ejemplo 192.168.56. Esa palabra se busca en la columna DEVICE de connection show. La NAME de esa misma fila es la que se modifica. lo es la máquina consigo misma: no se toca.", as: "root" },
         { cmd: "nmtui", why: "En la conexión de enp0s8: IPv4 en Manual, Address 172.16.1.12/24, Gateway 172.16.1.1 y, en DNS servers, Add 172.16.1.1. Si dice <Add...>, el DNS no está puesto.", as: "root", orGroup: "net-set", orName: "nmtui" },
         { cmd: "nmcli connection modify NOMBRE ipv4.method manual ipv4.addresses 172.16.1.12/24 ipv4.gateway 172.16.1.1 ipv4.dns 172.16.1.1", why: "NOMBRE es la columna NAME de la fila del lab, no la placa. Si esa fila dice hostonly y DEVICE enp0s8, el comando es modify hostonly. Guarda la IP, el gateway y el DNS en ese perfil. ipv4.dns es el pedazo que anota el DNS. Sin eso, el DNS no queda. sudo hace falta si el prompt es vagrant@. Si ya es root@, sudo no suma nada.", as: "root", orGroup: "net-set", orName: "nmcli" },
         { cmd: "restorecon -v /etc/NetworkManager/system-connections/NOMBRE.nmconnection", why: "No es un paso de siempre. Solo si el modify anterior dice Permission denied al renombrar el .nmconnection, aunque el prompt ya sea root@. El archivo se llama como la columna NAME: si el perfil es hostonly, el archivo es hostonly.nmconnection. SELinux no deja que NetworkManager lo reemplace. Este comando no guarda el DNS. Corrige la etiqueta y, si hacía falta, avisa Relabeled. Después se vuelve a correr el modify.", as: "root" },
         { cmd: "nmcli -f ipv4.dns connection show NOMBRE", why: "No cambia nada. NOMBRE es otra vez la columna NAME, por ejemplo hostonly. Muestra solo el DNS guardado en ese perfil. Si quedó, la línea dice ipv4.dns: 172.16.1.1. Si sale vacío, no quedó. ip a no muestra el DNS.", as: "root" },
-        { cmd: "nmcli connection up NOMBRE", why: "Aplica ahora lo que el modify ya guardó en ese perfil. No es lo que lo hace persistente: el modify ya lo escribió en disco. up sirve para no esperar al reboot. NOMBRE sigue siendo la columna NAME.", as: "root" },
+        { cmd: "nmcli connection up NOMBRE", why: "Aplica ahora lo que el modify ya guardó en ese perfil. No es lo que lo hace persistente: el modify ya lo escribió en disco. up sirve para no esperar al reboot. NOMBRE sigue siendo la columna NAME.", slip: "Me pasó: el perfil quedó bien y activé enp0s3 en vez de enp0s8. Por eso la IP seguía igual.", as: "root" },
         { cmd: "hostnamectl set-hostname client.rhcsa.lab", why: "Cambia el hostname ya, y lo guarda. No hace falta nmcli connection up ni ningún otro up: el hostname no es parte del perfil de red. Después de un reboot, hostnamectl tiene que seguir diciendo client.rhcsa.lab.", as: "root" },
         { cmd: "man nmcli", why: "En el examen esto es legal. Buscá connection modify.", as: "root" },
       ],
@@ -227,13 +234,14 @@ export const LABS: Lab[] = [
   {
     id: "lab-02-root-server",
     track: "pdf",
-    title: "Recuperar root en el server",
+    title: "El servidor olvidó la contraseña de root",
+    story: "El mismo percance, en la otra máquina. El empleado se fue y nadie puede entrar como root. Hay que recuperar el servidor para seguir trabajando.",
     objective: [
       "Reset de la contraseña de root en el server.",
       "Nueva contraseña: student.",
       "SELinux coherente antes del boot normal.",
     ],
-    where: "server · consola de VirtualBox, no SSH",
+    where: "server",
     steps: [
       "Interrumpí el boot del server y recuperá el acceso de root.",
       "Poné la contraseña de root en student (las dos veces iguales).",
@@ -251,14 +259,14 @@ export const LABS: Lab[] = [
         { cmd: "En GRUB: tecla e, al final de la línea que empieza con linux, agregar init=/bin/bash. Ctrl-x para arrancar.", why: "Es el que me funcionó. Q22b. La raíz queda en /, no en /sysroot.", as: "consola VM", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "mount -o remount,rw /", why: "Acá la raíz es /, no /sysroot. Arranca solo lectura. Sin este remount, passwd no puede guardar la contraseña.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "passwd", why: "Pide la contraseña dos veces: las dos tienen que ser student. No hace falta escribir root: en este shell ya sos root.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
-        { cmd: "touch /.autorelabel", why: "«SELinux coherente antes del boot normal» quiere decir que las etiquetas tienen que quedar bien antes de arrancar el sistema de forma normal. passwd toca /etc/shadow desde este shell y el archivo puede quedar con una etiqueta que SELinux no acepta. Este archivo vacío hace que el próximo boot reetiquete el disco. Sin eso, en enforcing nadie puede entrar, ni root con la clave nueva. Ese primer arranque tarda más.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
+        { cmd: "touch /.autorelabel", why: "La línea del enunciado «SELinux coherente antes del boot normal» es este comando. No hay otro paso para esa frase. passwd toca /etc/shadow desde este shell y el archivo puede quedar con una etiqueta que SELinux no acepta. Este archivo vacío hace que el próximo boot reetiquete el disco antes de arrancar normal. Sin eso, en enforcing nadie puede entrar, ni root con la clave nueva. Ese primer arranque tarda más.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "sync", why: "Baja a disco lo que todavía está en memoria, antes de cortar.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
-        { cmd: "exec /sbin/reboot -f", why: "Reinicia desde este shell. exec lo reemplaza. Si salís con exit, bash era el proceso 1 y aparece un kernel panic: la pantalla se queda en Kernel panic - not syncing y no hay shell. Reset de la VM. La edición de GRUB era solo de ese arranque.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
+        { cmd: "exec /sbin/reboot -f", why: "Reinicia ya. El -f no se saca. En este arranque bash es el proceso 1 y no hay systemd. Sin -f, reboot pide el cierre normal y mata ese proceso 1. El kernel se queda en Kernel panic - not syncing: Attempted to kill init. No vuelve el shell: reset de la VM. exec reemplaza el shell para que el reinicio ocupe ese proceso 1. exit hace el mismo panic. La edición de GRUB era solo de ese arranque.", as: "root", orGroup: "root-rescue", orName: "init=/bin/bash" },
         { cmd: "En GRUB: tecla e, al final de la línea que empieza con linux, agregar rd.break. Ctrl-x para arrancar.", why: "Es el otro video, Q22a. Puede no funcionar en v10. Si /sysroot no existe, volvé a la opción 1.", as: "consola VM", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "mount -o remount,rw /sysroot", why: "Pone escribible el sistema que rd.break dejó en /sysroot. Si dice que /sysroot no existe, este método no entró. Ahí se vuelve a la opción 1.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "chroot /sysroot", why: "Entra al sistema real. passwd y touch de abajo corren ahí, no en el shell de afuera.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "passwd", why: "Otra vez student dos veces, iguales.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
-        { cmd: "touch /.autorelabel", why: "«SELinux coherente antes del boot normal» quiere decir que las etiquetas tienen que quedar bien antes de arrancar el sistema de forma normal. passwd toca /etc/shadow y puede dejarle una etiqueta que SELinux no acepta. Sin este archivo, el boot normal en enforcing no deja entrar a nadie. El primer arranque reetiqueta el disco y tarda más.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
+        { cmd: "touch /.autorelabel", why: "La línea del enunciado «SELinux coherente antes del boot normal» es este comando. No hay otro paso para esa frase. passwd toca /etc/shadow y puede dejarle una etiqueta que SELinux no acepta. Sin este archivo, el boot normal en enforcing no deja entrar a nadie. El primer arranque reetiqueta el disco y tarda más.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "exit", why: "Sale del chroot y vuelve al shell de rd.break.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
         { cmd: "reboot", why: "Sigue el boot. En el video de rd.break el orden es exit y después reboot.", as: "root", orGroup: "root-rescue", orName: "rd.break" },
       ],
@@ -267,14 +275,15 @@ export const LABS: Lab[] = [
   {
     id: "lab-02",
     track: "pdf",
-    title: "Red y hostname del server",
+    title: "Hay que nombrar al servidor y sacarlo de la red principal",
+    story: "La otra computadora del par. Es el servidor: hay que ponerle nombre y la dirección de esta red, para que el cliente pueda llegar.",
     objective: [
       "IP 172.16.1.13/24 en la interfaz del lab.",
       "Gateway 172.16.1.1 y DNS 172.16.1.1.",
       "Hostname server.rhcsa.lab.",
       "Persistente tras reboot.",
     ],
-    where: "server · 172.16.1.13",
+    where: "server",
     steps: [
       "IP 172.16.1.13/24 en la interfaz del lab (enp0s8).",
       "Gateway 172.16.1.1 y DNS 172.16.1.1.",
@@ -291,12 +300,12 @@ export const LABS: Lab[] = [
       ],
       commands: [
         { cmd: "nmcli connection show", why: "No cambia nada. Lista los perfiles guardados, una fila por perfil. NAME es el nombre que vas a escribir en el modify: puede no coincidir con la placa. DEVICE es la placa que ese perfil está usando ahora. Si ves enp0s3 y enp0s8, no se elige el primero: se elige la fila cuyo DEVICE es la placa del lab. En el ejemplo, DEVICE enp0s8 está en la fila cuyo NAME es hostonly, así que el comando usa hostonly. lo es el loopback, la máquina consigo misma. Esa fila no se edita. Tab no hace falta para esto. Si al apretarlo salen archivos de la carpeta, el shell no tiene cargadas las palabras de nmcli. En el examen no se instala nada para arreglarlo: el nombre se copia de la columna NAME.", as: "root" },
-        { cmd: "ip -br a", why: "Para saber cuál placa es la del lab. Muestra cada placa y su IP, en corto. La que tiene 172.16.1.13 es la del lab: en este Vagrant es enp0s8. Esa palabra se busca en la columna DEVICE de connection show. La NAME de esa misma fila es la que se modifica. La otra ethernet, enp0s3, suele ser la entrada (en el Vagrant, 10.0.2.15). Esa no se pasa a manual.", as: "root" },
+        { cmd: "ip -br a", why: "Para saber cuál placa es la del lab, antes de cambiar nada. El nombre enp0s3 o enp0s8 no dice el rol: es el orden en que VirtualBox enchufó las placas. La que ya tiene 10.0.2.15 es la entrada, la NAT. No se pasa a manual. La otra ethernet es la del lab. En este Vagrant suele ser enp0s8, y al principio puede tener otra IP, por ejemplo 192.168.56. Esa palabra se busca en la columna DEVICE de connection show. La NAME de esa misma fila es la que se modifica. lo es la máquina consigo misma: no se toca.", as: "root" },
         { cmd: "nmtui", why: "En la conexión de enp0s8: IPv4 en Manual, Address 172.16.1.13/24, Gateway 172.16.1.1 y, en DNS servers, Add 172.16.1.1. Si dice <Add...>, el DNS no está puesto.", as: "root", orGroup: "net-set", orName: "nmtui" },
         { cmd: "nmcli connection modify NOMBRE ipv4.method manual ipv4.addresses 172.16.1.13/24 ipv4.gateway 172.16.1.1 ipv4.dns 172.16.1.1", why: "NOMBRE es la columna NAME de la fila del lab, no la placa. Si esa fila dice hostonly y DEVICE enp0s8, el comando es modify hostonly. Guarda la IP, el gateway y el DNS en ese perfil. ipv4.dns es el pedazo que anota el DNS. Sin eso, el DNS no queda. sudo hace falta si el prompt es vagrant@. Si ya es root@, sudo no suma nada.", as: "root", orGroup: "net-set", orName: "nmcli" },
         { cmd: "restorecon -v /etc/NetworkManager/system-connections/NOMBRE.nmconnection", why: "No es un paso de siempre. Solo si el modify anterior dice Permission denied al renombrar el .nmconnection, aunque el prompt ya sea root@. El archivo se llama como la columna NAME: si el perfil es hostonly, el archivo es hostonly.nmconnection. SELinux no deja que NetworkManager lo reemplace. Este comando no guarda el DNS. Corrige la etiqueta y, si hacía falta, avisa Relabeled. Después se vuelve a correr el modify.", as: "root" },
         { cmd: "nmcli -f ipv4.dns connection show NOMBRE", why: "No cambia nada. NOMBRE es otra vez la columna NAME, por ejemplo hostonly. Muestra solo el DNS guardado en ese perfil. Si quedó, la línea dice ipv4.dns: 172.16.1.1. Si sale vacío, no quedó. ip a no muestra el DNS.", as: "root" },
-        { cmd: "nmcli connection up NOMBRE", why: "Aplica ahora lo que el modify ya guardó en ese perfil. No es lo que lo hace persistente: el modify ya lo escribió en disco. up sirve para no esperar al reboot. NOMBRE sigue siendo la columna NAME.", as: "root" },
+        { cmd: "nmcli connection up NOMBRE", why: "Aplica ahora lo que el modify ya guardó en ese perfil. No es lo que lo hace persistente: el modify ya lo escribió en disco. up sirve para no esperar al reboot. NOMBRE sigue siendo la columna NAME.", slip: "Me pasó: el perfil quedó bien y activé enp0s3 en vez de enp0s8. Por eso la IP seguía igual.", as: "root" },
         { cmd: "hostnamectl set-hostname server.rhcsa.lab", why: "Cambia el hostname ya, y lo guarda. No hace falta nmcli connection up ni ningún otro up: el hostname no es parte del perfil de red. Después de un reboot, hostnamectl tiene que seguir diciendo server.rhcsa.lab.", as: "root" },
         { cmd: "man nmcli", why: "En el examen esto es legal. Buscá connection modify.", as: "root" },
       ],
@@ -305,13 +314,15 @@ export const LABS: Lab[] = [
   {
     id: "lab-03",
     track: "pdf",
-    title: "Repositorios DNF",
+    title: "Sin internet, los paquetes salen de un estante local",
+    story: "No hay salida a internet. Nos pasan dos direcciones, BaseOS y AppStream, y de ahí tiene que instalarse el diccionario de palabras.",
     objective: [
-      "En la máquina donde vayas a instalar: BaseOS y AppStream enabled.",
-      "gpgcheck=0 en esos dos (o lo que diga el enunciado).",
+      "Un repo de nombre BaseOS con baseurl http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/.",
+      "Un repo de nombre AppStream con baseurl http://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/.",
       "dnf list available lista paquetes de esos repos.",
+      "Instalar words. Deja /usr/share/dict/words, el diccionario del lab de grep.",
     ],
-    where: "en cada máquina, antes del primer dnf install de esa VM",
+    where: "client",
     steps: [
       "No es un lab de las dos a la vez: se hace en la VM donde necesites instalar (client o server).",
       "BaseOS y AppStream tienen que figurar en dnf repolist.",
@@ -321,7 +332,7 @@ export const LABS: Lab[] = [
     ],
     note: "En el examen casi no hay internet: el repo suele ser interno (DVD/ISO montada con file://, o un http:// del lab). En este Vagrant, si no montás una ISO, podés usar los repos que ya trae la box o un mirror que responda. Los labs que instalan (acl, chrony, words, tuned, …) asumen que en ESA máquina ya corriste este paso.",
     help: {
-      tip: "Como en el video Q03: dnf lee solo archivos en /etc/yum.repos.d/ que terminen en .repo (ej. local.repo). Entrás ahí (cd /etc/yum.repos.d/), creás el archivo a mano con dos bloques BaseOS y AppStream, y memorizás la forma: [id], name=, baseurl= (la URL o file:// del enunciado, copiar/pegar), enabled=1, gpgcheck=0. Sin repos, el resto del examen se traba. Un baseurl que no existe deja dnf muerto. En Vagrant, si dnf ya lista paquetes, no rompas los .repo; si practicás ISO, usá el mount + file:// de abajo.",
+      tip: "Como en el video Q03: dnf lee solo archivos en /etc/yum.repos.d/ que terminen en .repo (ej. local.repo). Entrás ahí (cd /etc/yum.repos.d/), creás el archivo a mano con dos bloques BaseOS y AppStream, y memorizás la forma: [id], name=, baseurl= (la URL o file:// del enunciado, copiar/pegar), enabled=1, gpgcheck=0. Sin repos, el resto del examen se traba. Un baseurl que no existe deja dnf muerto. En este Rocky alcanzan esos dos: Debug, Source y CRB no van en el archivo.",
       videoHint: "Videos de este lab: Q03, y otro canal (Mingtao SUN) con el repo local a mano, sin internet.",
       videos: [
         { title: "Q03: Repositorios YUM/DNF", url: YT.repos },
@@ -331,26 +342,28 @@ export const LABS: Lab[] = [
         },
       ],
       commands: [
+        { cmd: "man dnf.conf", why: "La página que explica gpgcheck, enabled y baseurl. Se lee antes de escribir el archivo.", as: "root" },
+        { cmd: "man dnf.conf | grep -E 'baseurl|gpgcheck|enabled'", why: "man escribe la página. El | se la pasa a grep en vez de mostrarla. grep imprime solo las líneas donde aparece alguna de las frases. -E prende la regex extendida: el | de adentro de las comillas significa «o». Sin -E, ese | es un carácter más y no separa las tres palabras. baseurl, gpgcheck y enabled son las de este lab.", as: "root" },
         { cmd: "cd /etc/yum.repos.d/ && ls", why: "Primero: entrar a la carpeta de los repos (dnf/yum la usan igual). Hay que saberla de memoria. Ahí se crea el .repo; si el archivo no termina en .repo, dnf lo ignora.", as: "root" },
         { cmd: "dnf repolist", why: "Ver qué repos están enabled ahora en ESTA máquina (antes y después de crear el archivo).", as: "root" },
-        { cmd: "mkdir -p /mnt/dvd && mount /dev/sr0 /mnt/dvd", why: "Si el lab da un DVD/ISO en lugar de http://: montar el medio. Si es un .iso en disco: mount -o loop /ruta/rocky.iso /mnt/dvd. ls /mnt/dvd tiene que mostrar BaseOS y AppStream.", as: "root" },
-        { cmd: "cat > /etc/yum.repos.d/local.repo <<'EOF'\n[BaseOS]\nname=BaseOS\nbaseurl={link-de-BaseOS}\nenabled=1\ngpgcheck=0\n\n[AppStream]\nname=AppStream\nbaseurl={link-de-AppStream}\nenabled=1\ngpgcheck=0\nEOF", why: "Ejemplo para copiar. El nombre local.repo no es obligatorio: cualquier archivo que termine en .repo. {link-de-BaseOS} y {link-de-AppStream} los reemplazás por las dos URLs que te pasan en el enunciado. name puede repetir el id. enabled=1 y gpgcheck=0. Si es ISO: baseurl=file:///mnt/dvd/BaseOS (tres barras).", as: "root" },
+        { cmd: "cat > /etc/yum.repos.d/local.repo <<'EOF'\n[BaseOS]\nname=BaseOS\nbaseurl=http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/\nenabled=1\ngpgcheck=0\n\n[AppStream]\nname=AppStream\nbaseurl=http://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/\nenabled=1\ngpgcheck=0\nEOF", why: "BaseOS: http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/. AppStream: http://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/. Esas dos líneas están comentadas en rocky.repo, en [baseos] y [appstream].", as: "root" },
         { cmd: "dnf config-manager --setopt=REPOS.gpgcheck=0 --save", why: "Solo si los repos ya existen y falta apagar GPG. El nombre sale de repolist.", as: "root" },
         { cmd: "dnf clean all && dnf repolist && dnf list available | head", why: "Comprobar: repolist muestra BaseOS y AppStream; list available tiene que listar paquetes (si la URL/file no existe, acá falla).", as: "root" },
-        { cmd: "man dnf.conf", why: "gpgcheck, enabled, baseurl.", as: "root" },
+        { cmd: "dnf install -y --repo=BaseOS --repo=AppStream words && ls /usr/share/dict/words", why: "Prueba de que el repo instala. words deja /usr/share/dict/words, el diccionario del lab de grep. En una mínima no está. Van los dos repos: el paquete puede estar en uno y una dependencia en el otro. Con solo --repo=AppStream, dnf no ve BaseOS y dice nothing provides. Sin --repo, también usa los de Rocky y un install que sale bien no prueba que lo sirvió local.repo. Si el paquete no se llama words, dnf provides /usr/share/dict/words dice el nombre.", as: "root" },
       ],
     },
   },
   {
     id: "lab-04",
     track: "pdf",
-    title: "Apache en el puerto 82",
+    title: "El sitio tiene que atender en un puerto que no es el de siempre",
+    story: "El servidor web sigue con SELinux activo. Tiene que contestar en el puerto 82, y seguir haciéndolo después de reiniciar.",
     objective: [
       "httpd escucha en TCP 82.",
       "SELinux en enforcing.",
       "Persistente tras reboot.",
     ],
-    where: "server (ahí el Vagrant instala httpd)",
+    where: "server",
     steps: [
       "Apache tiene que escuchar en el puerto 82.",
       "No pongas SELinux en permissive ni lo desactives.",
@@ -380,7 +393,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-05",
     track: "pdf",
-    title: "Usuarios, grupo y sudo",
+    title: "Llega gente nueva y no todos pueden administrar",
+    story: "Hay que crear las cuentas y un grupo para los que administran. Uno de ellos puede usar sudo. El resto, no.",
     objective: [
       "Grupo sysadm.",
       "Usuarios: felipe y erik en sysadm; diego con /sbin/nologin.",
@@ -426,7 +440,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-06",
     track: "pdf",
-    title: "Directorio compartido con setgid",
+    title: "Una carpeta compartida donde lo nuevo queda del grupo",
+    story: "Varias personas escriben en la misma carpeta. Los archivos que crean tienen que nacer ya del grupo, no solo de quien los creó.",
     objective: [
       "Directorio /shared/sysadm.",
       "Grupo dueño sysadm, setgid.",
@@ -457,7 +472,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-07",
     track: "pdf",
-    title: "Cron de Erik",
+    title: "Erik quiere un aviso que se anote solo",
+    story: "Erik no va a estar mirando la máquina. Quiere que, cada minuto, quede anotado el texto que le pidieron, sin que él lo escriba.",
     objective: [
       "Usuario erik.",
       "Cada 1 minuto.",
@@ -486,13 +502,14 @@ export const LABS: Lab[] = [
   {
     id: "lab-08",
     track: "pdf",
-    title: "NFS con autofs",
+    title: "Una carpeta del servidor tiene que aparecer sola en el cliente",
+    story: "El servidor comparte una carpeta. En el cliente tiene que montarse cuando alguien entra, sin montarla a mano cada vez.",
     objective: [
       "Usuario netuser1, home /home/guests/netuser1, pass arceprog.",
       "Export NFS en el server.",
       "Client: /netdir/netuser1 monta 172.16.1.13.",
     ],
-    where: "server exporta · client monta",
+    where: "server · client",
     steps: [
       "Antes: repos DNF ok en server y en client si hace falta instalar nfs-utils (lab Repositorios DNF en cada una).",
       "En el server, crear el usuario netuser1 con contraseña del ejercicio arceprog y el directorio /home/guests/netuser1.",
@@ -519,7 +536,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-09",
     track: "pdf",
-    title: "Zipear /etc",
+    title: "Antes de tocar la configuración, hay que guardar /etc",
+    story: "Vamos a cambiar cosas del sistema. Primero se comprime /etc en un archivo, por si hay que volver atrás.",
     objective: [
       "Archivo /root/myetcbackup.tar.bz2.",
       "Contiene /etc.",
@@ -545,7 +563,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-10",
     track: "pdf",
-    title: "ACL en /var/tmp/fstab",
+    title: "Una persona tiene que poder leer un archivo, y el resto no",
+    story: "El archivo ya tiene dueño. Hay que darle lectura a una cuenta concreta, sin abrirlo para todo el mundo.",
     objective: [
       "Copia /etc/fstab → /var/tmp/fstab, dueño root:root.",
       "erik: lectura y escritura.",
@@ -580,13 +599,14 @@ export const LABS: Lab[] = [
   {
     id: "lab-11",
     track: "pdf",
-    title: "Hora con chrony",
+    title: "Las dos máquinas no marcan la misma hora",
+    story: "El reloj del servidor y el del cliente tienen que quedar alineados, y seguir así después de reiniciar.",
     objective: [
       "Server 172.16.1.13 ofrece NTP.",
       "Client 172.16.1.12 sincroniza contra ese server.",
       "Persistente en las dos.",
     ],
-    where: "server ofrece hora · client es el cliente NTP",
+    where: "server · client",
     steps: [
       "Antes: repos DNF ok en cada máquina donde instales chrony (lab Repositorios DNF).",
       "El server (172.16.1.13) tiene que responder NTP.",
@@ -610,7 +630,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-12",
     track: "pdf",
-    title: "Buscar archivos de Erik",
+    title: "Erik no recuerda qué archivos tocó",
+    story: "Erik es nuevo y no recuerda qué archivos modificó. Quiere copiarlos con la misma estructura de carpetas de donde estaban la primera vez.",
     objective: [
       "Archivos de erik modificados en las últimas 24 h.",
       "Copiarlos a /root/erikfiles.",
@@ -651,7 +672,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-13",
     track: "pdf",
-    title: "Filtrar palabras con grep",
+    title: "Hay que quedarse con las palabras que contienen un pedazo",
+    story: "En el diccionario hay que encontrar las palabras que llevan ich y guardar esa lista en un archivo.",
     objective: [
       "Fuente: /usr/share/dict/words.",
       "Líneas que contienen ich.",
@@ -679,7 +701,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-14",
     track: "pdf",
-    title: "Usuario con UID fijo",
+    title: "Esta cuenta tiene que conservar el número que ya tenía",
+    story: "El usuario viene de otra máquina. Su número no puede cambiar, porque los archivos lo reconocen por ese número.",
     objective: [
       "Usuario arce.",
       "UID 1111.",
@@ -707,13 +730,14 @@ export const LABS: Lab[] = [
   {
     id: "lab-15",
     track: "pdf",
-    title: "LVM wgroup (VG) / wshare (LV)",
+    title: "Hay un disco de más y hay que dejar un espacio con nombre",
+    story: "El disco extra no se usa todavía. Hay que armar un volumen, darle formato y dejarlo montado para que vuelva al reiniciar.",
     objective: [
       "wgroup (VG), PE 8 MB.",
       "wshare (LV) de 50 extents, ext4.",
       "Montado en /mnt/wshare por UUID al boot.",
     ],
-    where: "server · disco extra de 1 GB",
+    where: "server",
     steps: [
       "wgroup (VG), extent físico de 8 MB.",
       "wshare (LV) de 50 extents.",
@@ -740,12 +764,13 @@ export const LABS: Lab[] = [
   {
     id: "lab-16",
     track: "pdf",
-    title: "Swap de 400 MB",
+    title: "La máquina se queda sin memoria y necesita una reserva",
+    story: "Cuando la memoria se llena, hace falta un espacio de 400 MB en disco para que el sistema pueda seguir.",
     objective: [
       "Partición swap de 400 MB.",
       "Activa ahora y en fstab.",
     ],
-    where: "server · mismo disco extra",
+    where: "server",
     steps: [
       "Crear una partición de swap de 400 MB.",
       "Activarla ahora.",
@@ -768,7 +793,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-17",
     track: "pdf",
-    title: "Redimensionar el LV vo",
+    title: "El volumen se llenó y hay que agrandarlo",
+    story: "El espacio que ya está en uso se quedó chico. Hay que estirarlo sin perder lo que tiene adentro.",
     objective: [
       "LV vo en el VG vgroup.",
       "Tamaño final cerca de 50 MB (vale 30–70).",
@@ -800,7 +826,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-18",
     track: "pdf",
-    title: "Perfil de tuned",
+    title: "La máquina tiene que trabajar con el perfil que le conviene",
+    story: "tuned puede recomendar un perfil. Hay que dejar ese perfil activo, y que siga después de reiniciar.",
     objective: [
       "Perfil que diga tuned-adm recommend.",
       "Sigue activo después de reboot.",
@@ -828,7 +855,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-19",
     track: "pdf",
-    title: "Saludo al entrar",
+    title: "Quien entra tiene que ver un mensaje",
+    story: "Al iniciar sesión tiene que aparecer un saludo. Puede ser para una persona o para todos los que entran.",
     objective: [
       "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
       "Cualquier usuario: \"Welcome USUARIO, you are logged in!\".",
@@ -858,7 +886,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-20",
     track: "pdf",
-    title: "Imagen de contenedor",
+    title: "La imagen está en un registro privado",
+    story: "El contenedor no está en el registro público. Hay que entrar al registro que nos pasan y traer la imagen.",
     objective: [
       "Clonar Text-To-PDF.",
       "Imagen localhost/text2pdf:latest.",
@@ -890,7 +919,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-21",
     track: "pdf",
-    title: "Correr el contenedor",
+    title: "Hay que poner el contenedor a correr",
+    story: "La imagen ya está. Hay que levantar el contenedor con el nombre y los puertos que piden.",
     objective: [
       "Contenedor mycontainer, imagen localhost/text2pdf:latest.",
       "/opt/file → /data/input.",
@@ -917,7 +947,8 @@ export const LABS: Lab[] = [
   {
     id: "lab-22",
     track: "pdf",
-    title: "Contenedor al boot, como usuario",
+    title: "El contenedor tiene que volver cuando la máquina arranca",
+    story: "Si se reinicia, el contenedor no puede quedar apagado. Tiene que levantarse con el usuario, sin que nadie abra sesión.",
     objective: [
       "Usuario student, contenedor mycontainer.",
       "Arranca al boot con linger, sin sesión abierta.",
@@ -946,12 +977,13 @@ export const LABS: Lab[] = [
   {
     id: "extra-01",
     track: "extra",
-    title: "Script de archivos .txt",
+    title: "Hace falta un programa que liste los textos de tres carpetas",
+    story: "En tres carpetas puede haber archivos de texto, o puede no haber carpeta. El programa tiene que decir qué encontró en cada una.",
     objective: [
       "Script /usr/local/bin/gap-txt.sh.",
       "Mira /opt/lab/dir1, dir2 y dir3.",
     ],
-    where: "client · después de correr el prep del repo",
+    where: "client",
     steps: [
       "Creá /usr/local/bin/gap-txt.sh y dejalo ejecutable.",
       "Tiene que mirar solo el primer nivel de /opt/lab/dir1, /opt/lab/dir2 y /opt/lab/dir3.",
@@ -975,7 +1007,8 @@ export const LABS: Lab[] = [
   {
     id: "extra-02",
     track: "extra",
-    title: "Timer systemd de limpieza",
+    title: "Una limpieza tiene que correr sola a una hora",
+    story: "No queremos acordarnos de borrar los archivos viejos. Un timer tiene que hacerlo en el horario pedido, también si la máquina estaba apagada a esa hora.",
     objective: [
       "Timer cleanup habilitado al boot.",
       "A :30 corre /usr/local/bin/clean.sh.",
@@ -1005,13 +1038,14 @@ export const LABS: Lab[] = [
   {
     id: "extra-03",
     track: "extra",
-    title: "SELinux y FTP anonimo",
+    title: "El FTP anónimo tiene que poder dejar y llevar archivos",
+    story: "La gente entra sin cuenta. Tiene que poder bajar de una carpeta y subir a otra, con SELinux todavía activo.",
     objective: [
       "vsftpd en enforcing.",
       "Anónimo descarga de /srv/company-drop/pub.",
       "Anónimo sube a /srv/company-drop/incoming.",
     ],
-    where: "server o client, donde corras el prep de vsftpd",
+    where: "server o client",
     steps: [
       "El servicio es vsftpd. El script de preparación del repo deja el escenario.",
       "Un anónimo tiene que poder descargar de /srv/company-drop/pub.",
@@ -1035,7 +1069,8 @@ export const LABS: Lab[] = [
   {
     id: "extra-04",
     track: "extra",
-    title: "Flatpak de sistema y de usuario",
+    title: "Unas aplicaciones quedan para todos y otra para una persona",
+    story: "Nos pasan un depósito de aplicaciones. Una queda para toda la máquina y otra solo para un usuario. Las dos siguen después de cerrar sesión.",
     objective: [
       "Agregá un remote de Flatpak y dejalo guardado. De ahí salen las apps. La dirección te la dan en el enunciado.",
       "Instalá una app para todos los usuarios de la máquina.",
@@ -1147,6 +1182,7 @@ export function labsFor(locale: Locale): Lab[] {
     return {
       ...lab,
       title: copy.title,
+      story: copy.story,
       objective: copy.objective,
       where: copy.where,
       steps: copy.steps,
@@ -1163,6 +1199,7 @@ export function labsFor(locale: Locale): Lab[] {
           ...command,
           why: copy.why[index] ?? command.why,
           as: localizeAs(command.as, "en"),
+          slip: copy.slip?.[index],
         })),
       },
     };

@@ -1,5 +1,6 @@
 export interface LabEn {
   title: string;
+  story?: string;
   objective: string[];
   where: string;
   steps: string[];
@@ -8,11 +9,14 @@ export interface LabEn {
   videoHint: string;
   videos?: string[];
   why: string[];
+  /** Same index as why. Only the commands that have a hover note. */
+  slip?: (string | undefined)[];
 }
 
 export const LAB_EN: Record<string, LabEn> = {
   "setup-keyboard": {
-    title: "Keyboard",
+    title: "The console keyboard does not match",
+    story: "In the virtual machine window the keys do not come out as you see them. On the client you can switch to Latin American. On the server it has to stay United States, because recovery is typed there.",
     objective: [
       "In vagrant ssh the keyboard comes from your machine.",
       "On the client you may switch to latam / la-latin1 for the VM console.",
@@ -40,13 +44,14 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-01-root-client": {
-    title: "Recover root on the client",
+    title: "The client forgot the root password",
+    story: "There was a mishap. This machine was configured by an employee who resigned, we lost contact, and we need it urgently to keep going with the configuration.",
     objective: [
       "Reset the root password on the client.",
       "New password: student.",
       "SELinux consistent before a normal boot.",
     ],
-    where: "client · VirtualBox console, not SSH",
+    where: "client",
     steps: [
       "Interrupt the client boot and recover root access.",
       "Set the root password to student (both times the same).",
@@ -60,27 +65,28 @@ export const LAB_EN: Record<string, LabEn> = {
       "This is the one that worked here. Q22b. The root stays at /, not /sysroot.",
       "Here the root is /, not /sysroot. It starts read-only. Without this remount, passwd cannot save the password.",
       "Asks for the password twice: both must be student. You do not type root: this shell is already root.",
-      "\"SELinux consistent before a normal boot\" means the labels have to be right before the system starts normally. passwd touches /etc/shadow from this shell, and the file can end up with a label SELinux will not accept. This empty file makes the next boot relabel the disk. Without it, in enforcing nobody can log in, not even root with the new password. That first boot takes longer.",
+      "The line \"SELinux consistent before a normal boot\" is this command. There is no other step for that sentence. passwd touches /etc/shadow from this shell, and the file can end up with a label SELinux will not accept. This empty file makes the next boot relabel the disk before a normal start. Without it, in enforcing nobody can log in, not even root with the new password. That first boot takes longer.",
       "Writes to disk what is still in memory, before you cut the power.",
-      "Reboots from this shell. exec replaces it. If you exit, bash was process 1 and you get a kernel panic: the screen stops at Kernel panic - not syncing and there is no shell. Reset the VM. The GRUB edit was only for that boot.",
+      "Reboots immediately. Do not drop the -f. On this boot bash is process 1 and there is no systemd. Without -f, reboot asks for a normal shutdown and kills that process 1. The kernel stops at Kernel panic - not syncing: Attempted to kill init. The shell does not come back: reset the VM. exec replaces the shell so the reboot takes over process 1. exit causes the same panic. The GRUB edit was only for that boot.",
       "This is the other video, Q22a. It may not work on v10. If /sysroot does not exist, go back to option 1.",
       "Makes writable the system rd.break left at /sysroot. If it says /sysroot does not exist, this method did not get in. Go back to option 1.",
       "Enters the real system. passwd and touch below run there, not in the outer shell.",
       "Again student twice, matching.",
-      "\"SELinux consistent before a normal boot\" means the labels have to be right before the system starts normally. passwd touches /etc/shadow and can leave it with a label SELinux will not accept. Without this file, a normal boot in enforcing lets nobody log in. The first boot relabels the disk and takes longer.",
+      "The line \"SELinux consistent before a normal boot\" is this command. There is no other step for that sentence. passwd touches /etc/shadow and can leave it with a label SELinux will not accept. Without this file, a normal boot in enforcing lets nobody log in. The first boot relabels the disk and takes longer.",
       "Leaves the chroot and returns to the rd.break shell.",
       "Continues the boot. In the rd.break video the order is exit and then reboot.",
     ],
   },
   "lab-01": {
-    title: "Client network and hostname",
+    title: "Name the client and take it off the main network",
+    story: "We need to connect two computers outside the main network. This is the client machine: it needs a name, an address, a gateway, and DNS.",
     objective: [
       "IP 172.16.1.12/24 on the lab interface.",
       "Gateway 172.16.1.1 and DNS 172.16.1.1.",
       "Hostname client.rhcsa.lab.",
       "Persistent after reboot.",
     ],
-    where: "client · 172.16.1.12",
+    where: "client",
     steps: [
       "IP 172.16.1.12/24 on the lab interface (enp0s8).",
       "Gateway 172.16.1.1 and DNS 172.16.1.1.",
@@ -93,7 +99,7 @@ export const LAB_EN: Record<string, LabEn> = {
     videos: ['Q01a: Networking with nmtui', 'Q01b: Networking with nmcli and hostnamectl'],
     why: [
       "It changes nothing. It lists saved profiles, one row each. NAME is what you will type in modify: it may not match the card. DEVICE is the card that profile is using now. If you see enp0s3 and enp0s8, you do not pick the first one: you pick the row whose DEVICE is the lab card. In the example, DEVICE enp0s8 is on the row whose NAME is hostonly, so the command uses hostonly. lo is loopback, the machine talking to itself. That row is not edited. Tab is not required for this. If pressing it lists files in the folder, the shell does not have nmcli's words loaded. On the exam you do not install anything to fix that: you copy the name from the NAME column.",
-      "This shows which card is the lab one. It prints each card and its address, short. The one with 172.16.1.12 is the lab card: on this Vagrant that is enp0s8. Look for that word in the DEVICE column of connection show. The NAME on that same row is the one you modify. The other ethernet, enp0s3, is usually the way in (on Vagrant, 10.0.2.15). Do not set that one to manual.",
+      "Shows which card is the lab one, before you change anything. The name enp0s3 or enp0s8 does not say the role: it is the order VirtualBox plugged the cards in. The one that already has 10.0.2.15 is the way in, NAT. Do not set it to manual. The other ethernet is the lab card. On this Vagrant that is usually enp0s8, and at first it can have another address, for example 192.168.56. Look for that word in the DEVICE column of connection show. The NAME on that same row is the one you modify. lo is the machine talking to itself: leave it alone.",
       "You can do it here too. On the enp0s8 connection: IPv4 Manual, Address 172.16.1.12/24, Gateway 172.16.1.1, and under DNS servers, Add 172.16.1.1. If it says <Add...>, DNS is not set.",
       "NAME is the NAME column of the lab row, not the card. If that row says hostonly and DEVICE enp0s8, the command is modify hostonly. It saves the IP, the gateway, and the DNS in that profile. ipv4.dns is the part that stores the DNS. Without it, the DNS is not saved. sudo is needed when the prompt is vagrant@. If it is already root@, sudo adds nothing.",
       "This is not a step you always run. Only if the modify above says Permission denied while renaming the .nmconnection, even when the prompt is already root@. The file is named after the NAME column: if the profile is hostonly, the file is hostonly.nmconnection. SELinux does not let NetworkManager replace it. This command does not save the DNS. It fixes the label and, if that was the problem, says Relabeled. Then you run modify again.",
@@ -102,15 +108,25 @@ export const LAB_EN: Record<string, LabEn> = {
       "Changes the hostname now, and saves it. No nmcli connection up, and no other up: the hostname is not part of the network profile. After a reboot, hostnamectl should still say client.rhcsa.lab.",
       "On the exam this is allowed. Look up connection modify.",
     ],
+    slip: [
+      ,
+      ,
+      ,
+      ,
+      ,
+      ,
+      "I did this: the profile was right and I activated enp0s3 instead of enp0s8. That is why the address stayed the same.",
+    ],
   },
   "lab-02-root-server": {
-    title: "Recover root on the server",
+    title: "The server forgot the root password",
+    story: "The same mishap, on the other machine. The employee left and nobody can log in as root. The server has to be recovered so work can continue.",
     objective: [
       "Reset the root password on the server.",
       "New password: student.",
       "SELinux consistent before a normal boot.",
     ],
-    where: "server · VirtualBox console, not SSH",
+    where: "server",
     steps: [
       "Interrupt the server boot and recover root access.",
       "Set the root password to student (both times the same).",
@@ -124,27 +140,28 @@ export const LAB_EN: Record<string, LabEn> = {
       "This is the one that worked here. Q22b. The root stays at /, not /sysroot.",
       "Here the root is /, not /sysroot. It starts read-only. Without this remount, passwd cannot save the password.",
       "Asks for the password twice: both must be student. You do not type root: this shell is already root.",
-      "\"SELinux consistent before a normal boot\" means the labels have to be right before the system starts normally. passwd touches /etc/shadow from this shell, and the file can end up with a label SELinux will not accept. This empty file makes the next boot relabel the disk. Without it, in enforcing nobody can log in, not even root with the new password. That first boot takes longer.",
+      "The line \"SELinux consistent before a normal boot\" is this command. There is no other step for that sentence. passwd touches /etc/shadow from this shell, and the file can end up with a label SELinux will not accept. This empty file makes the next boot relabel the disk before a normal start. Without it, in enforcing nobody can log in, not even root with the new password. That first boot takes longer.",
       "Writes to disk what is still in memory, before you cut the power.",
-      "Reboots from this shell. exec replaces it. If you exit, bash was process 1 and you get a kernel panic: the screen stops at Kernel panic - not syncing and there is no shell. Reset the VM. The GRUB edit was only for that boot.",
+      "Reboots immediately. Do not drop the -f. On this boot bash is process 1 and there is no systemd. Without -f, reboot asks for a normal shutdown and kills that process 1. The kernel stops at Kernel panic - not syncing: Attempted to kill init. The shell does not come back: reset the VM. exec replaces the shell so the reboot takes over process 1. exit causes the same panic. The GRUB edit was only for that boot.",
       "This is the other video, Q22a. It may not work on v10. If /sysroot does not exist, go back to option 1.",
       "Makes writable the system rd.break left at /sysroot. If it says /sysroot does not exist, this method did not get in. Go back to option 1.",
       "Enters the real system. passwd and touch below run there, not in the outer shell.",
       "Again student twice, matching.",
-      "\"SELinux consistent before a normal boot\" means the labels have to be right before the system starts normally. passwd touches /etc/shadow and can leave it with a label SELinux will not accept. Without this file, a normal boot in enforcing lets nobody log in. The first boot relabels the disk and takes longer.",
+      "The line \"SELinux consistent before a normal boot\" is this command. There is no other step for that sentence. passwd touches /etc/shadow and can leave it with a label SELinux will not accept. Without this file, a normal boot in enforcing lets nobody log in. The first boot relabels the disk and takes longer.",
       "Leaves the chroot and returns to the rd.break shell.",
       "Continues the boot. In the rd.break video the order is exit and then reboot.",
     ],
   },
   "lab-02": {
-    title: "Server network and hostname",
+    title: "Name the server and take it off the main network",
+    story: "The other computer of the pair. This is the server: it needs a name and the address on this network, so the client can reach it.",
     objective: [
       "IP 172.16.1.13/24 on the lab interface.",
       "Gateway 172.16.1.1 and DNS 172.16.1.1.",
       "Hostname server.rhcsa.lab.",
       "Persistent after reboot.",
     ],
-    where: "server · 172.16.1.13",
+    where: "server",
     steps: [
       "IP 172.16.1.13/24 on the lab interface (enp0s8).",
       "Gateway 172.16.1.1 and DNS 172.16.1.1.",
@@ -157,7 +174,7 @@ export const LAB_EN: Record<string, LabEn> = {
     videos: ["Q01a: Networking with nmtui", "Q01b: Networking with nmcli and hostnamectl"],
     why: [
       "It changes nothing. It lists saved profiles, one row each. NAME is what you will type in modify: it may not match the card. DEVICE is the card that profile is using now. If you see enp0s3 and enp0s8, you do not pick the first one: you pick the row whose DEVICE is the lab card. In the example, DEVICE enp0s8 is on the row whose NAME is hostonly, so the command uses hostonly. lo is loopback, the machine talking to itself. That row is not edited. Tab is not required for this. If pressing it lists files in the folder, the shell does not have nmcli's words loaded. On the exam you do not install anything to fix that: you copy the name from the NAME column.",
-      "This shows which card is the lab one. It prints each card and its address, short. The one with 172.16.1.13 is the lab card: on this Vagrant that is enp0s8. Look for that word in the DEVICE column of connection show. The NAME on that same row is the one you modify. The other ethernet, enp0s3, is usually the way in (on Vagrant, 10.0.2.15). Do not set that one to manual.",
+      "Shows which card is the lab one, before you change anything. The name enp0s3 or enp0s8 does not say the role: it is the order VirtualBox plugged the cards in. The one that already has 10.0.2.15 is the way in, NAT. Do not set it to manual. The other ethernet is the lab card. On this Vagrant that is usually enp0s8, and at first it can have another address, for example 192.168.56. Look for that word in the DEVICE column of connection show. The NAME on that same row is the one you modify. lo is the machine talking to itself: leave it alone.",
       "You can do it here too. On the enp0s8 connection: IPv4 Manual, Address 172.16.1.13/24, Gateway 172.16.1.1, and under DNS servers, Add 172.16.1.1. If it says <Add...>, DNS is not set.",
       "NAME is the NAME column of the lab row, not the card. If that row says hostonly and DEVICE enp0s8, the command is modify hostonly. It saves the IP, the gateway, and the DNS in that profile. ipv4.dns is the part that stores the DNS. Without it, the DNS is not saved. sudo is needed when the prompt is vagrant@. If it is already root@, sudo adds nothing.",
       "This is not a step you always run. Only if the modify above says Permission denied while renaming the .nmconnection, even when the prompt is already root@. The file is named after the NAME column: if the profile is hostonly, the file is hostonly.nmconnection. SELinux does not let NetworkManager replace it. This command does not save the DNS. It fixes the label and, if that was the problem, says Relabeled. Then you run modify again.",
@@ -166,15 +183,26 @@ export const LAB_EN: Record<string, LabEn> = {
       "Changes the hostname now, and saves it. No nmcli connection up, and no other up: the hostname is not part of the network profile. After a reboot, hostnamectl should still say server.rhcsa.lab.",
       "On the exam this is allowed. Look up connection modify.",
     ],
+    slip: [
+      ,
+      ,
+      ,
+      ,
+      ,
+      ,
+      "I did this: the profile was right and I activated enp0s3 instead of enp0s8. That is why the address stayed the same.",
+    ],
   },
   "lab-03": {
-    title: "DNF repositories",
+    title: "With no internet, packages come from a local shelf",
+    story: "There is no way out to the internet. They give us two addresses, BaseOS and AppStream, and the word dictionary has to be installed from there.",
     objective: [
-      "On the machine where you will install: BaseOS and AppStream enabled.",
-      "gpgcheck=0 on those two (or whatever the task says).",
+      "A repo named BaseOS with baseurl http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/.",
+      "A repo named AppStream with baseurl http://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/.",
       "dnf list available lists packages from those repos.",
+      "Install words. It provides /usr/share/dict/words, the dictionary for the grep lab.",
     ],
-    where: "on each machine, before the first dnf install on that VM",
+    where: "client",
     steps: [
       "Not a both-at-once lab: do it on the VM where you need to install (client or server).",
       "BaseOS and AppStream must show up in dnf repolist.",
@@ -183,30 +211,32 @@ export const LAB_EN: Record<string, LabEn> = {
       "dnf list available must return packages.",
     ],
     note: "On the exam there is almost never internet: the repo is usually internal (DVD/ISO mounted with file://, or a lab http://). On this Vagrant, if you do not mount an ISO, you can use the box repos or a mirror that answers. Labs that install (acl, chrony, words, tuned, …) assume you already did this step on THAT machine.",
-    tip: "As in video Q03: dnf only reads files under /etc/yum.repos.d/ that end in .repo (e.g. local.repo). Go there (cd /etc/yum.repos.d/), create the file by hand with two BaseOS and AppStream blocks, and memorize the shape: [id], name=, baseurl= (the URL or file:// from the task, copy/paste), enabled=1, gpgcheck=0. Without repos, the rest of the exam stalls. A bad baseurl kills dnf. On Vagrant, if dnf already lists packages, do not break the .repo files; if you practice with an ISO, use the mount + file:// below.",
+    tip: "As in video Q03: dnf only reads files under /etc/yum.repos.d/ that end in .repo (e.g. local.repo). Go there (cd /etc/yum.repos.d/), create the file by hand with two BaseOS and AppStream blocks, and memorize the shape: [id], name=, baseurl= (the URL or file:// from the task, copy/paste), enabled=1, gpgcheck=0. Without repos, the rest of the exam stalls. A bad baseurl kills dnf. On this Rocky those two are enough: Debug, Source and CRB do not go in the file.",
     videoHint: 'Videos for this lab: Q03, and another channel (Mingtao SUN) on a local repo by hand, with no internet.',
     videos: [
       'Q03: YUM/DNF repositories',
       'RHCSA Exam: How to Manually Configure a Local YUM/DNF Repository (No Internet!) · Mingtao SUN',
     ],
     why: [
+      "The page that explains gpgcheck, enabled, and baseurl. Read it before writing the file.",
+      "man writes the page. The | hands it to grep instead of showing it. grep prints only the lines where one of the phrases appears. -E turns on extended regex: the | inside the quotes means \"or\". Without -E, that | is just another character and does not split the three words. baseurl, gpgcheck and enabled are the ones this lab uses.",
       "First: enter the repos directory (dnf/yum both use it). Learn that path by heart. Create the .repo there; if the file does not end in .repo, dnf ignores it.",
       "See which repos are enabled now on THIS machine (before and after creating the file).",
-      "If the lab gives a DVD/ISO instead of http://: mount the media. If it is a .iso on disk: mount -o loop /path/rocky.iso /mnt/dvd. ls /mnt/dvd must show BaseOS and AppStream.",
-      "Example to copy. The name local.repo is not required: any file ending in .repo. Replace {link-de-BaseOS} and {link-de-AppStream} with the two URLs from the task. name can repeat the id. enabled=1 and gpgcheck=0. If it is an ISO: baseurl=file:///mnt/dvd/BaseOS (three slashes).",
+      "BaseOS: http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/. AppStream: http://dl.rockylinux.org/$contentdir/$releasever/AppStream/$basearch/os/. Those two lines are commented in rocky.repo, under [baseos] and [appstream].",
       "Only if the repos already exist and you just need to turn GPG off. The name comes from repolist.",
       "Check: repolist shows BaseOS and AppStream; list available must list packages (if the URL/file is wrong, it fails here).",
-      "gpgcheck, enabled, baseurl.",
+      "Proof the repo can install. words provides /usr/share/dict/words, the dictionary for the grep lab. A minimal install does not have it. Both repos go in: the package can be in one and a dependency in the other. With only --repo=AppStream, dnf cannot see BaseOS and says nothing provides. Without --repo, it also uses Rocky's repos, and a successful install does not prove local.repo served it. If the package is not named words, dnf provides /usr/share/dict/words prints the name.",
     ],
   },
   "lab-04": {
-    title: "Apache on port 82",
+    title: "The site has to answer on a port that is not the usual one",
+    story: "The web server stays with SELinux active. It has to answer on port 82, and keep doing that after a reboot.",
     objective: [
       "httpd listens on TCP 82.",
       "SELinux enforcing.",
       "Persistent after reboot.",
     ],
-    where: "server (the Vagrant box installs httpd there)",
+    where: "server",
     steps: [
       "Apache has to listen on port 82.",
       "Do not set SELinux to permissive and do not disable it.",
@@ -232,7 +262,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-05": {
-    title: "Users, group, and sudo",
+    title: "New people arrive and not all of them may administer",
+    story: "The accounts have to be created, plus a group for the people who administer. One of them may use sudo. The rest may not.",
     objective: [
       "Group sysadm.",
       "Users: felipe and erik in sysadm; diego with /sbin/nologin.",
@@ -274,7 +305,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-06": {
-    title: "Shared directory with setgid",
+    title: "A shared folder where new files belong to the group",
+    story: "Several people write in the same folder. The files they create have to be born in the group, not only owned by whoever created them.",
     objective: [
       "Directory /shared/sysadm.",
       "Owning group sysadm, setgid.",
@@ -301,7 +333,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-07": {
-    title: "Erik's cron",
+    title: "Erik wants a note that writes itself",
+    story: "Erik will not be watching the machine. He wants the requested text written down every minute, without him typing it.",
     objective: [
       "User erik.",
       "Every 1 minute.",
@@ -326,13 +359,14 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-08": {
-    title: "NFS with autofs",
+    title: "A folder from the server has to show up on the client by itself",
+    story: "The server shares a folder. On the client it has to mount when someone goes in, without mounting it by hand every time.",
     objective: [
       "User netuser1, home /home/guests/netuser1, pass arceprog.",
       "NFS export on the server.",
       "Client: /netdir/netuser1 mounts 172.16.1.13.",
     ],
-    where: "server exports · client mounts",
+    where: "server · client",
     steps: [
       "First: DNF repos OK on server and client if you need to install nfs-utils (DNF repositories lab on each).",
       "On the server, create user netuser1 with exercise password arceprog and directory /home/guests/netuser1.",
@@ -355,7 +389,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-09": {
-    title: "Zip /etc",
+    title: "Before changing configuration, /etc has to be saved",
+    story: "We are about to change system files. First /etc is packed into an archive, in case we need to go back.",
     objective: [
       "File /root/myetcbackup.tar.bz2.",
       "Contains /etc.",
@@ -377,7 +412,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-10": {
-    title: "ACL on /var/tmp/fstab",
+    title: "One person has to be able to read a file, and nobody else",
+    story: "The file already has an owner. One account needs read access, without opening the file to everyone.",
     objective: [
       "Copy /etc/fstab → /var/tmp/fstab, owner root:root.",
       "erik: read and write.",
@@ -408,13 +444,14 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-11": {
-    title: "Time with chrony",
+    title: "The two machines do not show the same time",
+    story: "The server clock and the client clock have to line up, and stay that way after a reboot.",
     objective: [
       "Server 172.16.1.13 serves NTP.",
       "Client 172.16.1.12 syncs against that server.",
       "Persistent on both.",
     ],
-    where: "server offers time · client is the NTP client",
+    where: "server · client",
     steps: [
       "First: DNF repos OK on each machine where you install chrony (DNF repositories lab).",
       "The server (172.16.1.13) has to answer NTP.",
@@ -434,7 +471,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-12": {
-    title: "Find Erik's files",
+    title: "Erik does not remember which files he touched",
+    story: "Erik is new and does not remember which files he changed. He wants them copied with the same folder structure they had the first time.",
     objective: [
       "erik's files modified in the last 24 hours.",
       "Copy them to /root/erikfiles.",
@@ -459,7 +497,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-13": {
-    title: "Filter words with grep",
+    title: "Keep the words that contain a piece",
+    story: "In the dictionary, find the words that contain ich and save that list in a file.",
     objective: [
       "Source: /usr/share/dict/words.",
       "Lines that contain ich.",
@@ -483,7 +522,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-14": {
-    title: "User with a fixed UID",
+    title: "This account has to keep the number it already had",
+    story: "The user comes from another machine. The user number cannot change, because files recognize them by that number.",
     objective: [
       "User arce.",
       "UID 1111.",
@@ -503,13 +543,14 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-15": {
-    title: "LVM wgroup (VG) / wshare (LV)",
+    title: "There is a spare disk and it needs a named space",
+    story: "The extra disk is unused. A volume has to be built, formatted, and mounted so it comes back after a reboot.",
     objective: [
       "wgroup (VG), PE 8 MB.",
       "wshare (LV) of 50 extents, ext4.",
       "Mounted at /mnt/wshare by UUID at boot.",
     ],
-    where: "server · extra 1 GB disk",
+    where: "server",
     steps: [
       "wgroup (VG), 8 MB physical extent.",
       "wshare (LV) of 50 extents.",
@@ -532,12 +573,13 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-16": {
-    title: "400 MB swap",
+    title: "The machine runs out of memory and needs a reserve",
+    story: "When memory fills up, it needs 400 MB of disk so the system can keep going.",
     objective: [
       "400 MB swap partition.",
       "Active now and in fstab.",
     ],
-    where: "server · same extra disk",
+    where: "server",
     steps: ["Create a 400 MB swap partition.", "Activate it now.", "Make it come back by itself after reboot."],
     note: "Practice creating or growing the swap partition and leaving it permanent.",
     tip: "If the previous lab did pvcreate on the whole disk, there is no room for this partition. A VG can live on one partition and swap on another of the same disk.",
@@ -552,7 +594,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-17": {
-    title: "Resize LV vo",
+    title: "The volume filled up and has to grow",
+    story: "The space already in use got too small. It has to be stretched without losing what is inside.",
     objective: [
       "LV vo in VG vgroup.",
       "Final size near 50 MB (30–70 OK).",
@@ -577,7 +620,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-18": {
-    title: "tuned profile",
+    title: "The machine should work with the profile that fits it",
+    story: "tuned can recommend a profile. That profile has to stay active, including after a reboot.",
     objective: [
       "Profile from tuned-adm recommend.",
       "Still active after reboot.",
@@ -601,7 +645,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-19": {
-    title: "Greeting at login",
+    title: "Whoever logs in has to see a message",
+    story: "A greeting has to appear at login. It can be for one person or for everyone who logs in.",
     objective: [
       "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
       "Any user: \"Welcome USER, you are logged in!\".",
@@ -624,7 +669,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-20": {
-    title: "Container image",
+    title: "The image is in a private registry",
+    story: "The container is not in the public registry. We have to log in to the registry they give us and pull the image.",
     objective: [
       "Clone Text-To-PDF.",
       "Image localhost/text2pdf:latest.",
@@ -648,7 +694,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-21": {
-    title: "Run the container",
+    title: "The container has to be running",
+    story: "The image is already here. The container has to be started with the name and ports they ask for.",
     objective: [
       "Container mycontainer, image localhost/text2pdf:latest.",
       "/opt/file → /data/input.",
@@ -671,7 +718,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "lab-22": {
-    title: "Container at boot, as a user",
+    title: "The container has to come back when the machine boots",
+    story: "After a reboot the container cannot stay off. It has to start as the user, without anyone logging in.",
     objective: [
       "User student, container mycontainer.",
       "Starts at boot with linger, no open session.",
@@ -696,12 +744,13 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "extra-01": {
-    title: "Script for .txt files",
+    title: "A program has to list the text files in three folders",
+    story: "Three folders may have text files, or the folder may be missing. The program has to say what it found in each one.",
     objective: [
       "Script /usr/local/bin/gap-txt.sh.",
       "Looks at /opt/lab/dir1, dir2, and dir3.",
     ],
-    where: "client · after running the repo prep",
+    where: "client",
     steps: [
       "Create /usr/local/bin/gap-txt.sh and make it executable.",
       "It has to look only at the first level of /opt/lab/dir1, /opt/lab/dir2, and /opt/lab/dir3.",
@@ -721,7 +770,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "extra-02": {
-    title: "systemd cleanup timer",
+    title: "A cleanup has to run by itself at a set time",
+    story: "We do not want to remember to delete old files. A timer has to do it at the requested time, including if the machine was off then.",
     objective: [
       "Timer cleanup enabled at boot.",
       "At :30 runs /usr/local/bin/clean.sh.",
@@ -747,13 +797,14 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "extra-03": {
-    title: "SELinux and anonymous FTP",
+    title: "Anonymous FTP has to be able to drop off and pick up files",
+    story: "People come in without an account. They have to be able to download from one folder and upload to another, with SELinux still active.",
     objective: [
       "vsftpd with enforcing.",
       "Anonymous downloads from /srv/company-drop/pub.",
       "Anonymous uploads to /srv/company-drop/incoming.",
     ],
-    where: "server or client, wherever you run the vsftpd prep",
+    where: "server or client",
     steps: [
       "The service is vsftpd. The repo prep script sets up the scenario.",
       "An anonymous user has to be able to download from /srv/company-drop/pub.",
@@ -773,7 +824,8 @@ export const LAB_EN: Record<string, LabEn> = {
     ],
   },
   "extra-04": {
-    title: "System and user Flatpak",
+    title: "Some applications are for everyone and one is for a single person",
+    story: "They give us a store of applications. One stays for the whole machine and another only for one user. Both remain after logging out.",
     objective: [
       "Add a Flatpak remote and leave it saved. The apps come from there. You are given the address in the task.",
       "Install one app for every user on the machine.",

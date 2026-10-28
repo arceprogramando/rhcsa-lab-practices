@@ -44,6 +44,22 @@ const es: GlossaryEntry[] = [
     tldr: { page: "wc" },
   },
   {
+    term: "man",
+    definition:
+      "Abre la página del manual de un comando o de un archivo de configuración. El argumento es el nombre de la página. Adentro, /FRASE salta a ese texto y q cierra. Con un pipe el visor no se abre: el texto pasa al comando de la derecha, y grep deja solo las líneas de la frase.",
+    example:
+      "man dnf.conf | grep -E 'baseurl|gpgcheck|enabled' → solo las líneas de esas tres · man localectl → teclado de la consola · man nmcli → connection modify · man usermod | grep -- '-l' → renombrar el login · man auto.master → mapa de autofs · man tar → la letra de bzip2 · man chrony.conf → allow, pool, server · man grep → inicio de línea y palabra entera · man test → -d · man systemd.timer → OnCalendar y Persistent · man restorecon → aplicar el contexto · man flatpak-remote-add → LOCATION, --system, --user · man parted → mkpart · man podman-generate-systemd → la unidad del contenedor",
+    tldr: { page: "man" },
+  },
+  {
+    term: "grep",
+    definition:
+      "Filtra líneas. Imprime las que contienen el texto y descarta el resto. Lee un archivo (grep FRASE ARCHIVO) o lo que llega por un pipe (comando | grep FRASE). -E permite varias frases separadas por | dentro de las comillas: cada | es un «o». Sin -E, ese | es un carácter más. -i ignora mayúsculas. ^ al principio de la frase exige que la línea empiece así. -w exige la palabra entera.",
+    example:
+      "man dnf.conf | grep -E 'baseurl|gpgcheck|enabled' → de la página del manual, solo las líneas con una de esas tres · grep ich /usr/share/dict/words > /root/lines → palabras que contienen ich, guardadas en ese archivo · grep '^Listen' /etc/httpd/conf/httpd.conf → líneas que empiezan con Listen",
+    tldr: { page: "grep" },
+  },
+  {
     term: "cp",
     definition:
       "Copia archivos o directorios. Orden: cp ORIGEN DESTINO. Primero lo que copiás, después a dónde. Si DESTINO es una carpeta que ya existe, el archivo entra adentro con el mismo nombre. Si DESTINO es una ruta con nombre de archivo, ahí queda con ese nombre (renombrás al copiar). -p conserva dueño/modo/fechas del origen (hace falta root para el dueño). --parents recrea la ruta del origen bajo el destino. No asigna un dueño nuevo: eso es chown después.",
@@ -196,6 +212,92 @@ const es: GlossaryEntry[] = [
     example: "tuned-adm recommend · tuned-adm profile NOMBRE · tuned-adm active",
     tldr: { page: "tuned-adm", platform: "linux" },
   },
+  {
+    term: "copiar y pegar",
+    definition:
+      "Hay tres portapapeles distintos y cada tecla habla con uno solo. Bash recorta la línea que estás escribiendo (Ctrl+K, Ctrl+U, Ctrl+W) y la devuelve con Ctrl+Y. La terminal del escritorio, la de la estación del examen, usa el del escritorio: Ctrl+Shift+C copia, Ctrl+Shift+V o Shift+Insert pegan; marcar con el botón izquierdo y pegar con el del medio usa ese mismo. Neovim guarda el suyo: yy o y copian, p pega, y el texto no sale del editor. En la consola pelada, sin escritorio, el del escritorio no existe.",
+  },
+  {
+    term: "Ctrl+C",
+    definition:
+      "En la terminal manda una interrupción al comando que está corriendo. En un programa de escritorio, como el panel del enunciado o el navegador, copia el texto marcado. En el examen esa tecla sola a veces traba la terminal o el navegador. Para copiar desde la terminal del escritorio se usa Ctrl+Shift+C.",
+  },
+  {
+    term: "Ctrl+V",
+    definition:
+      "En bash la próxima tecla se toma literal: no pega nada. En un programa de escritorio pega el portapapeles. En la terminal del escritorio pegar es Ctrl+Shift+V o Shift+Insert.",
+  },
+  {
+    term: "Ctrl+Shift+C",
+    definition:
+      "Copia en la terminal del escritorio y deja el texto en el portapapeles del escritorio. El Shift deja Ctrl+C libre para interrumpir el comando. En la consola pelada esta combinación no existe.",
+  },
+  {
+    term: "Ctrl+Shift+V",
+    definition:
+      "Pega en la terminal del escritorio el portapapeles del escritorio. Bash pega su recorte con Ctrl+Y. Neovim pega el suyo con p.",
+  },
+  {
+    term: "Shift+Insert",
+    definition:
+      "Pega en la terminal del escritorio. Usa el mismo portapapeles que Ctrl+Shift+V.",
+  },
+  {
+    term: "Ctrl+K",
+    definition:
+      "En bash corta desde el cursor hasta el final de la línea que estás escribiendo. Eso va al recorte de bash y vuelve con Ctrl+Y. El texto que ya se imprimió en la pantalla sigue ahí. En Neovim cortar una línea es dd.",
+  },
+  {
+    term: "Ctrl+U",
+    definition:
+      "En bash corta desde el cursor hasta el principio de la línea que estás escribiendo. Vuelve con Ctrl+Y.",
+  },
+  {
+    term: "Ctrl+W",
+    definition:
+      "En bash corta la palabra anterior de la línea que estás escribiendo. Vuelve con Ctrl+Y. En el navegador cierra la pestaña. En Neovim cortar es d o dd.",
+  },
+  {
+    term: "Ctrl+Y",
+    definition:
+      "En bash pega lo último cortado de la línea con Ctrl+K, Ctrl+U o Ctrl+W. Alt+Y, justo después, cambia por un corte anterior. El portapapeles del escritorio se pega con Ctrl+Shift+V. Neovim pega con p.",
+  },
+  {
+    term: "Alt+Y",
+    definition:
+      "En bash, después de un Ctrl+Y, cambia ese pegado por un corte anterior de la misma línea. Sigue siendo el recorte de bash.",
+  },
+  {
+    term: "Ctrl+R",
+    definition:
+      "En bash busca para atrás en el historial de comandos. En Neovim, en modo inserción, Ctrl+R y después \" inserta lo que copiaste con y. La tecla es la misma y el programa decide cuál de las dos cosas hace.",
+  },
+  {
+    term: "yy",
+    definition:
+      "En Neovim, modo normal, copia la línea del cursor y la deja en su lugar. p la pega debajo y P arriba, adentro de Neovim. dd corta esa línea: la copia y la borra. El portapapeles del escritorio es Ctrl+Shift+C.",
+  },
+  {
+    term: "y (Neovim)",
+    definition:
+      "En Neovim, modo normal, copia sin borrar. yy copia la línea entera. Con v (caracteres) o V (la línea) marcado, y copia esa marca. p la pega adentro de Neovim.",
+  },
+  {
+    term: "p (Neovim)",
+    definition:
+      "En Neovim, modo normal, pega debajo del cursor lo copiado con yy o y. P lo pega arriba. En bash el pegado de la línea es Ctrl+Y. En la terminal del escritorio es Ctrl+Shift+V.",
+  },
+  {
+    term: "dd",
+    definition:
+      "En Neovim, modo normal, corta la línea: la copia y la borra. p la pega. yy copia esa línea y la deja escrita. En bash, cortar la línea que estás escribiendo es Ctrl+K o Ctrl+U.",
+  },
+  {
+    term: "screen",
+    definition:
+      "Copia con el teclado texto que ya salió en la pantalla. No viene en una instalación mínima. Ctrl+A y después [ abre el modo copia, las flechas se mueven, Espacio marca el principio y otro Espacio el final, Ctrl+A y después ] pega. El recorte es de screen. Bash sigue pegando con Ctrl+Y.",
+    tldr: { page: "screen" },
+  },
 ];
 
 const en: GlossaryEntry[] = [
@@ -218,6 +320,22 @@ const en: GlossaryEntry[] = [
       "Counts lines, words, and bytes in a file or on a pipe. With no options it prints all three. -l = lines only, -w = words, -c = bytes. Handy to check that a filter (grep, etc.) left real content.",
     example: "wc -l /root/lines → how many lines the grep lab file has · grep ich /usr/share/dict/words | wc -l → count without saving the file",
     tldr: { page: "wc" },
+  },
+  {
+    term: "man",
+    definition:
+      "Opens the manual page for a command or a configuration file. The argument is the page name. Inside, /PHRASE jumps to that text and q closes it. On a pipe the viewer does not open: the text goes to the command on the right, and grep keeps only the lines with the phrase.",
+    example:
+      "man dnf.conf | grep -E 'baseurl|gpgcheck|enabled' → only the lines for those three · man localectl → console keymap · man nmcli → connection modify · man usermod | grep -- '-l' → rename the login · man auto.master → autofs map · man tar → the bzip2 letter · man chrony.conf → allow, pool, server · man grep → start of line and whole word · man test → -d · man systemd.timer → OnCalendar and Persistent · man restorecon → apply the context · man flatpak-remote-add → LOCATION, --system, --user · man parted → mkpart · man podman-generate-systemd → the container unit",
+    tldr: { page: "man" },
+  },
+  {
+    term: "grep",
+    definition:
+      "Filters lines. It prints the ones that contain the text and drops the rest. It reads a file (grep PHRASE FILE) or whatever arrives on a pipe (command | grep PHRASE). -E allows several phrases split by | inside the quotes: each | is an \"or\". Without -E, that | is just another character. -i ignores case. ^ at the start of the phrase requires the line to begin that way. -w requires the whole word.",
+    example:
+      "man dnf.conf | grep -E 'baseurl|gpgcheck|enabled' → from the manual page, only the lines with one of those three · grep ich /usr/share/dict/words > /root/lines → words that contain ich, saved in that file · grep '^Listen' /etc/httpd/conf/httpd.conf → lines that start with Listen",
+    tldr: { page: "grep" },
   },
   {
     term: "cp",
@@ -371,6 +489,92 @@ const en: GlossaryEntry[] = [
       "The command that talks to the tuned service. recommend only prints a name and does not save it. profile NAME applies it now and writes it to /etc/tuned/active_profile. active shows the profile that is set. Without the tuned service running, there is nobody to apply the profile to.",
     example: "tuned-adm recommend · tuned-adm profile NAME · tuned-adm active",
     tldr: { page: "tuned-adm", platform: "linux" },
+  },
+  {
+    term: "copy and paste",
+    definition:
+      "There are three clipboards, and each key talks to only one. Bash cuts the line you are typing (Ctrl+K, Ctrl+U, Ctrl+W) and puts it back with Ctrl+Y. The desktop terminal, the one on the exam workstation, uses the desktop clipboard: Ctrl+Shift+C copies, Ctrl+Shift+V or Shift+Insert pastes; selecting with the left button and pasting with the middle button uses that same one. Neovim keeps its own: yy or y copy, p pastes, and the text stays inside the editor. On a bare console, with no desktop, the desktop clipboard does not exist.",
+  },
+  {
+    term: "Ctrl+C",
+    definition:
+      "In the terminal it interrupts the command that is running. In a desktop program, such as the task panel or the browser, it copies the selected text. On the exam that key alone can freeze the terminal or the browser. Copying from the desktop terminal is Ctrl+Shift+C.",
+  },
+  {
+    term: "Ctrl+V",
+    definition:
+      "In bash the next key is taken literally: it pastes nothing. In a desktop program it pastes the clipboard. In the desktop terminal, paste is Ctrl+Shift+V or Shift+Insert.",
+  },
+  {
+    term: "Ctrl+Shift+C",
+    definition:
+      "Copies in the desktop terminal and puts the text on the desktop clipboard. Shift leaves Ctrl+C free to interrupt the command. On a bare console this combination does not exist.",
+  },
+  {
+    term: "Ctrl+Shift+V",
+    definition:
+      "Pastes the desktop clipboard into the desktop terminal. Bash pastes its own cut with Ctrl+Y. Neovim pastes its own with p.",
+  },
+  {
+    term: "Shift+Insert",
+    definition:
+      "Pastes in the desktop terminal. It uses the same clipboard as Ctrl+Shift+V.",
+  },
+  {
+    term: "Ctrl+K",
+    definition:
+      "In bash it cuts from the cursor to the end of the line you are typing. That goes to bash's cut buffer and comes back with Ctrl+Y. Text already printed on the screen stays there. In Neovim, cutting a line is dd.",
+  },
+  {
+    term: "Ctrl+U",
+    definition:
+      "In bash it cuts from the cursor to the start of the line you are typing. It comes back with Ctrl+Y.",
+  },
+  {
+    term: "Ctrl+W",
+    definition:
+      "In bash it cuts the previous word of the line you are typing. It comes back with Ctrl+Y. In the browser it closes the tab. In Neovim, cutting is d or dd.",
+  },
+  {
+    term: "Ctrl+Y",
+    definition:
+      "In bash it pastes the last piece cut from the line with Ctrl+K, Ctrl+U, or Ctrl+W. Alt+Y, right after that, swaps in an older cut. The desktop clipboard pastes with Ctrl+Shift+V. Neovim pastes with p.",
+  },
+  {
+    term: "Alt+Y",
+    definition:
+      "In bash, after a Ctrl+Y, it swaps that paste for an older cut from the same line. It is still bash's cut buffer.",
+  },
+  {
+    term: "Ctrl+R",
+    definition:
+      "In bash it searches backward through command history. In Neovim insert mode, Ctrl+R then \" inserts what you copied with y. The key is the same and the program decides which of the two it does.",
+  },
+  {
+    term: "yy",
+    definition:
+      "In Neovim normal mode it copies the cursor's line and leaves it in place. p pastes it below and P pastes it above, inside Neovim. dd cuts that line: it copies and deletes it. The desktop clipboard is Ctrl+Shift+C.",
+  },
+  {
+    term: "y (Neovim)",
+    definition:
+      "In Neovim normal mode it copies without deleting. yy copies the whole line. After v (characters) or V (the line), y copies that selection. p pastes it inside Neovim.",
+  },
+  {
+    term: "p (Neovim)",
+    definition:
+      "In Neovim normal mode it pastes below the cursor what you copied with yy or y. P pastes it above. In bash, pasting the line is Ctrl+Y. In the desktop terminal it is Ctrl+Shift+V.",
+  },
+  {
+    term: "dd",
+    definition:
+      "In Neovim normal mode it cuts the line: it copies and deletes it. p pastes it. yy copies that line and leaves it written. In bash, cutting the line you are typing is Ctrl+K or Ctrl+U.",
+  },
+  {
+    term: "screen",
+    definition:
+      "Copies, with the keyboard, text that has already been printed on the screen. It is not part of a minimal install. Ctrl+A then [ opens copy mode, the arrows move, Space marks the start and Space again marks the end, Ctrl+A then ] pastes. The buffer belongs to screen. Bash still pastes with Ctrl+Y.",
+    tldr: { page: "screen" },
   },
 ];
 

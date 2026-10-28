@@ -338,21 +338,19 @@ function taskRow(run: Run, lab: Lab, index: number): HTMLElement {
   );
   const marks = el("div", "flex items-center gap-4");
   marks.append(radioMark(index, "revisit", copy().revisit, revisit), radioMark(index, "done", copy().done, done));
-  const open = document.createElement("button");
-  open.type = "button";
-  open.className = "text-left";
+  const text = el("div", "min-w-0 text-left");
   const title = el("span", `font-medium ${done && !hard ? "line-through" : ""}`, lab.title);
-  open.append(title);
+  text.append(title);
+  if (lab.story) text.append(el("span", "mt-1 block text-sm leading-relaxed text-ink/75", lab.story));
   const meta = el(
     "span",
     "mt-0.5 block text-sm text-muted",
     rowMeta(record, lab),
   );
-  open.append(meta);
-  open.addEventListener("click", () => openLab(index));
+  text.append(meta);
   const enter = button(copy().enterLab, "btn btn-primary shrink-0");
   enter.addEventListener("click", () => openLab(index));
-  row.append(marks, open, enter);
+  row.append(marks, text, enter);
   if (done) row.append(difficultyLine(index, record?.difficulty ?? null));
   return row;
 }
@@ -573,6 +571,9 @@ function labCard(lab: Lab, record: LabRecord): HTMLElement {
   card.append(
     el("p", "text-xs font-semibold tracking-[0.16em] text-muted uppercase", lab.where),
     el("h1", "mt-2 text-3xl font-semibold tracking-tight", lab.title),
+  );
+  if (lab.story) card.append(el("p", "mt-3 text-base leading-relaxed text-ink/80", lab.story));
+  card.append(
     objectiveList(lab.objective, "mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-ink/90 sm:text-lg"),
   );
   if (record.attempts > 1) {
@@ -910,7 +911,7 @@ function renderChoiceGroup(group: LabCommand[]): HTMLElement {
           ),
         );
       }
-      step.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
+      step.append(commandRow(item.cmd, item.slip), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
       card.append(step);
     });
     inner.append(card);
@@ -930,16 +931,37 @@ function renderCommandItem(item: LabCommand): HTMLElement {
       ),
     );
   }
-  li.append(commandRow(item.cmd), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
+  li.append(commandRow(item.cmd, item.slip), el("p", "mt-1 text-sm text-muted whitespace-pre-line", item.why));
   return li;
 }
 
-function commandRow(cmd: string): HTMLElement {
+function commandRow(cmd: string, slip?: string): HTMLElement {
   const row = el("div", "cmd-row");
   const text = el("code", "cmd-text");
   text.textContent = cmd;
-  row.append(text, createCopyButton(cmd, { copy: copy().copyCmd, copied: copy().copiedCmd }));
+  row.append(text);
+  if (slip) row.append(slipMark(slip));
+  row.append(createCopyButton(cmd, { copy: copy().copyCmd, copied: copy().copiedCmd }));
   return row;
+}
+
+function slipMark(text: string): HTMLElement {
+  const wrap = el("span", "slip");
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "slip-mark";
+  btn.setAttribute("aria-label", copy().slipLabel);
+  btn.setAttribute("aria-expanded", "false");
+  btn.textContent = "!";
+  const pop = el("span", "slip-pop", text);
+  pop.setAttribute("role", "tooltip");
+  btn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const open = wrap.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  wrap.append(btn, pop);
+  return wrap;
 }
 
 function el(tag: string, className = "", text = ""): HTMLElement {

@@ -27,6 +27,7 @@ function to(route: RouteId): string {
 }
 
 function readMode(): ExamMode {
+  if (!PAUSABLE_ENABLED) return "fixed";
   const raw = new URLSearchParams(location.search).get("mode");
   return raw === "pausable" ? "pausable" : "fixed";
 }
@@ -43,7 +44,8 @@ function view(): HTMLElement {
   const mode = readMode();
   const store = filterRuns(loadStore(), mode);
   const page = el("div", "flex flex-col gap-6 pb-12");
-  page.append(modeTabs(mode), coverageCard(store.runs));
+  if (PAUSABLE_ENABLED) page.append(modeTabs(mode));
+  page.append(coverageCard(store.runs));
 
   if (store.runs.length === 0) {
     page.append(empty(mode));
@@ -263,15 +265,10 @@ function domainList(domains: DomainScore[]): HTMLElement {
   const sorted = domains
     .slice()
     .sort((a, b) => a.percent - b.percent || (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-  const floor = sorted[0]?.percent ?? 0;
-  let opened = 0;
   const list = el("div", "flex flex-col gap-2");
   for (const domain of sorted) {
-    const open = domain.percent === floor && opened < 3 && domain.percent < 100;
-    if (open) opened += 1;
     const details = document.createElement("details");
     details.className = "coverage-domain rounded-2xl border border-line bg-paper px-3 py-2";
-    details.open = open;
     const summary = document.createElement("summary");
     summary.className = "flex cursor-pointer items-center justify-between gap-3";
     const name = el("span", "font-medium", ui.domainName[domain.id] ?? domain.id);

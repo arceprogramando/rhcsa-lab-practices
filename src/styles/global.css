@@ -274,6 +274,71 @@
   word-break: break-word;
 }
 
+.slip {
+  position: relative;
+  flex: none;
+  align-self: center;
+}
+
+.slip-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.slip-mark:hover,
+.slip-mark:focus-visible {
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.slip-pop {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  bottom: 100%;
+  width: min(16rem, 70vw);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.slip-pop::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 1.35rem;
+  height: 0.45rem;
+}
+
+.slip:hover .slip-pop,
+.slip:focus-within .slip-pop,
+.slip.is-open .slip-pop {
+  display: block;
+}
+
 .cmd-copy {
   display: inline-flex;
   flex-shrink: 0;

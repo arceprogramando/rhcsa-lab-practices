@@ -105,7 +105,8 @@ export interface Copy {
   glossaryPopupClose: string;
   glossaryShortcut: string;
   cv: string;
-  banner: string;
+  bannerLead: string;
+  bannerTail: string;
   homeTitle: string;
   homeDescription: string;
   hello: string;
@@ -209,6 +210,7 @@ export interface Copy {
   commandsTitle: string;
   copyCmd: string;
   copiedCmd: string;
+  slipLabel: string;
   helpPickOne: string;
   helpOption: (n: number, name?: string) => string;
   asWho: (who: string) => string;
@@ -315,7 +317,8 @@ const es: Copy = {
   glossaryPopupClose: "Cerrar",
   glossaryShortcut: "Ctrl+K abre el glosario",
   cv: "Sobre mí",
-  banner: "Práctica personal para el RHCSA del 6 de noviembre. No es el examen oficial ni un sitio de Red Hat.",
+  bannerLead: "Práctica personal para el RHCSA del 6 de noviembre.",
+  bannerTail: "No es el examen oficial ni un sitio de Red Hat.",
   homeTitle: "Práctica personal para el examen RHCSA",
   homeDescription: "Hola, me estoy preparando para rendir el RHCSA el 6 de noviembre y estoy usando esto como práctica personal.",
   hello: "Hola, me estoy preparando para rendir el examen RHCSA el 6 de noviembre, y estoy usando esto como práctica personal.",
@@ -430,6 +433,7 @@ const es: Copy = {
   commandsTitle: "Comandos para mirar",
   copyCmd: "Copiar",
   copiedCmd: "Copiado",
+  slipLabel: "Error que me pasó",
   helpPickOne: "Elegí una forma · no hace falta las dos",
   helpOption: (n, name) => (name ? `Opción ${n} · ${name}` : `Opción ${n}`),
   asWho: (who) => `Como ${who}`,
@@ -545,7 +549,8 @@ const en: Copy = {
   glossaryPopupClose: "Close",
   glossaryShortcut: "Ctrl+K opens the glossary",
   cv: "About me",
-  banner: "Personal practice for the November 6 RHCSA. This is not the official exam and not a Red Hat site.",
+  bannerLead: "Personal practice for the November 6 RHCSA.",
+  bannerTail: "This is not the official exam and not a Red Hat site.",
   homeTitle: "Personal practice for the RHCSA exam",
   homeDescription: "I am preparing for the RHCSA on November 6, and I am using this as personal practice.",
   hello: "I am preparing to take the RHCSA exam on November 6, and I am using this as personal practice.",
@@ -660,6 +665,7 @@ const en: Copy = {
   commandsTitle: "Commands to look at",
   copyCmd: "Copy",
   copiedCmd: "Copied",
+  slipLabel: "A mistake I made",
   helpPickOne: "Pick one way · you do not need both",
   helpOption: (n, name) => (name ? `Option ${n} · ${name}` : `Option ${n}`),
   asWho: (who) => `As ${who}`,
