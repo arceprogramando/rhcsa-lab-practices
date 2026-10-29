@@ -11,6 +11,7 @@ let input: HTMLInputElement | null = null;
 let results: HTMLElement | null = null;
 let empty: HTMLElement | null = null;
 let detail: HTMLElement | null = null;
+let tip: HTMLElement | null = null;
 /** Term pinned in the popup list; null = show every search match. */
 let selectedTerm: string | null = null;
 
@@ -67,11 +68,18 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
       <div id="glossary-popup-results" class="glossary-popup-results"></div>
       <div id="glossary-popup-detail" class="glossary-popup-detail hidden"></div>
       <p class="glossary-popup-foot">
-        <a href="${routePath(pageLocale(), "glossary")}">${escapeHtml(ui.glossaryNav)}</a>
+        <a class="underline decoration-line" href="${routePath(pageLocale(), "glossary")}">${escapeHtml(ui.glossaryNav)}</a>
       </p>
     </div>
   `;
   document.body.append(overlay);
+  tip = document.createElement("div");
+  tip.id = "glossary-tip";
+  tip.className = "glossary-tip";
+  tip.hidden = true;
+  tip.setAttribute("role", "tooltip");
+  document.body.append(tip);
+  document.addEventListener("scroll", hideTip, true);
   input = overlay.querySelector("#glossary-popup-input");
   results = overlay.querySelector("#glossary-popup-results");
   empty = overlay.querySelector("#glossary-popup-empty");
@@ -95,6 +103,7 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
 
 function openPopup(prefill = ""): void {
   if (!overlay || !input) return;
+  hideTip();
   overlay.classList.remove("hidden");
   input.value = prefill;
   selectedTerm = prefill.trim() ? prefill.trim() : null;
@@ -144,7 +153,10 @@ function renderResults(query: string): void {
     ? matches.filter((entry) => entry.term.toLowerCase() === selectedTerm!.toLowerCase())
     : matches;
   empty.classList.toggle("hidden", visible.length > 0);
+  const pinned = selectedTerm != null && visible.length > 0;
+  results.classList.toggle("hidden", pinned);
   results.replaceChildren();
+  if (pinned) return;
   for (const entry of visible.slice(0, 40)) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -207,10 +219,34 @@ function showDetail(entry: GlossaryEntry | undefined): void {
     link.href = tldrUrl(entry.tldr);
     link.target = "_blank";
     link.rel = "noopener noreferrer";
+    link.className = "underline decoration-line";
     link.textContent = ui.glossaryTldr;
+    tldr.className = "glossary-popup-tldr";
     tldr.append(link);
     detail.append(tldr);
   }
+}
+
+function showTip(mark: HTMLElement, text: string): void {
+  if (!tip || (overlay && !overlay.classList.contains("hidden"))) return;
+  tip.textContent = text;
+  tip.hidden = false;
+  const rect = mark.getBoundingClientRect();
+  const tipRect = tip.getBoundingClientRect();
+  const margin = 8;
+  let top = rect.top - tipRect.height - margin;
+  if (top < margin) top = rect.bottom + margin;
+  let left = rect.left;
+  const maxLeft = window.innerWidth - tipRect.width - margin;
+  if (left > maxLeft) left = Math.max(margin, maxLeft);
+  if (left < margin) left = margin;
+  tip.style.top = `${top}px`;
+  tip.style.left = `${left}px`;
+}
+
+function hideTip(): void {
+  if (!tip) return;
+  tip.hidden = true;
 }
 
 function hideDetail(): void {
@@ -255,10 +291,15 @@ function walk(node: Node): void {
     mark.setAttribute("role", "button");
     mark.tabIndex = 0;
     mark.textContent = matched.term;
-    mark.title = matched.entry.definition;
+    const definition = matched.entry.definition;
+    mark.addEventListener("mouseenter", () => showTip(mark, definition));
+    mark.addEventListener("mouseleave", hideTip);
+    mark.addEventListener("focus", () => showTip(mark, definition));
+    mark.addEventListener("blur", hideTip);
     const open = (event: Event) => {
       event.preventDefault();
       event.stopPropagation();
+      hideTip();
       openPopup(matched!.entry.term);
       showDetail(matched!.entry);
     };

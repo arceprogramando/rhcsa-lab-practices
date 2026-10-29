@@ -30,6 +30,13 @@ const es: GlossaryEntry[] = [
     tldr: { page: "which" },
   },
   {
+    term: "rpm",
+    definition:
+      "Consulta paquetes ya instalados. rpm -ql PAQUETE lista los archivos que dejó en el disco. Sirve cuando el paquete no trae un comando: which no lo va a encontrar. rpm -q PAQUETE solo dice si está instalado y qué versión.",
+    example: "rpm -ql words → el diccionario queda en /usr/share/dict/words. which words no sirve: words no es un comando",
+    tldr: { page: "rpm", platform: "linux" },
+  },
+  {
     term: "head",
     definition:
       "Muestra solo las primeras líneas de un archivo o de lo que llega por pipe (por defecto 10). Sirve para mirar un preview sin inundar la terminal. Con -n N cambiás cuántas líneas.",
@@ -193,6 +200,13 @@ const es: GlossaryEntry[] = [
     tldr: { page: "lvcreate", platform: "linux" },
   },
   {
+    term: "fstab",
+    definition:
+      "El archivo /etc/fstab. Ahí está escrito qué discos se montan al arrancar y dónde. Cada línea es un montaje, con seis campos en este orden: qué (UUID=…), dónde (/mnt/wshare), tipo (ext4, xfs o swap), opciones (defaults), dump (0) y el orden del chequeo (0 no chequea, 1 es la raíz, 2 el resto). Guardar el archivo no monta ahora: lo aplica el próximo boot. Para probarlo ya, mount -a. El UUID sale de blkid. No pongas /dev/sdX: ese nombre puede cambiar. La copia /var/tmp/fstab del lab de permisos es solo un archivo para practicar ACL: no monta nada.",
+    example: "cat /etc/fstab · blkid /dev/wgroup/wshare · UUID=… /mnt/wshare ext4 defaults 0 0 · mount -a",
+    tldr: { page: "fstab", platform: "linux" },
+  },
+  {
     term: "al boot",
     definition:
       "Que el montaje vuelva solo después de reiniciar. No es la partición /boot. En este lab es una línea de /etc/fstab con el UUID del LV (blkid /dev/wgroup/wshare), no con /dev/sdX, porque ese nombre puede cambiar. Sin esa línea el LV sigue existiendo, pero /mnt/wshare queda vacío al reiniciar.",
@@ -306,6 +320,13 @@ const en: GlossaryEntry[] = [
     definition: "Prints the path of the executable the shell will run. It does not search random files: it looks up commands on PATH.",
     example: "which logger → /usr/bin/logger",
     tldr: { page: "which" },
+  },
+  {
+    term: "rpm",
+    definition:
+      "Looks up packages that are already installed. rpm -ql PACKAGE lists the files it put on disk. Use it when the package does not ship a command: which will not find it. rpm -q PACKAGE only says whether it is installed and which version.",
+    example: "rpm -ql words → the dictionary is /usr/share/dict/words. which words fails: words is not a command",
+    tldr: { page: "rpm", platform: "linux" },
   },
   {
     term: "head",
@@ -469,6 +490,13 @@ const en: GlossaryEntry[] = [
       "This lab's Logical Volume. It lives inside wgroup. -l 50 asks for 50 extents, not 50 MB: 50 × 8 MB = 400 MB. The device is /dev/wgroup/wshare. ext4 and the mount point /mnt/wshare go on top of it.",
     example: "lvcreate -n wshare -l 50 wgroup",
     tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "fstab",
+    definition:
+      "The file /etc/fstab. It says which disks get mounted at boot and where. Each line is one mount, with six fields in this order: what (UUID=…), where (/mnt/wshare), type (ext4, xfs, or swap), options (defaults), dump (0), and the check order (0 skips the check, 1 is the root, 2 is the rest). Saving the file does not mount now: the next boot applies it. To try it immediately, mount -a. The UUID comes from blkid. Do not write /dev/sdX: that name can change. The /var/tmp/fstab copy in the permissions lab is only a file for ACL practice: it mounts nothing.",
+    example: "cat /etc/fstab · blkid /dev/wgroup/wshare · UUID=… /mnt/wshare ext4 defaults 0 0 · mount -a",
+    tldr: { page: "fstab", platform: "linux" },
   },
   {
     term: "al boot",

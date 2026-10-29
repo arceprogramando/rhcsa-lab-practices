@@ -341,7 +341,7 @@ function taskRow(run: Run, lab: Lab, index: number): HTMLElement {
   const text = el("div", "min-w-0 text-left");
   const title = el("span", `font-medium ${done && !hard ? "line-through" : ""}`, lab.title);
   text.append(title);
-  if (lab.story) text.append(el("span", "mt-1 block text-sm leading-relaxed text-ink/75", lab.story));
+  if (lab.story) text.append(storyText(lab.story, "mt-1 block text-sm leading-relaxed text-ink/75"));
   const meta = el(
     "span",
     "mt-0.5 block text-sm text-muted",
@@ -599,7 +599,7 @@ function labCard(lab: Lab, record: LabRecord): HTMLElement {
     el("p", "text-xs font-semibold tracking-[0.16em] text-muted uppercase", lab.where),
     el("h1", "mt-2 text-3xl font-semibold tracking-tight", lab.title),
   );
-  if (lab.story) card.append(el("p", "mt-3 text-base leading-relaxed text-ink/80", lab.story));
+  if (lab.story) card.append(storyText(lab.story, "mt-3 text-base leading-relaxed text-ink/80"));
   card.append(
     objectiveList(lab.objective, "mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-ink/90 sm:text-lg"),
   );
@@ -988,6 +988,14 @@ function slipMark(text: string): HTMLElement {
     btn.setAttribute("aria-expanded", open ? "true" : "false");
   });
   wrap.append(btn, pop);
+  return wrap;
+}
+
+function storyText(story: string, className: string): HTMLElement {
+  const parts = story.split(/\n\n+/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length < 2) return el("p", className, parts[0] ?? story);
+  const wrap = el("div", className);
+  parts.forEach((part, index) => wrap.append(el("p", index === 0 ? "" : "mt-2", part)));
   return wrap;
 }
 
