@@ -562,8 +562,35 @@ function counter(label: string, value: string, isLab = false): HTMLElement {
 
 function objectiveList(lines: string[], className: string): HTMLElement {
   const list = el("ul", className);
-  for (const line of lines) list.append(el("li", "", line));
+  for (const line of lines) list.append(objectiveItem(line));
   return list;
+}
+
+function objectiveItem(line: string): HTMLElement {
+  const li = el("li");
+  const urls: string[] = [];
+  const text = line
+    .replace(/https?:\/\/[^\s]+/g, (raw) => {
+      urls.push(raw.replace(/[.,;)]+$/, ""));
+      return "";
+    })
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([.,;])/g, "$1")
+    .trim();
+  if (urls.length === 0) {
+    li.textContent = line;
+    return li;
+  }
+  li.append(document.createTextNode(text));
+  const labels = { copy: copy().copyCmd, copied: copy().copiedCmd };
+  for (const url of urls) {
+    const row = el("div", "cmd-row mt-2");
+    const code = el("code", "cmd-text");
+    code.textContent = url;
+    row.append(code, createCopyButton(url, labels));
+    li.append(row);
+  }
+  return li;
 }
 
 function labCard(lab: Lab, record: LabRecord): HTMLElement {
