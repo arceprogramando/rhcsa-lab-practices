@@ -165,6 +165,11 @@ function fillModeSummary(store: Store, mode: ExamMode, prefix: string): void {
   setText(`${prefix}-best`, best ? formatClock(wallSec(best)) : "—");
   setText(`${prefix}-help`, String(help));
   setText(`${prefix}-skip`, String(skipped));
+  if (prefix === "stat-fixed") {
+    setText("shell-runs", String(scoped.runs.length));
+    setText("shell-best", best ? formatClock(wallSec(best)) : "—");
+    setText("shell-help", String(help));
+  }
 }
 
 function fillDelta(store: Store, mode: ExamMode, id: string): void {

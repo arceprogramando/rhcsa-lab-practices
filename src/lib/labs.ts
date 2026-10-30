@@ -850,7 +850,7 @@ export const LABS: Lab[] = [
     id: "lab-19",
     track: "pdf",
     title: "Quien entra tiene que ver un mensaje",
-    story: "Al iniciar sesión tiene que aparecer un saludo. Puede ser para una persona o para todos los que entran.",
+    story: "Al iniciar sesión tiene que aparecer un saludo. Puede ser para una persona o para todos los que entran.\n\nLlega gente nueva a la empresa. Al entrar, cada uno tiene que ver un saludo.\n\nJoaquin acaba de sumarse al trabajo. A él le toca un saludo propio, porque es el asombroso. A los otros recién llegados les toca el saludo por ser nuevos en la empresa.",
     objective: [
       "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
       "Cualquier usuario: \"Welcome USUARIO, you are logged in!\".",

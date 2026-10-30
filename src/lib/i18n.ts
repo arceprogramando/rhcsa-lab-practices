@@ -104,14 +104,49 @@ export interface Copy {
   glossaryPopupSearch: string;
   glossaryPopupClose: string;
   glossaryShortcut: string;
+  opensNew: string;
   cv: string;
+  themeLight: string;
+  themeDark: string;
+  themeToLight: string;
+  themeToDark: string;
   bannerLead: string;
   bannerTail: string;
   homeTitle: string;
   homeDescription: string;
   hello: string;
   kicker: string;
-  headline: string;
+  headlineLead: string;
+  headlineMark: string;
+  shellKicker: string;
+  shellTitleLead: string;
+  shellTitleMark: string;
+  shellLead: string;
+  shellWindow: string;
+  shellNoteUsers: string;
+  shellNoteNet: string;
+  shellOutputLabel: string;
+  shellPromptLabel: string;
+  shellPromptHint: string;
+  shellIntro: string;
+  shellUnknown: (command: string) => string;
+  shellManMissing: string;
+  shellExample: string;
+  shellHelp: string[];
+  penguinKicker: string;
+  penguinTitle: string;
+  penguinCaption: string;
+  penguinPanelLabel: string;
+  penguinStill: string;
+  penguinWave: string;
+  penguinSmile: string;
+  penguinDance: string;
+  penguinSign: string;
+  penguinSignText: string;
+  penguinLook: string;
+  penguinNotebook: string;
+  penguinSpeed: string;
+  penguinOrbitHint: string;
   leadBefore: string;
   leadAfter: string;
   start: string;
@@ -316,14 +351,55 @@ const es: Copy = {
   glossaryPopupSearch: "Buscar en el glosario…",
   glossaryPopupClose: "Cerrar",
   glossaryShortcut: "Ctrl+K abre el glosario",
+  opensNew: "se abre en una pestaña nueva",
   cv: "Sobre mí",
+  themeLight: "Claro",
+  themeDark: "Oscuro",
+  themeToLight: "Cambiar a modo claro",
+  themeToDark: "Cambiar a modo oscuro",
   bannerLead: "Práctica personal para el RHCSA del 6 de noviembre.",
   bannerTail: "No es el examen oficial ni un sitio de Red Hat.",
   homeTitle: "Práctica personal para el examen RHCSA",
   homeDescription: "Hola, me estoy preparando para rendir el RHCSA el 6 de noviembre y estoy usando esto como práctica personal.",
   hello: "Hola, me estoy preparando para rendir el examen RHCSA el 6 de noviembre, y estoy usando esto como práctica personal.",
   kicker: "Práctica personal · EX200",
-  headline: "Primero lo que ya sabés hacer.",
+  headlineLead: "Primero lo que",
+  headlineMark: "ya sabés hacer.",
+  shellKicker: "/ En la terminal",
+  shellTitleLead: "Se escribe.",
+  shellTitleMark: "Se comprueba.",
+  shellLead: "Cada punto se resuelve en la máquina. Esta ventana solo consulta el glosario.",
+  shellWindow: "práctica — vm",
+  shellNoteUsers: "# usuarios",
+  shellNoteNet: "# red y perfil",
+  shellOutputLabel: "Salida del glosario de práctica",
+  shellPromptLabel: "Comando de la práctica",
+  shellPromptHint: "man usermod",
+  shellIntro: "No corre comandos del sistema. Muestra definiciones del glosario. Escribí help.",
+  shellUnknown: (command) => `${command}: no está en este glosario de práctica`,
+  shellManMissing: "man: falta el término. Por ejemplo: man usermod",
+  shellExample: "ejemplo",
+  shellHelp: [
+    "man TÉRMINO — definición del glosario",
+    "TÉRMINO — la misma definición, si el nombre está en el glosario",
+    "terms — lista esos nombres",
+    "help — esta lista",
+    "clear — limpia la ventana y deja el prompt",
+  ],
+  penguinKicker: "/ Compañía de estudio",
+  penguinTitle: "Un pingüino que también practica.",
+  penguinCaption: "Tocá la panza y pasa de escena: saludo y baile. Cada una vuelve sola a la pose quieta.",
+  penguinPanelLabel: "Qué hace el pingüino",
+  penguinStill: "Quieto",
+  penguinWave: "Saludar",
+  penguinSmile: "Sonreír",
+  penguinDance: "Baile",
+  penguinSign: "Cartel",
+  penguinSignText: "Hola",
+  penguinLook: "Mirar",
+  penguinNotebook: "Notebook",
+  penguinSpeed: "Lento",
+  penguinOrbitHint: "Arrastrá para verlo de atrás. Tocá la panza para la siguiente escena. La notebook se prende con un clic.",
   leadBefore: "La estructura (reloj de 3 horas, Revisit y Done) está basada en el video público de Red Hat ",
   leadAfter: ". Los puntos rápidos van primero. Si algo te traba, lo marcás y seguís.",
   start: "Empezá la práctica",
@@ -333,8 +409,8 @@ const es: Copy = {
     `La abierta es ${openVersion}. Abajo empezás una nueva con ${nextVersion}. La abierta queda en el historial.`,
   confirmStartOther: (openVersion, nextVersion) =>
     `La práctica de ${openVersion} queda en el historial. ¿Empezás una nueva con ${nextVersion}?`,
-  editionV10: "RHCSA 10 · Flatpak",
-  editionV9: "RHCSA 9 · Podman",
+  editionV10: "Flatpak",
+  editionV9: "Podman",
   editionNote: "No sabemos cómo es el examen. En lo publicado, la 10 practica Flatpak y la 9 practica Podman.",
   startModesLabel: "Empezar una práctica",
   startPausable: "Práctica con pausas",
@@ -349,7 +425,7 @@ const es: Copy = {
   seeStats: "Ver mis tiempos",
   seeStatsFixed: "Tiempos sin pausas",
   seeStatsPausable: "Tiempos con pausas",
-  statsModeFixed: "Sin pausas · como el examen",
+  statsModeFixed: "Sin pausas",
   statsModePausable: "Con pausas · práctica",
   timesNote: "Los tiempos quedan en este navegador.",
   loading: "Cargando tiempos locales…",
@@ -464,7 +540,7 @@ const es: Copy = {
   statsTitle: "Estadísticas de la práctica",
   statsDescription: "Tiempos por lab, promedio, ayuda pedida y mejora contra la práctica anterior. Guardado en este navegador.",
   statsHeading: "Estadísticas",
-  statsIntro: "Separadas por modo. Sin pausas es la que importa (como el examen). Con pausas es práctica libre.",
+  statsIntro: "Separadas por modo. Sin pausas es la que importa para medir tiempos. Con pausas es práctica libre.",
   coverageTitle: "Qué falta practicar",
   coverageLead: "Las barras agrupan los labs por tema. El largo es cuánto de ese grupo ya hiciste en este modo.",
   coverageNote:
@@ -548,14 +624,55 @@ const en: Copy = {
   glossaryPopupSearch: "Search the glossary…",
   glossaryPopupClose: "Close",
   glossaryShortcut: "Ctrl+K opens the glossary",
+  opensNew: "opens in a new tab",
   cv: "About me",
+  themeLight: "Light",
+  themeDark: "Dark",
+  themeToLight: "Switch to light mode",
+  themeToDark: "Switch to dark mode",
   bannerLead: "Personal practice for the November 6 RHCSA.",
   bannerTail: "This is not the official exam and not a Red Hat site.",
   homeTitle: "Personal practice for the RHCSA exam",
   homeDescription: "I am preparing for the RHCSA on November 6, and I am using this as personal practice.",
   hello: "I am preparing to take the RHCSA exam on November 6, and I am using this as personal practice.",
   kicker: "Personal practice · EX200",
-  headline: "Do what you already know first.",
+  headlineLead: "Do what you",
+  headlineMark: "already know.",
+  shellKicker: "/ In the terminal",
+  shellTitleLead: "You type it.",
+  shellTitleMark: "You check it.",
+  shellLead: "Each point is done on the machine. This window only looks up the glossary.",
+  shellWindow: "practice — vm",
+  shellNoteUsers: "# users",
+  shellNoteNet: "# network and profile",
+  shellOutputLabel: "Practice glossary output",
+  shellPromptLabel: "Practice command",
+  shellPromptHint: "man usermod",
+  shellIntro: "It does not run system commands. It shows glossary definitions. Type help.",
+  shellUnknown: (command) => `${command}: is not in this practice glossary`,
+  shellManMissing: "man: missing term. For example: man usermod",
+  shellExample: "example",
+  shellHelp: [
+    "man TERM — glossary definition",
+    "TERM — the same definition, when the name is in the glossary",
+    "terms — lists those names",
+    "help — this list",
+    "clear — clears the window and leaves the prompt",
+  ],
+  penguinKicker: "/ Study buddy",
+  penguinTitle: "A penguin that practices too.",
+  penguinCaption: "Tap the belly to change the scene: wave and dance. Each one returns to the quiet pose on its own.",
+  penguinPanelLabel: "What the penguin does",
+  penguinStill: "Still",
+  penguinWave: "Wave",
+  penguinSmile: "Smile",
+  penguinDance: "Dance",
+  penguinSign: "Sign",
+  penguinSignText: "Hi",
+  penguinLook: "Look",
+  penguinNotebook: "Notebook",
+  penguinSpeed: "Slow",
+  penguinOrbitHint: "Drag to see the back. Tap the belly for the next scene. Tap the notebook to switch it on.",
   leadBefore: "The structure (3-hour clock, Revisit and Done) is based on the public Red Hat video ",
   leadAfter: ". Quick points go first. If something stalls you, mark it and move on.",
   start: "Start practice",
@@ -565,8 +682,8 @@ const en: Copy = {
     `The open one is ${openVersion}. Below you start a new one with ${nextVersion}. The open one stays in the history.`,
   confirmStartOther: (openVersion, nextVersion) =>
     `The ${openVersion} practice stays in the history. Start a new one with ${nextVersion}?`,
-  editionV10: "RHCSA 10 · Flatpak",
-  editionV9: "RHCSA 9 · Podman",
+  editionV10: "Flatpak",
+  editionV9: "Podman",
   editionNote: "We don't know what the exam is like. From what's published, 10 practices Flatpak and 9 practices Podman.",
   startModesLabel: "Start a practice",
   startPausable: "Practice with pauses",
@@ -581,7 +698,7 @@ const en: Copy = {
   seeStats: "View my times",
   seeStatsFixed: "Times without pauses",
   seeStatsPausable: "Times with pauses",
-  statsModeFixed: "Without pauses · like the exam",
+  statsModeFixed: "Without pauses",
   statsModePausable: "With pauses · practice",
   timesNote: "Times stay in this browser.",
   loading: "Loading local times…",
@@ -696,7 +813,7 @@ const en: Copy = {
   statsTitle: "Practice stats",
   statsDescription: "Time per lab, average, help requested, and improvement against the previous attempt. Stored in this browser.",
   statsHeading: "Stats",
-  statsIntro: "Split by mode. Without pauses is what matters (like the exam). With pauses is free practice.",
+  statsIntro: "Split by mode. Without pauses is what matters for measuring times. With pauses is free practice.",
   coverageTitle: "What still needs practice",
   coverageLead: "The bars group the labs by topic. The length is how much of that group you have already done in this mode.",
   coverageNote:

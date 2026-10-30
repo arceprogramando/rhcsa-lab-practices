@@ -333,7 +333,7 @@ function taskRow(run: Run, lab: Lab, index: number): HTMLElement {
   const row = el(
     "div",
     `grid grid-cols-1 gap-2 border-b border-line px-4 py-3 last:border-b-0 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:px-5 ${
-      hard ? "bg-[#f8f1e4]" : done ? "opacity-60" : revisit ? "bg-[#f8f1e4]" : ""
+      hard ? "bg-warn-soft" : done ? "opacity-60" : revisit ? "bg-warn-soft" : ""
     }`,
   );
   const marks = el("div", "flex items-center gap-4");
@@ -611,7 +611,7 @@ function labCard(lab: Lab, record: LabRecord): HTMLElement {
 }
 
 function helpPanel(lab: Lab): HTMLElement {
-  const panel = el("section", "mt-6 rounded-2xl border border-warn/40 bg-[#f8f1e4] p-4 sm:p-5");
+  const panel = el("section", "mt-6 rounded-2xl border border-warn/40 bg-warn-soft p-4 sm:p-5");
   panel.setAttribute("aria-labelledby", "ayuda-titulo");
   panel.append(
     el("h2", "text-lg font-semibold", copy().helpAsked),
@@ -1026,5 +1026,9 @@ function anchor(href: string, text: string): HTMLAnchorElement {
   const node = link(href, text, "font-medium underline decoration-line underline-offset-2");
   node.target = "_blank";
   node.rel = "noopener noreferrer";
+  const extra = document.createElement("span");
+  extra.className = "sr-only";
+  extra.textContent = `, ${copy().opensNew}`;
+  node.append(extra);
   return node;
 }

@@ -93,7 +93,7 @@ function headline(
   const card = el(
     "section",
     mode === "fixed"
-      ? "rounded-3xl border-2 border-ink bg-card p-6 sm:p-8"
+      ? "is-window rounded-3xl border border-line bg-card p-6 sm:p-8"
       : "rounded-3xl border border-line bg-card p-6 sm:p-8",
   );
   const ui = copy();
@@ -177,7 +177,8 @@ function radialBars(domains: DomainScore[], overall: number): SVGSVGElement {
   svg.setAttribute("role", "img");
   svg.classList.add("mx-auto", "w-full", "max-w-[420px]");
   const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-  title.textContent = `${ui.coverageTitle}. ${overall}%`;
+  const detail = domains.map((domain) => `${ui.domainName[domain.id] ?? domain.id} ${domain.percent}%`).join(", ");
+  title.textContent = `${ui.coverageTitle}: ${overall}%. ${detail}`;
   svg.append(title);
 
   const cx = 280;
@@ -193,7 +194,7 @@ function radialBars(domains: DomainScore[], overall: number): SVGSVGElement {
     const a1 = mid + bar / 2;
     const track = document.createElementNS("http://www.w3.org/2000/svg", "path");
     track.setAttribute("d", ring(cx, cy, inner, outer, a0, a1));
-    track.setAttribute("fill", "#e4e0d6");
+    track.setAttribute("fill", token("--color-track"));
     svg.append(track);
     if (domain.percent > 0) {
       const reach = inner + ((outer - inner) * domain.percent) / 100;
@@ -207,7 +208,7 @@ function radialBars(domains: DomainScore[], overall: number): SVGSVGElement {
     text.setAttribute("x", String(cx + labelR * Math.cos(mid)));
     text.setAttribute("y", String(cy + labelR * Math.sin(mid)));
     text.setAttribute("text-anchor", anchor(mid));
-    text.setAttribute("fill", "#121a2b");
+    text.setAttribute("fill", token("--color-ink"));
     text.setAttribute("font-size", "15");
     text.setAttribute("font-family", "Figtree, Segoe UI, sans-serif");
     text.setAttribute("font-weight", "600");
@@ -230,7 +231,7 @@ function radialBars(domains: DomainScore[], overall: number): SVGSVGElement {
   caption.setAttribute("x", String(cx));
   caption.setAttribute("y", String(cy + 18));
   caption.setAttribute("text-anchor", "middle");
-  caption.setAttribute("fill", "#5c6570");
+  caption.setAttribute("fill", token("--color-muted"));
   caption.setAttribute("font-size", "12");
   caption.setAttribute("font-family", "Figtree, Segoe UI, sans-serif");
   caption.setAttribute("letter-spacing", "0.08em");
@@ -253,10 +254,14 @@ function anchor(angle: number): "start" | "middle" | "end" {
   return "middle";
 }
 
+function token(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 function tone(percent: number): string {
-  if (percent >= 80) return "#1c6b45";
-  if (percent >= 40) return "#8a5a00";
-  return "#8e2a2a";
+  if (percent >= 80) return token("--color-good");
+  if (percent >= 40) return token("--color-warn");
+  return token("--color-bad");
 }
 
 function domainList(domains: DomainScore[]): HTMLElement {
@@ -273,7 +278,7 @@ function domainList(domains: DomainScore[]): HTMLElement {
     summary.className = "flex cursor-pointer items-center justify-between gap-3";
     const name = el("span", "font-medium", ui.domainName[domain.id] ?? domain.id);
     const percent = el("span", "stat-value text-sm font-semibold", `${domain.percent}%`);
-    percent.style.color = domain.percent === 0 ? "#8e2a2a" : tone(domain.percent);
+    percent.style.color = domain.percent === 0 ? token("--color-bad") : tone(domain.percent);
     summary.append(name, percent);
     const meter = el("div", "coverage-meter mt-2");
     const fill = document.createElement("span");

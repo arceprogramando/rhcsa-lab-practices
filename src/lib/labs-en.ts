@@ -648,10 +648,10 @@ export const LAB_EN: Record<string, LabEn> = {
   },
   "lab-19": {
     title: "Whoever logs in has to see a message",
-    story: "A greeting has to appear at login. It can be for one person or for everyone who logs in.",
+    story: "A greeting has to appear at login. It can be for one person or for everyone who logs in.\n\nNew people are joining the company. When they log in, each of them has to see a greeting.\n\nJoaquin just joined the job. He gets his own greeting, because he is the amazing one. The other newcomers get the greeting for being new at the company.",
     objective: [
       "joaquin: \"Welcome to you, user Joaquin, you are amazing!\".",
-      "Any user: \"Welcome USER, you are logged in!\".",
+      "Any user: \"Welcome USUARIO, you are logged in!\".",
     ],
     where: "client",
     steps: [

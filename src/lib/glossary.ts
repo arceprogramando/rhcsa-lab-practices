@@ -312,6 +312,348 @@ const es: GlossaryEntry[] = [
       "Copia con el teclado texto que ya salió en la pantalla. No viene en una instalación mínima. Ctrl+A y después [ abre el modo copia, las flechas se mueven, Espacio marca el principio y otro Espacio el final, Ctrl+A y después ] pega. El recorte es de screen. Bash sigue pegando con Ctrl+Y.",
     tldr: { page: "screen" },
   },
+  {
+    term: "ls",
+    definition:
+      "Lista lo que hay en una carpeta. Sin opciones, solo nombres. -l es el listado largo: permisos, dueño, grupo y tamaño. -a incluye los que empiezan con punto. -n muestra UID y GID en número. -d no entra: muestra la carpeta misma. -Z agrega el contexto de SELinux.",
+    example: "ls -lan → largo, ocultos, UID y GID numéricos · ls -ld /shared/sysadm → la carpeta, no el contenido · ls -Zd RUTA → el contexto de esa carpeta",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -lan",
+    definition:
+      "Listado largo, con ocultos, y el dueño y el grupo en número. -l es largo, -a incluye . y .., -n cambia el nombre del dueño y del grupo por el UID y el GID. Sirve cuando el nombre no alcanza para ver de quién es el archivo.",
+    example: "ls -lan /home/thiago",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -ld",
+    definition:
+      "Muestra la carpeta misma, no lo que tiene adentro. Sin -d, ls entra y lista el contenido. Con -l se lee el setgid: drwxrws--- tiene la s en el lugar de la x del grupo.",
+    example: "ls -ld /shared/sysadm",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -Zd",
+    definition:
+      "Muestra el contexto de SELinux de la carpeta misma. -Z es el contexto y -d no entra adentro. Sin -d, -Z lista el contexto de cada archivo de adentro.",
+    example: "ls -Zd /srv/company-drop",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "cd",
+    definition: "Cambia de carpeta. Sin argumento va al home de quien está logueado. cd - vuelve a la carpeta anterior.",
+    example: "cd /etc/yum.repos.d/ && ls",
+    tldr: { page: "cd" },
+  },
+  {
+    term: "cat",
+    definition: "Imprime un archivo entero en la terminal. No pagina: si es largo, se va para arriba. Para mirar una parte, head o grep.",
+    example: "cat /etc/vconsole.conf",
+    tldr: { page: "cat" },
+  },
+  {
+    term: "echo",
+    definition: "Imprime el texto que le pasás. Con >> lo agrega al final de un archivo. Con > lo pisa. Dentro de comillas simples el shell no toca el texto.",
+    example: "echo prueba >> /var/tmp/fstab",
+    tldr: { page: "echo" },
+  },
+  {
+    term: "mkdir",
+    definition: "Crea una carpeta. -p crea también las de arriba si no existen y no se queja si la última ya está. Sin -p, una ruta con un padre que no existe falla.",
+    example: "mkdir -p /shared/sysadm",
+    tldr: { page: "mkdir" },
+  },
+  {
+    term: "touch",
+    definition: "Crea un archivo vacío si no existe. Si existe, le actualiza la fecha. También sirve para dejar un archivo vacío que otro programa va a leer, como /.autorelabel.",
+    example: "touch /.autorelabel",
+    tldr: { page: "touch" },
+  },
+  {
+    term: "id",
+    definition: "Muestra UID, grupo primario y grupos secundarios de un usuario. Sin argumento, los de quien está en el prompt. Sirve para comprobar un useradd o un usermod -aG.",
+    example: "id thiago",
+    tldr: { page: "id" },
+  },
+  {
+    term: "useradd",
+    definition:
+      "Crea un usuario. -m crea el home. -u fija el UID. -g es el grupo primario. -G suma grupos secundarios en el alta. La contraseña no se pone acá: después va passwd.",
+    example: "useradd -m -G developer thiago",
+    tldr: { page: "useradd", platform: "linux" },
+  },
+  {
+    term: "groupadd",
+    definition: "Crea un grupo. El usuario se suma después con useradd -G o con usermod -aG. groupadd no mete a nadie adentro.",
+    example: "groupadd developer",
+    tldr: { page: "groupadd", platform: "linux" },
+  },
+  {
+    term: "passwd",
+    definition: "Cambia la contraseña. Sin argumento, la de quien está logueado: la pide dos veces. passwd USUARIO, como root, cambia la de esa cuenta. No crea el usuario.",
+    example: "passwd thiago",
+    tldr: { page: "passwd" },
+  },
+  {
+    term: "chown",
+    definition: "Cambia dueño y grupo de un archivo. Dueño y grupo van juntos: USUARIO:GRUPO. -R baja por la carpeta. No pone permisos: eso es chmod.",
+    example: "chown erik:erik /var/tmp/fstab",
+    tldr: { page: "chown" },
+  },
+  {
+    term: "getent",
+    definition: "Lee una base del sistema: passwd, group o shadow. Muestra la línea de esa cuenta, venga de un archivo local o de otra fuente. getent group NOMBRE dice si el grupo existe y quién está.",
+    example: "getent passwd thiago · getent group developer",
+    tldr: { page: "getent" },
+  },
+  {
+    term: "su -",
+    definition:
+      "Abre un login de ese usuario: carga su home y su entorno. El guion no se saca. su USUARIO sin guion no es un login. su - -c 'COMANDO' corre eso y vuelve. Para probar un permiso, el comando tiene que ir adentro de las comillas.",
+    example: "su - felipe · su - erik -c 'echo prueba >> /var/tmp/fstab'",
+    tldr: { page: "su" },
+  },
+  {
+    term: "dnf",
+    definition:
+      "Instala y consulta paquetes. repolist muestra los repos enabled. install -y instala sin preguntar. --repo= limita a esos repos. provides RUTA dice qué paquete trae ese archivo. clean all tira la caché. list available lista lo que se puede instalar.",
+    example: "dnf repolist · dnf install -y --repo=BaseOS --repo=AppStream words · dnf provides /usr/sbin/semanage",
+    tldr: { page: "dnf", platform: "linux" },
+  },
+  {
+    term: "find",
+    definition:
+      "Busca archivos por nombre, dueño, tipo o fecha. -user es el dueño, -type f es archivo, -mtime -1 es el último día. -exec COMANDO {} \\; corre ese comando con cada resultado. 2>/dev/null esconde los Permission denied.",
+    example: "find / -user erik -mtime -1 -type f",
+    tldr: { page: "find" },
+  },
+  {
+    term: "tar",
+    definition:
+      "Empaqueta o lista un tar. -c crea, -t lista, -x extrae. -j es bzip2, -z es gzip, -f es el archivo. El orden que se usa acá es la letra de la acción, después la del compresor y -f al final, pegado al nombre.",
+    example: "tar -tjf /root/myetcbackup.tar.bz2 | head",
+    tldr: { page: "tar" },
+  },
+  {
+    term: "systemctl",
+    definition:
+      "Maneja unidades de systemd. status no cambia nada. start y stop son de ahora. enable lo deja para el próximo boot y disable lo saca. enable --now arranca ya y lo deja para el boot. restart vuelve a leer la configuración.",
+    example: "systemctl enable --now httpd · systemctl status httpd",
+    tldr: { page: "systemctl", platform: "linux" },
+  },
+  {
+    term: "journalctl",
+    definition: "Lee el diario de systemd. -u UNIDAD deja solo ese servicio. -b es este boot. -f sigue las líneas nuevas. No reemplaza a ausearch: el de SELinux es otro registro.",
+    example: "journalctl -u httpd -b",
+    tldr: { page: "journalctl", platform: "linux" },
+  },
+  {
+    term: "hostnamectl",
+    definition: "Muestra o cambia el hostname. set-hostname lo cambia ya y lo guarda. No es un perfil de red: no hace falta nmcli connection up. status, o hostnamectl solo, muestra el nombre actual.",
+    example: "hostnamectl set-hostname client.rhcsa.lab",
+    tldr: { page: "hostnamectl", platform: "linux" },
+  },
+  {
+    term: "localectl",
+    definition:
+      "Teclado de la consola y del gráfico. status muestra VC Keymap y X11 Layout. set-keymap es la consola. set-x11-keymap es el gráfico. list-keymaps y list-x11-keymap-layouts son las listas. No cambia lo que escribís en una SSH.",
+    example: "localectl status · localectl list-keymaps",
+    tldr: { page: "localectl", platform: "linux" },
+  },
+  {
+    term: "loginctl",
+    definition: "Lista sesiones de login. Sirve para ver si un usuario sigue adentro antes de borrarlo: userdel no puede con una sesión abierta.",
+    example: "loginctl list-sessions",
+    tldr: { page: "loginctl", platform: "linux" },
+  },
+  {
+    term: "reboot",
+    definition: "Reinicia. En un arranque normal alcanza reboot. Si bash quedó como proceso 1, hace falta exec /sbin/reboot -f: sin -f el kernel entra en panic.",
+    example: "reboot · exec /sbin/reboot -f",
+    tldr: { page: "reboot" },
+  },
+  {
+    term: "mount",
+    definition:
+      "Muestra o monta sistemas de archivos. Sin argumentos, lista lo que está montado. -o remount,rw vuelve a montar escribible una raíz que arrancó solo lectura. El punto de montaje es el último argumento.",
+    example: "mount -o remount,rw / · mount -o remount,rw /sysroot",
+    tldr: { page: "mount" },
+  },
+  {
+    term: "nmcli",
+    definition:
+      "Configura NetworkManager desde la terminal. connection show lista perfiles: NAME es el nombre que va en modify, DEVICE es la placa. connection modify guarda IP, gateway y DNS. connection up aplica ahora. -f muestra un solo campo. ip a no muestra el DNS.",
+    example: "nmcli connection show · nmcli -f ipv4.dns connection show hostonly · nmcli connection up hostonly",
+    tldr: { page: "nmcli", platform: "linux" },
+  },
+  {
+    term: "ip",
+    definition: "Mira la red. ip -br a es la lista corta de placas y direcciones. ip a es la misma, más larga. No cambia el perfil: eso es nmcli. lo es la máquina consigo misma y no se edita.",
+    example: "ip -br a",
+    tldr: { page: "ip" },
+  },
+  {
+    term: "curl",
+    definition: "Pide una URL y muestra la respuesta. -I pide solo las cabeceras. Sirve para ver si un puerto o un servicio responde, sin abrir el navegador.",
+    example: "curl -I http://127.0.0.1:82/",
+    tldr: { page: "curl" },
+  },
+  {
+    term: "firewall-cmd",
+    definition:
+      "Abre o cierra puertos en firewalld. --add-port=PUERTO/tcp abre. --permanent lo guarda. Sin --permanent, al reboot se pierde. --reload aplica ahora lo que quedó guardado. Hasta el reload, lo permanente no entra.",
+    example: "firewall-cmd --add-port=82/tcp --permanent && firewall-cmd --reload",
+    tldr: { page: "firewall-cmd", platform: "linux" },
+  },
+  {
+    term: "getenforce",
+    definition: "Dice el modo de SELinux ahora: Enforcing, Permissive o Disabled. No lo cambia. Enforcing bloquea. Permissive avisa y deja pasar.",
+    example: "getenforce",
+    tldr: { page: "getenforce", platform: "linux" },
+  },
+  {
+    term: "semanage",
+    definition:
+      "Cambia la política de SELinux y lo guarda. port -l lista puertos etiquetados. port -a -t TIPO -p tcp PUERTO agrega uno. fcontext anota el contexto de una ruta para después de restorecon. No viene en una mínima: el paquete es policycoreutils-python-utils.",
+    example: "semanage port -l | grep http · semanage port -a -t http_port_t -p tcp 82",
+    tldr: { page: "semanage", platform: "linux" },
+  },
+  {
+    term: "restorecon",
+    definition: "Aplica a los archivos el contexto que la política ya tiene anotado. -v avisa si reetiquetó. No inventa una etiqueta nueva: si falta la regla, primero va semanage fcontext.",
+    example: "restorecon -v /etc/NetworkManager/system-connections/hostonly.nmconnection",
+    tldr: { page: "restorecon", platform: "linux" },
+  },
+  {
+    term: "getsebool",
+    definition: "Muestra un booleano de SELinux. -a lista todos. No lo cambia: eso es setsebool. on permite, off no.",
+    example: "getsebool -a | grep ftp",
+    tldr: { page: "getsebool", platform: "linux" },
+  },
+  {
+    term: "ausearch",
+    definition: "Busca en el registro de auditoría. -m avc deja los bloqueos de SELinux. -ts recent es lo de recién. No es journalctl: el AVC de SELinux está acá.",
+    example: "ausearch -m avc -ts recent",
+    tldr: { page: "ausearch", platform: "linux" },
+  },
+  {
+    term: "podman",
+    definition:
+      "Corre contenedores sin un demonio. run crea y arranca. -d lo deja atrás. --name le pone nombre. -v ORIGEN:DESTINO:Z monta una carpeta y la Z ajusta el contexto. generate systemd escribe la unidad para que systemd lo levante.",
+    example: "podman run -d --name mycontainer localhost/text2pdf:latest · man podman-generate-systemd",
+    tldr: { page: "podman", platform: "linux" },
+  },
+  {
+    term: "flatpak",
+    definition:
+      "Instala aplicaciones aparte de dnf. remote-add agrega un origen. install baja una app. --user es de esa cuenta, --system es de la máquina. list muestra lo instalado. uninstall saca una. El remote de sistema no le aparece a otro usuario cuando usa --user.",
+    example: "flatpak list · flatpak install --user -y NOMBRE APP · man flatpak-remote-add",
+    tldr: { page: "flatpak", platform: "linux" },
+  },
+  {
+    term: "lsblk",
+    definition: "Lista discos y particiones en árbol. -f agrega el sistema de archivos y el UUID. El disco que tiene / y /boot no se reparte de nuevo.",
+    example: "lsblk -f",
+    tldr: { page: "lsblk", platform: "linux" },
+  },
+  {
+    term: "blkid",
+    definition: "Muestra UUID y tipo de un dispositivo. Ese UUID es el que va en fstab si la línea no usa el nombre /dev, que puede cambiar de orden.",
+    example: "blkid /dev/sdb1",
+    tldr: { page: "blkid", platform: "linux" },
+  },
+  {
+    term: "parted",
+    definition: "Reparte un disco. mklabel escribe la tabla. mkpart crea una partición. La unidad va en el número: 400MiB no es 400MB. El disco de / no se toca.",
+    example: "parted /dev/sdb --script mklabel gpt mkpart primary 1MiB 401MiB",
+    tldr: { page: "parted", platform: "linux" },
+  },
+  {
+    term: "pvcreate",
+    definition: "Marca una partición como Physical Volume para LVM. No crea el grupo ni el volumen lógico: eso es vgcreate y lvcreate. Antes tiene que existir la partición.",
+    example: "pvcreate /dev/sdb1",
+    tldr: { page: "pvcreate", platform: "linux" },
+  },
+  {
+    term: "vgcreate",
+    definition: "Crea un Volume Group con uno o más PV. El primer argumento es el nombre del grupo. El resto son los discos.",
+    example: "vgcreate wgroup /dev/sdb1",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "lvcreate",
+    definition: "Crea un Logical Volume dentro de un VG. -n es el nombre. -L es el tamaño. El último argumento es el grupo.",
+    example: "lvcreate -n wshare -L 400M wgroup",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "lvs",
+    definition: "Lista Logical Volumes. No cambia nada. Ahí se lee el tamaño y el grupo antes de un lvresize.",
+    example: "lvs",
+    tldr: { page: "lvs", platform: "linux" },
+  },
+  {
+    term: "vgs",
+    definition: "Lista Volume Groups y cuánto espacio libre les queda. No cambia nada.",
+    example: "vgs",
+    tldr: { page: "vgs", platform: "linux" },
+  },
+  {
+    term: "mkfs.ext4",
+    definition: "Formatea un volumen en ext4. El argumento es el dispositivo, no el punto de montaje. Formatear borra lo que había.",
+    example: "mkfs.ext4 /dev/wgroup/wshare",
+    tldr: { page: "mkfs.ext4", platform: "linux" },
+  },
+  {
+    term: "mkswap",
+    definition: "Marca una partición como swap. No la activa: eso es swapon. Después la línea va en fstab para que vuelva sola.",
+    example: "mkswap /dev/sdb2",
+    tldr: { page: "mkswap", platform: "linux" },
+  },
+  {
+    term: "swapon",
+    definition: "Activa un swap ya marcado con mkswap. swapon --show lista los que están activos. Sin la línea en fstab, al reboot no vuelve.",
+    example: "swapon /dev/sdb2 · swapon --show",
+    tldr: { page: "swapon", platform: "linux" },
+  },
+  {
+    term: "crontab",
+    definition: "Edita o lista la tabla de tareas de un usuario. -l lista, -e edita, -r borra. -u USUARIO, como root, es la tabla de esa cuenta. No es el timer de systemd.",
+    example: "crontab -l -u erik",
+    tldr: { page: "crontab" },
+  },
+  {
+    term: "exportfs",
+    definition: "Publica o revisa lo que NFS está exportando. -v lista con las opciones. -r vuelve a leer /etc/exports. No alcanza con editar el archivo: hay que publicarlo.",
+    example: "exportfs -v · exportfs -r",
+    tldr: { page: "exportfs", platform: "linux" },
+  },
+  {
+    term: "showmount",
+    definition: "Pregunta a un servidor NFS qué exporta. -e HOST lista las exportaciones. Sirve para comprobar desde el cliente, sin montar todavía.",
+    example: "showmount -e server",
+    tldr: { page: "showmount", platform: "linux" },
+  },
+  {
+    term: "sed",
+    definition:
+      "Edita texto por línea. -i cambia el archivo. Sin -i, solo imprime. La s cambia la primera coincidencia de cada línea. ^ exige el principio de la línea. No es set: set es otra orden de bash.",
+    example: "sed -i 's/^Listen 80$/Listen 82/' /etc/httpd/conf/httpd.conf",
+    tldr: { page: "sed" },
+  },
+  {
+    term: "visudo",
+    definition: "Abre sudoers y no lo guarda si la sintaxis está mal. Es el editor seguro. No se edita /etc/sudoers con vim directo: un error te deja sin sudo.",
+    example: "visudo",
+    tldr: { page: "visudo", platform: "linux" },
+  },
+  {
+    term: "chroot",
+    definition: "Entra a otro árbol de directorios y lo toma como /. En el rescate con rd.break, chroot /sysroot entra al sistema real. exit sale de ahí.",
+    example: "chroot /sysroot",
+    tldr: { page: "chroot" },
+  },
 ];
 
 const en: GlossaryEntry[] = [
@@ -603,6 +945,348 @@ const en: GlossaryEntry[] = [
     definition:
       "Copies, with the keyboard, text that has already been printed on the screen. It is not part of a minimal install. Ctrl+A then [ opens copy mode, the arrows move, Space marks the start and Space again marks the end, Ctrl+A then ] pastes. The buffer belongs to screen. Bash still pastes with Ctrl+Y.",
     tldr: { page: "screen" },
+  },
+  {
+    term: "ls",
+    definition:
+      "Lists what is in a directory. With no options, names only. -l is the long list: mode, owner, group, and size. -a includes names that start with a dot. -n prints UID and GID as numbers. -d does not enter: it shows the directory itself. -Z adds the SELinux context.",
+    example: "ls -lan → long, hidden, numeric UID and GID · ls -ld /shared/sysadm → the directory, not its contents · ls -Zd PATH → that directory's context",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -lan",
+    definition:
+      "Long listing, including hidden names, with owner and group as numbers. -l is long, -a includes . and .., -n replaces the owner and group names with the UID and the GID. Use it when the name is not enough to see who owns the file.",
+    example: "ls -lan /home/thiago",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -ld",
+    definition:
+      "Shows the directory itself, not what is inside. Without -d, ls enters and lists the contents. With -l you can read setgid: drwxrws--- has s in the group's execute slot.",
+    example: "ls -ld /shared/sysadm",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "ls -Zd",
+    definition:
+      "Shows the SELinux context of the directory itself. -Z is the context and -d does not enter. Without -d, -Z lists the context of each file inside.",
+    example: "ls -Zd /srv/company-drop",
+    tldr: { page: "ls" },
+  },
+  {
+    term: "cd",
+    definition: "Changes directory. With no argument it goes to the home of whoever is logged in. cd - returns to the previous directory.",
+    example: "cd /etc/yum.repos.d/ && ls",
+    tldr: { page: "cd" },
+  },
+  {
+    term: "cat",
+    definition: "Prints a whole file on the terminal. It does not page: a long file scrolls away. To see a piece, use head or grep.",
+    example: "cat /etc/vconsole.conf",
+    tldr: { page: "cat" },
+  },
+  {
+    term: "echo",
+    definition: "Prints the text you give it. >> appends that text to a file. > overwrites the file. Inside single quotes the shell does not touch the text.",
+    example: "echo prueba >> /var/tmp/fstab",
+    tldr: { page: "echo" },
+  },
+  {
+    term: "mkdir",
+    definition: "Creates a directory. -p also creates parents that are missing and stays quiet if the last one already exists. Without -p, a path whose parent is missing fails.",
+    example: "mkdir -p /shared/sysadm",
+    tldr: { page: "mkdir" },
+  },
+  {
+    term: "touch",
+    definition: "Creates an empty file if it does not exist. If it exists, it updates the timestamp. Also used to leave an empty file another program will read, such as /.autorelabel.",
+    example: "touch /.autorelabel",
+    tldr: { page: "touch" },
+  },
+  {
+    term: "id",
+    definition: "Shows the UID, primary group, and secondary groups of a user. With no argument, those of whoever is at the prompt. Use it to check a useradd or a usermod -aG.",
+    example: "id thiago",
+    tldr: { page: "id" },
+  },
+  {
+    term: "useradd",
+    definition:
+      "Creates a user. -m creates the home. -u sets the UID. -g is the primary group. -G adds secondary groups at creation. The password is not set here: passwd comes after.",
+    example: "useradd -m -G developer thiago",
+    tldr: { page: "useradd", platform: "linux" },
+  },
+  {
+    term: "groupadd",
+    definition: "Creates a group. The user is added later with useradd -G or usermod -aG. groupadd does not put anyone in the group.",
+    example: "groupadd developer",
+    tldr: { page: "groupadd", platform: "linux" },
+  },
+  {
+    term: "passwd",
+    definition: "Changes a password. With no argument, the password of whoever is logged in: it asks twice. passwd USER, as root, changes that account. It does not create the user.",
+    example: "passwd thiago",
+    tldr: { page: "passwd" },
+  },
+  {
+    term: "chown",
+    definition: "Changes the owner and group of a file. Owner and group go together: USER:GROUP. -R walks down the directory. It does not set mode: that is chmod.",
+    example: "chown erik:erik /var/tmp/fstab",
+    tldr: { page: "chown" },
+  },
+  {
+    term: "getent",
+    definition: "Reads a system database: passwd, group, or shadow. It prints that account's line, from a local file or from another source. getent group NAME says whether the group exists and who is in it.",
+    example: "getent passwd thiago · getent group developer",
+    tldr: { page: "getent" },
+  },
+  {
+    term: "su -",
+    definition:
+      "Opens a login as that user: it loads their home and their environment. Do not drop the dash. su USER without the dash is not a login. su - -c 'COMMAND' runs that and returns. To test a permission, the command has to stay inside the quotes.",
+    example: "su - felipe · su - erik -c 'echo prueba >> /var/tmp/fstab'",
+    tldr: { page: "su" },
+  },
+  {
+    term: "dnf",
+    definition:
+      "Installs and looks up packages. repolist shows enabled repos. install -y installs without asking. --repo= limits the search to those repos. provides PATH says which package ships that file. clean all drops the cache. list available lists what can be installed.",
+    example: "dnf repolist · dnf install -y --repo=BaseOS --repo=AppStream words · dnf provides /usr/sbin/semanage",
+    tldr: { page: "dnf", platform: "linux" },
+  },
+  {
+    term: "find",
+    definition:
+      "Finds files by name, owner, type, or age. -user is the owner, -type f is a file, -mtime -1 is the last day. -exec COMMAND {} \\; runs that command on each result. 2>/dev/null hides Permission denied.",
+    example: "find / -user erik -mtime -1 -type f",
+    tldr: { page: "find" },
+  },
+  {
+    term: "tar",
+    definition:
+      "Packs or lists a tar archive. -c creates, -t lists, -x extracts. -j is bzip2, -z is gzip, -f is the file. The order used here is the action letter, then the compressor, and -f at the end, next to the name.",
+    example: "tar -tjf /root/myetcbackup.tar.bz2 | head",
+    tldr: { page: "tar" },
+  },
+  {
+    term: "systemctl",
+    definition:
+      "Manages systemd units. status changes nothing. start and stop are for now. enable leaves it for the next boot and disable removes that. enable --now starts it now and leaves it for boot. restart makes it read the configuration again.",
+    example: "systemctl enable --now httpd · systemctl status httpd",
+    tldr: { page: "systemctl", platform: "linux" },
+  },
+  {
+    term: "journalctl",
+    definition: "Reads the systemd journal. -u UNIT keeps only that service. -b is this boot. -f follows new lines. It does not replace ausearch: SELinux denials are a different log.",
+    example: "journalctl -u httpd -b",
+    tldr: { page: "journalctl", platform: "linux" },
+  },
+  {
+    term: "hostnamectl",
+    definition: "Shows or changes the hostname. set-hostname changes it now and saves it. It is not a network profile: nmcli connection up is not required. status, or hostnamectl alone, shows the current name.",
+    example: "hostnamectl set-hostname client.rhcsa.lab",
+    tldr: { page: "hostnamectl", platform: "linux" },
+  },
+  {
+    term: "localectl",
+    definition:
+      "Console and graphical keymap. status shows VC Keymap and X11 Layout. set-keymap is the console. set-x11-keymap is the graphical one. list-keymaps and list-x11-keymap-layouts are the lists. It does not change what you type over SSH.",
+    example: "localectl status · localectl list-keymaps",
+    tldr: { page: "localectl", platform: "linux" },
+  },
+  {
+    term: "loginctl",
+    definition: "Lists login sessions. Use it to see whether a user is still logged in before deleting them: userdel cannot remove an open session.",
+    example: "loginctl list-sessions",
+    tldr: { page: "loginctl", platform: "linux" },
+  },
+  {
+    term: "reboot",
+    definition: "Reboots. On a normal boot, reboot is enough. If bash is process 1, you need exec /sbin/reboot -f: without -f the kernel panics.",
+    example: "reboot · exec /sbin/reboot -f",
+    tldr: { page: "reboot" },
+  },
+  {
+    term: "mount",
+    definition:
+      "Shows or mounts filesystems. With no arguments it lists what is mounted. -o remount,rw mounts a root that booted read-only so it can be written. The mount point is the last argument.",
+    example: "mount -o remount,rw / · mount -o remount,rw /sysroot",
+    tldr: { page: "mount" },
+  },
+  {
+    term: "nmcli",
+    definition:
+      "Configures NetworkManager from the terminal. connection show lists profiles: NAME is what you pass to modify, DEVICE is the NIC. connection modify saves the address, gateway, and DNS. connection up applies it now. -f prints one field. ip a does not show DNS.",
+    example: "nmcli connection show · nmcli -f ipv4.dns connection show hostonly · nmcli connection up hostonly",
+    tldr: { page: "nmcli", platform: "linux" },
+  },
+  {
+    term: "ip",
+    definition: "Looks at the network. ip -br a is the short list of NICs and addresses. ip a is the same list, longer. It does not change the profile: that is nmcli. lo is the machine talking to itself and is not edited.",
+    example: "ip -br a",
+    tldr: { page: "ip" },
+  },
+  {
+    term: "curl",
+    definition: "Requests a URL and prints the answer. -I asks for headers only. Use it to see whether a port or a service answers, without a browser.",
+    example: "curl -I http://127.0.0.1:82/",
+    tldr: { page: "curl" },
+  },
+  {
+    term: "firewall-cmd",
+    definition:
+      "Opens or closes ports in firewalld. --add-port=PORT/tcp opens one. --permanent saves it. Without --permanent, a reboot drops it. --reload applies what was saved. Until the reload, the permanent change is not active.",
+    example: "firewall-cmd --add-port=82/tcp --permanent && firewall-cmd --reload",
+    tldr: { page: "firewall-cmd", platform: "linux" },
+  },
+  {
+    term: "getenforce",
+    definition: "Prints the SELinux mode right now: Enforcing, Permissive, or Disabled. It does not change it. Enforcing blocks. Permissive warns and allows.",
+    example: "getenforce",
+    tldr: { page: "getenforce", platform: "linux" },
+  },
+  {
+    term: "semanage",
+    definition:
+      "Changes SELinux policy and saves it. port -l lists labeled ports. port -a -t TYPE -p tcp PORT adds one. fcontext records the context of a path for a later restorecon. It is not in a minimal install: the package is policycoreutils-python-utils.",
+    example: "semanage port -l | grep http · semanage port -a -t http_port_t -p tcp 82",
+    tldr: { page: "semanage", platform: "linux" },
+  },
+  {
+    term: "restorecon",
+    definition: "Applies the context the policy already has recorded. -v says when it relabeled. It does not invent a new label: if the rule is missing, semanage fcontext comes first.",
+    example: "restorecon -v /etc/NetworkManager/system-connections/hostonly.nmconnection",
+    tldr: { page: "restorecon", platform: "linux" },
+  },
+  {
+    term: "getsebool",
+    definition: "Shows one SELinux boolean. -a lists them all. It does not change one: that is setsebool. on allows, off does not.",
+    example: "getsebool -a | grep ftp",
+    tldr: { page: "getsebool", platform: "linux" },
+  },
+  {
+    term: "ausearch",
+    definition: "Searches the audit log. -m avc keeps SELinux denials. -ts recent is what just happened. It is not journalctl: SELinux AVCs are here.",
+    example: "ausearch -m avc -ts recent",
+    tldr: { page: "ausearch", platform: "linux" },
+  },
+  {
+    term: "podman",
+    definition:
+      "Runs containers without a daemon. run creates and starts one. -d leaves it in the background. --name sets the name. -v SOURCE:DEST:Z mounts a directory and Z fixes the context. generate systemd writes the unit so systemd can start it.",
+    example: "podman run -d --name mycontainer localhost/text2pdf:latest · man podman-generate-systemd",
+    tldr: { page: "podman", platform: "linux" },
+  },
+  {
+    term: "flatpak",
+    definition:
+      "Installs applications apart from dnf. remote-add adds a source. install downloads an app. --user is that account, --system is the machine. list shows what is installed. uninstall removes one. A system remote does not show up for another user when they use --user.",
+    example: "flatpak list · flatpak install --user -y NAME APP · man flatpak-remote-add",
+    tldr: { page: "flatpak", platform: "linux" },
+  },
+  {
+    term: "lsblk",
+    definition: "Lists disks and partitions as a tree. -f adds the filesystem and the UUID. The disk that holds / and /boot is not partitioned again.",
+    example: "lsblk -f",
+    tldr: { page: "lsblk", platform: "linux" },
+  },
+  {
+    term: "blkid",
+    definition: "Prints the UUID and type of a device. That UUID is what goes in fstab when the line does not use the /dev name, which can change order.",
+    example: "blkid /dev/sdb1",
+    tldr: { page: "blkid", platform: "linux" },
+  },
+  {
+    term: "parted",
+    definition: "Partitions a disk. mklabel writes the table. mkpart creates a partition. The unit belongs on the number: 400MiB is not 400MB. The disk that holds / is left alone.",
+    example: "parted /dev/sdb --script mklabel gpt mkpart primary 1MiB 401MiB",
+    tldr: { page: "parted", platform: "linux" },
+  },
+  {
+    term: "pvcreate",
+    definition: "Marks a partition as a Physical Volume for LVM. It does not create the group or the logical volume: those are vgcreate and lvcreate. The partition has to exist first.",
+    example: "pvcreate /dev/sdb1",
+    tldr: { page: "pvcreate", platform: "linux" },
+  },
+  {
+    term: "vgcreate",
+    definition: "Creates a Volume Group from one or more PVs. The first argument is the group name. The rest are the disks.",
+    example: "vgcreate wgroup /dev/sdb1",
+    tldr: { page: "vgcreate", platform: "linux" },
+  },
+  {
+    term: "lvcreate",
+    definition: "Creates a Logical Volume inside a VG. -n is the name. -L is the size. The last argument is the group.",
+    example: "lvcreate -n wshare -L 400M wgroup",
+    tldr: { page: "lvcreate", platform: "linux" },
+  },
+  {
+    term: "lvs",
+    definition: "Lists Logical Volumes. It changes nothing. That is where you read the size and the group before an lvresize.",
+    example: "lvs",
+    tldr: { page: "lvs", platform: "linux" },
+  },
+  {
+    term: "vgs",
+    definition: "Lists Volume Groups and how much free space they have left. It changes nothing.",
+    example: "vgs",
+    tldr: { page: "vgs", platform: "linux" },
+  },
+  {
+    term: "mkfs.ext4",
+    definition: "Formats a volume as ext4. The argument is the device, not the mount point. Formatting erases what was there.",
+    example: "mkfs.ext4 /dev/wgroup/wshare",
+    tldr: { page: "mkfs.ext4", platform: "linux" },
+  },
+  {
+    term: "mkswap",
+    definition: "Marks a partition as swap. It does not turn it on: that is swapon. The fstab line comes after, so it comes back by itself.",
+    example: "mkswap /dev/sdb2",
+    tldr: { page: "mkswap", platform: "linux" },
+  },
+  {
+    term: "swapon",
+    definition: "Turns on swap that mkswap already marked. swapon --show lists the ones that are active. Without the fstab line, a reboot drops it.",
+    example: "swapon /dev/sdb2 · swapon --show",
+    tldr: { page: "swapon", platform: "linux" },
+  },
+  {
+    term: "crontab",
+    definition: "Edits or lists one user's job table. -l lists, -e edits, -r deletes. -u USER, as root, is that account's table. It is not a systemd timer.",
+    example: "crontab -l -u erik",
+    tldr: { page: "crontab" },
+  },
+  {
+    term: "exportfs",
+    definition: "Publishes or reviews what NFS is exporting. -v lists them with the options. -r rereads /etc/exports. Editing the file is not enough: it has to be published.",
+    example: "exportfs -v · exportfs -r",
+    tldr: { page: "exportfs", platform: "linux" },
+  },
+  {
+    term: "showmount",
+    definition: "Asks an NFS server what it exports. -e HOST lists the exports. Use it to check from the client, before mounting.",
+    example: "showmount -e server",
+    tldr: { page: "showmount", platform: "linux" },
+  },
+  {
+    term: "sed",
+    definition:
+      "Edits text line by line. -i changes the file. Without -i it only prints. s replaces the first match on each line. ^ requires the start of the line. It is not set: set is a different bash builtin.",
+    example: "sed -i 's/^Listen 80$/Listen 82/' /etc/httpd/conf/httpd.conf",
+    tldr: { page: "sed" },
+  },
+  {
+    term: "visudo",
+    definition: "Opens sudoers and does not save it if the syntax is wrong. It is the safe editor. Do not edit /etc/sudoers with vim directly: one mistake can leave you without sudo.",
+    example: "visudo",
+    tldr: { page: "visudo", platform: "linux" },
+  },
+  {
+    term: "chroot",
+    definition: "Enters another directory tree and treats it as /. In an rd.break rescue, chroot /sysroot enters the real system. exit leaves it.",
+    example: "chroot /sysroot",
+    tldr: { page: "chroot" },
   },
 ];
 

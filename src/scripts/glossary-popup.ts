@@ -12,6 +12,9 @@ let results: HTMLElement | null = null;
 let empty: HTMLElement | null = null;
 let detail: HTMLElement | null = null;
 let tip: HTMLElement | null = null;
+let tipMark: HTMLElement | null = null;
+let tipTimer = 0;
+let returnFocus: HTMLElement | null = null;
 /** Term pinned in the popup list; null = show every search match. */
 let selectedTerm: string | null = null;
 
@@ -63,8 +66,8 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
         <p class="glossary-popup-kicker">${escapeHtml(ui.glossaryHeading)} · Ctrl+K</p>
         <button type="button" class="glossary-popup-x" data-close aria-label="${escapeHtml(ui.glossaryPopupClose)}">×</button>
       </div>
-      <input id="glossary-popup-input" type="search" autocomplete="off" spellcheck="false" placeholder="${escapeHtml(ui.glossaryPopupSearch)}" />
-      <p id="glossary-popup-empty" class="glossary-popup-empty hidden">${escapeHtml(ui.glossarySearchEmpty)}</p>
+      <input id="glossary-popup-input" type="search" autocomplete="off" spellcheck="false" placeholder="${escapeHtml(ui.glossaryPopupSearch)}" aria-label="${escapeHtml(ui.glossaryPopupSearch)}" />
+      <p id="glossary-popup-empty" class="glossary-popup-empty hidden" aria-live="polite">${escapeHtml(ui.glossarySearchEmpty)}</p>
       <div id="glossary-popup-results" class="glossary-popup-results"></div>
       <div id="glossary-popup-detail" class="glossary-popup-detail hidden"></div>
       <p class="glossary-popup-foot">
@@ -79,6 +82,8 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
   tip.hidden = true;
   tip.setAttribute("role", "tooltip");
   document.body.append(tip);
+  tip.addEventListener("mouseenter", () => window.clearTimeout(tipTimer));
+  tip.addEventListener("mouseleave", queueHideTip);
   document.addEventListener("scroll", hideTip, true);
   input = overlay.querySelector("#glossary-popup-input");
   results = overlay.querySelector("#glossary-popup-results");
@@ -94,9 +99,31 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
     renderResults(input?.value ?? "");
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && overlay && !overlay.classList.contains("hidden")) {
+    if (!overlay || overlay.classList.contains("hidden")) {
+      if (event.key === "Escape") hideTip();
+      return;
+    }
+    if (event.key === "Escape") {
       event.preventDefault();
       closePopup();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const panel = overlay.querySelector(".glossary-popup-panel");
+    if (!panel) return;
+    const items = [...panel.querySelectorAll<HTMLElement>("a, button, input, textarea, select")].filter(
+      (node) => !node.hasAttribute("disabled") && node.getClientRects().length > 0,
+    );
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !panel.contains(active))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
     }
   });
 }
@@ -104,6 +131,8 @@ function ensureUi(ui: ReturnType<typeof getUI>): void {
 function openPopup(prefill = ""): void {
   if (!overlay || !input) return;
   hideTip();
+  const active = document.activeElement;
+  returnFocus = active instanceof HTMLElement ? active : null;
   overlay.classList.remove("hidden");
   input.value = prefill;
   selectedTerm = prefill.trim() ? prefill.trim() : null;
@@ -117,6 +146,9 @@ function closePopup(): void {
   overlay?.classList.add("hidden");
   selectedTerm = null;
   hideDetail();
+  const back = returnFocus;
+  returnFocus = null;
+  back?.focus();
 }
 
 /** Lower = better. Title beats definition/example. */
@@ -220,7 +252,11 @@ function showDetail(entry: GlossaryEntry | undefined): void {
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     link.className = "underline decoration-line";
-    link.textContent = ui.glossaryTldr;
+    link.append(document.createTextNode(ui.glossaryTldr));
+    const extra = document.createElement("span");
+    extra.className = "sr-only";
+    extra.textContent = `, ${ui.opensNew}`;
+    link.append(extra);
     tldr.className = "glossary-popup-tldr";
     tldr.append(link);
     detail.append(tldr);
@@ -229,6 +265,10 @@ function showDetail(entry: GlossaryEntry | undefined): void {
 
 function showTip(mark: HTMLElement, text: string): void {
   if (!tip || (overlay && !overlay.classList.contains("hidden"))) return;
+  window.clearTimeout(tipTimer);
+  if (tipMark && tipMark !== mark) tipMark.removeAttribute("aria-describedby");
+  tipMark = mark;
+  mark.setAttribute("aria-describedby", "glossary-tip");
   tip.textContent = text;
   tip.hidden = false;
   const rect = mark.getBoundingClientRect();
@@ -244,7 +284,15 @@ function showTip(mark: HTMLElement, text: string): void {
   tip.style.left = `${left}px`;
 }
 
+function queueHideTip(): void {
+  window.clearTimeout(tipTimer);
+  tipTimer = window.setTimeout(hideTip, 150);
+}
+
 function hideTip(): void {
+  window.clearTimeout(tipTimer);
+  tipMark?.removeAttribute("aria-describedby");
+  tipMark = null;
   if (!tip) return;
   tip.hidden = true;
 }
@@ -293,7 +341,7 @@ function walk(node: Node): void {
     mark.textContent = matched.term;
     const definition = matched.entry.definition;
     mark.addEventListener("mouseenter", () => showTip(mark, definition));
-    mark.addEventListener("mouseleave", hideTip);
+    mark.addEventListener("mouseleave", queueHideTip);
     mark.addEventListener("focus", () => showTip(mark, definition));
     mark.addEventListener("blur", hideTip);
     const open = (event: Event) => {
@@ -305,6 +353,10 @@ function walk(node: Node): void {
     };
     mark.addEventListener("click", open);
     mark.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        hideTip();
+        return;
+      }
       if (event.key === "Enter" || event.key === " ") open(event);
     });
     frag.append(mark);
@@ -318,7 +370,7 @@ function walk(node: Node): void {
 
   if (node.nodeType !== Node.ELEMENT_NODE) return;
   const el = node as HTMLElement;
-  if (SKIP.has(el.tagName) || el.classList.contains("glossary-mark") || el.id === "glossary-popup") return;
+  if (SKIP.has(el.tagName) || el.classList.contains("glossary-mark") || el.id === "glossary-popup" || el.closest(".term")) return;
   const children = Array.from(el.childNodes);
   for (const child of children) walk(child);
 }
