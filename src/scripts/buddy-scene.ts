@@ -14,7 +14,6 @@ import {
   CanvasTexture,
   CapsuleGeometry,
   CircleGeometry,
-  Clock,
   ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
@@ -31,6 +30,7 @@ import {
   Scene,
   SphereGeometry,
   SRGBColorSpace,
+  Timer,
   TorusGeometry,
   TOUCH,
   Vector2,
@@ -287,7 +287,7 @@ export function mountBuddyScene(
     for (const listener of listeners) listener({ ...state });
   }
 
-  const clock = new Clock(false);
+  const timer = new Timer();
   let onScreen = true;
   let running = false;
 
@@ -326,7 +326,8 @@ export function mountBuddyScene(
   }
 
   function frame(): void {
-    const dtReal = Math.min(clock.getDelta(), 0.1);
+    timer.update();
+    const dtReal = Math.min(timer.getDelta(), 0.1);
     penguin.update(dtReal, dtReal * state.speed);
     if (penguin.finishedOneShot()) {
       state.pose = "still";
@@ -344,10 +345,9 @@ export function mountBuddyScene(
     if (shouldRun === running) return;
     running = shouldRun;
     if (running) {
-      clock.start();
+      timer.reset();
       renderer.setAnimationLoop(frame);
     } else {
-      clock.stop();
       renderer.setAnimationLoop(null);
       if (reducedMotion.matches) staticFrame();
     }

@@ -1072,30 +1072,3 @@ html[data-theme="light"] .bg-card {
     display: none;
   }
 }
-    color-scheme: light;
-    --color-paper: #fff;
-    --color-ink: #121a2b;
-    --color-muted: #5a636e;
-    --color-card: #fff;
-    --color-line: #cfcabe;
-    --color-accent: #121a2b;
-    --color-good: #1c6b45;
-    --color-warn: #885800;
-    --color-bad: #8e2a2a;
-    --color-track: #e4e1d8;
-  }
-
-  html,
-  body {
-    background: #fff;
-    color: #121a2b;
-  }
-
-  .bg-card,
-  .waybar,
-  .exam-status {
-    background: #fff;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-}

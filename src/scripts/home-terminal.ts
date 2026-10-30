@@ -12,10 +12,13 @@ type Block = { className: string; text: string };
 const COMMANDS = ["man", "terms", "help", "clear"] as const;
 
 export function mountHomeTerminal(): void {
-  const log = document.getElementById("home-term-log");
-  const input = document.getElementById("home-term-input");
-  const body = document.querySelector(".term .term__body");
-  if (!(log instanceof HTMLElement) || !(input instanceof HTMLInputElement) || !(body instanceof HTMLElement)) return;
+  const logNode = document.getElementById("home-term-log");
+  const inputNode = document.getElementById("home-term-input");
+  const bodyNode = document.querySelector(".term .term__body");
+  if (!(logNode instanceof HTMLElement) || !(inputNode instanceof HTMLInputElement) || !(bodyNode instanceof HTMLElement)) return;
+  const log = logNode;
+  const input = inputNode;
+  const body = bodyNode;
 
   const locale = pageLocale();
   const ui = getUI(locale);

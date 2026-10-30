@@ -12,7 +12,6 @@ interface Props {
 const { locale } = Astro.props;
 const ui = getUI(locale);
 const statsFixed = `${routePath(locale, "stats")}?mode=fixed`;
-const statsPausable = `${routePath(locale, "stats")}?mode=pausable`;
 ---
 
 <Base title={ui.homeTitle} description={ui.homeDescription} locale={locale} route="home">
